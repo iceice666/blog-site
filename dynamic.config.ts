@@ -52,7 +52,7 @@ export const umami = {
    * Helps avoid ad-blockers that block direct requests to analytics domains.
    * Requires `apiUrl` to be set. When enabled, `scriptUrl` is ignored.
    */
-  scriptProxy: false,
+  scriptProxy: true,
 };
 
 // --- Author ---

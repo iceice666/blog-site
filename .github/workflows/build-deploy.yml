@@ -48,6 +48,9 @@ jobs:
       - name: Build
         run: pnpm build
         working-directory: platform
+        env:
+          UMAMI_API_URL: https://umami.justaslime.dev
+          UMAMI_WEBSITE_ID: 84486b11-2fb6-48fb-a4ab-46673c2c22f1
 
       - name: Ignore _worker.js
         run: echo dist/_worker.js > dist/.assetsignore

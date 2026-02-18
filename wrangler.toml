@@ -1,9 +1,18 @@
 name = "blog"
 main = "dist/_worker.js"
 compatibility_date = "2026-02-16"
+workers_dev = false
 
 [assets]
 directory = "dist"
+
+
+[observability]
+enabled = true
+
+[vars]
+UMAMI_API_URL = "https://umami.justaslime.dev"
+UMAMI_WEBSITE_ID = "84486b11-2fb6-48fb-a4ab-46673c2c22f1"
 
 [[routes]]
 pattern = "www.justaslime.dev"

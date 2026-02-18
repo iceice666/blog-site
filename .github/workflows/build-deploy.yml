@@ -49,8 +49,9 @@ jobs:
         run: pnpm build
         working-directory: platform
         env:
-          UMAMI_API_URL: https://umami.justaslime.dev
-          UMAMI_WEBSITE_ID: 84486b11-2fb6-48fb-a4ab-46673c2c22f1
+          UMAMI_API_URL: ${{ vars.UMAMI_API_URL }}
+          UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}
 
       - name: Ignore _worker.js
         run: echo dist/_worker.js > dist/.assetsignore

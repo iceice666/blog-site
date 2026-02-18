@@ -48,6 +48,10 @@ jobs:
         run: pnpm build
         working-directory: platform
 
+      - name: Ignore _worker.js
+        run: echo dist/_worker.js > dist/.assetsignore
+        working-directory: platform
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:

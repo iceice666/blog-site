@@ -6,5 +6,5 @@ compatibility_date = "2026-02-16"
 directory = "dist"
 
 [[routes]]
-pattern = "www.justaslime.dev/*"
+pattern = "www.justaslime.dev"
 custom_domain = true

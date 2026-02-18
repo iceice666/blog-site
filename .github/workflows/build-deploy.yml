@@ -1,0 +1,57 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout blog-site
+        uses: actions/checkout@v4
+        with:
+          path: blog-site
+
+      - name: Clone dynamic platform
+        run: git clone --depth 1 --branch main https://code.justaslime.dev/justaslime/dynamic.git platform
+
+      - name: Overlay content onto platform
+        run: |
+          rm -rf platform/content
+          cp -r blog-site/content platform/content
+          cp blog-site/dynamic.config.ts platform/dynamic.config.ts
+          cp blog-site/wrangler.toml platform/wrangler.toml
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: platform/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: platform
+
+      - name: Build
+        run: pnpm build
+        working-directory: platform
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+          workingDirectory: platform

@@ -1,0 +1,10 @@
+name = "blog"
+main = "dist/_worker.js"
+compatibility_date = "2026-02-16"
+
+[assets]
+directory = "dist"
+
+[[routes]]
+pattern = "www.justaslime.dev/*"
+custom_domain = true

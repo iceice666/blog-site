@@ -12,6 +12,7 @@ concurrency:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout blog-site
         uses: actions/checkout@v4

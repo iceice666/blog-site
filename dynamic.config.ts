@@ -1,5 +1,15 @@
 import type { Author, Friend } from './src/types';
 
+// --- Site Configuration ---
+export const site = {
+  /** The production URL of your site */
+  url: 'https://www.justaslime.dev',
+  /** The site title, used for RSS/Sitemap */
+  title: 'Just A Slime',
+  /** The site description, used for RSS/Sitemap */
+  description: 'Just A Slime',
+};
+
 // --- Giscus Comments ---
 // Configure via https://giscus.app/ — leave repo empty to disable comments entirely.
 export const giscus = {

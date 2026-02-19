@@ -24,14 +24,12 @@ export const giscus = {
 };
 
 // --- Umami Analytics ---
-// Set VITE_UMAMI_API_URL and VITE_UMAMI_WEBSITE_ID env vars at build time to enable the visit counter widget.
-// Optional: set VITE_UMAMI_API_KEY if your instance requires authentication.
+// Environment variables are defined in wrangler.toml [env.production] section.
 
-// Directly inline env vars at build time by assigning them immediately
-const UMAMI_API_URL = process.env.VITE_UMAMI_API_URL ?? '';
-const UMAMI_WEBSITE_ID = process.env.VITE_UMAMI_WEBSITE_ID ?? '';
-const UMAMI_API_KEY = process.env.VITE_UMAMI_API_KEY ?? '';
-const UMAMI_SCRIPT_URL = process.env.VITE_UMAMI_SCRIPT_URL;
+const UMAMI_API_URL = process.env.UMAMI_API_URL ?? '';
+const UMAMI_WEBSITE_ID = process.env.UMAMI_WEBSITE_ID ?? '';
+const UMAMI_API_KEY = process.env.UMAMI_API_KEY ?? '';
+const UMAMI_SCRIPT_URL = process.env.UMAMI_SCRIPT_URL;
 
 export const umami = {
   /**

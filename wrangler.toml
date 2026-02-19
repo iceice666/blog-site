@@ -3,6 +3,9 @@ main = "dist/_worker.js"
 compatibility_date = "2026-02-16"
 workers_dev = false
 
+[env.production]
+vars = { UMAMI_API_URL = "https://umami.justaslime.dev", UMAMI_WEBSITE_ID = "84486b11-2fb6-48fb-a4ab-46673c2c22f1", UMAMI_API_KEY = "" }
+
 [assets]
 directory = "dist"
 

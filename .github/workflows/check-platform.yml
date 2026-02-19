@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write
-      repository-variables: write
+      variables: write
     steps:
       - name: Get latest dynamic commit
         id: remote

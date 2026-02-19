@@ -48,10 +48,6 @@ jobs:
       - name: Build
         run: pnpm build
         working-directory: platform
-        env:
-          VITE_UMAMI_API_URL: ${{ vars.UMAMI_API_URL }}
-          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
-          VITE_UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}
 
       - name: Ignore _worker.js
         run: echo dist/_worker.js > dist/.assetsignore
@@ -71,7 +67,3 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
           workingDirectory: platform
-        env:
-          VITE_UMAMI_API_URL: ${{ vars.UMAMI_API_URL }}
-          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
-          VITE_UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}

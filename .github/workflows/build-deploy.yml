@@ -49,9 +49,9 @@ jobs:
         run: pnpm build
         working-directory: platform
         env:
-          UMAMI_API_URL: ${{ vars.UMAMI_API_URL }}
-          UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
-          UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}
+          VITE_UMAMI_API_URL: ${{ vars.UMAMI_API_URL }}
+          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          VITE_UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}
 
       - name: Ignore _worker.js
         run: echo dist/_worker.js > dist/.assetsignore

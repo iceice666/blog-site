@@ -24,9 +24,8 @@ export const giscus = {
 };
 
 // --- Umami Analytics ---
-// Set VITE_UMAMI_API_URL and VITE_UMAMI_WEBSITE_ID env vars to enable the visit counter widget.
+// Set VITE_UMAMI_API_URL and VITE_UMAMI_WEBSITE_ID env vars at build time to enable the visit counter widget.
 // Optional: set VITE_UMAMI_API_KEY if your instance requires authentication.
-// The VITE_ prefix ensures these variables are replaced at build time.
 export const umami = {
   /**
    * Public base URL of your Umami instance.
@@ -34,21 +33,21 @@ export const umami = {
    * @example 'https://analytics.example.com'
    * @env VITE_UMAMI_API_URL
    */
-  apiUrl: import.meta.env.VITE_UMAMI_API_URL ?? '',
+  apiUrl: process.env.VITE_UMAMI_API_URL ?? '',
 
   /**
    * Website ID found in your Umami dashboard under Settings -> Websites.
    * Required to enable tracking and the visit counter widget.
    * @env VITE_UMAMI_WEBSITE_ID
    */
-  websiteId: import.meta.env.VITE_UMAMI_WEBSITE_ID ?? '',
+  websiteId: process.env.VITE_UMAMI_WEBSITE_ID ?? '',
 
   /**
    * API key for authenticating requests to the Umami stats API.
    * Only needed if your Umami instance has API key auth enabled.
    * @env VITE_UMAMI_API_KEY
    */
-  apiKey: import.meta.env.VITE_UMAMI_API_KEY ?? '',
+  apiKey: process.env.VITE_UMAMI_API_KEY ?? '',
 
   /**
    * Custom URL for the Umami tracking script.
@@ -56,7 +55,7 @@ export const umami = {
    * Useful if you serve the script from a different path or CDN.
    * @env VITE_UMAMI_SCRIPT_URL
    */
-  scriptUrl: import.meta.env.VITE_UMAMI_SCRIPT_URL,
+  scriptUrl: process.env.VITE_UMAMI_SCRIPT_URL,
 
   /**
    * Proxy the Umami tracking script through `/api/uwu.js` on your own domain.

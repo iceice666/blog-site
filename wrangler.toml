@@ -3,9 +3,11 @@ main = "dist/_worker.js"
 compatibility_date = "2026-02-16"
 workers_dev = false
 
+[env.production]
+vars = { VITE_UMAMI_API_URL = "", VITE_UMAMI_WEBSITE_ID = "", VITE_UMAMI_API_KEY = "" }
+
 [assets]
 directory = "dist"
-
 
 [observability]
 enabled = true

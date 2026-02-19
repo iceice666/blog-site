@@ -71,3 +71,8 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
           workingDirectory: platform
+          secrets: VITE_UMAMI_API_URL,VITE_UMAMI_WEBSITE_ID,VITE_UMAMI_API_KEY
+        env:
+          VITE_UMAMI_API_URL: ${{ vars.UMAMI_API_URL }}
+          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          VITE_UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}

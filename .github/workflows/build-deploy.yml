@@ -45,17 +45,6 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: platform
 
-      - name: Print ENV vars
-        run: |
-          echo "UMAMI_API_URL: $UMAMI_API_URL"
-          echo "UMAMI_WEBSITE_ID: $UMAMI_WEBSITE_ID"
-          echo "UMAMI_API_KEY: [MASKED]"
-        working-directory: platform
-        env:
-          UMAMI_API_URL: ${{ vars.UMAMI_API_URL }}
-          UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
-          UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}
-
       - name: Build
         run: pnpm build
         working-directory: platform

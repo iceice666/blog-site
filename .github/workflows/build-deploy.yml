@@ -26,13 +26,13 @@ jobs:
             SHA=$(cat blog-site/.last-dynamic-sha)
             echo "Using SHA from .last-dynamic-sha: $SHA"
           else
-            SHA=$(git ls-remote https://code.justaslime.dev/justaslime/dynamic.git refs/heads/main | cut -f1)
+            SHA=$(git ls-remote https://github.com/iceice666/dynamic.git refs/heads/main | cut -f1)
             echo "No .last-dynamic-sha found, using latest: $SHA"
           fi
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: Clone dynamic platform
-        run: git clone --branch main https://code.justaslime.dev/justaslime/dynamic.git platform && cd platform && git checkout ${{ steps.dynamic_sha.outputs.sha }}
+        run: git clone --branch main https://github.com/iceice666/dynamic.git platform && cd platform && git checkout ${{ steps.dynamic_sha.outputs.sha }}
 
       - name: Overlay content onto platform
         run: |

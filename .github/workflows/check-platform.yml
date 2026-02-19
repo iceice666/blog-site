@@ -18,7 +18,7 @@ jobs:
       - name: Get latest dynamic commit
         id: remote
         run: |
-          SHA=$(git ls-remote https://code.justaslime.dev/justaslime/dynamic.git refs/heads/main | cut -f1)
+          SHA=$(git ls-remote https://github.com/iceice666/dynamic.git refs/heads/main | cut -f1)
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: Compare with last known commit

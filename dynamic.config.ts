@@ -24,48 +24,13 @@ export const giscus = {
 };
 
 // --- Umami Analytics ---
-// Environment variables are defined in wrangler.toml [env.production] section.
-
-const UMAMI_API_URL = process.env.UMAMI_API_URL ?? '';
-const UMAMI_WEBSITE_ID = process.env.UMAMI_WEBSITE_ID ?? '';
-const UMAMI_API_KEY = process.env.UMAMI_API_KEY ?? '';
-const UMAMI_SCRIPT_URL = process.env.UMAMI_SCRIPT_URL;
-
+// Sensitive credentials (UMAMI_API_URL, UMAMI_WEBSITE_ID, etc.) are read at
+// runtime from Cloudflare Worker bindings (set in the dashboard).
 export const umami = {
-  /**
-   * Public base URL of your Umami instance.
-   * Used for both the tracking script and the stats API.
-   * @example 'https://analytics.example.com'
-   * @env VITE_UMAMI_API_URL
-   */
-  apiUrl: UMAMI_API_URL,
-
-  /**
-   * Website ID found in your Umami dashboard under Settings -> Websites.
-   * Required to enable tracking and the visit counter widget.
-   * @env VITE_UMAMI_WEBSITE_ID
-   */
-  websiteId: UMAMI_WEBSITE_ID,
-
-  /**
-   * API key for authenticating requests to the Umami stats API.
-   * Only needed if your Umami instance has API key auth enabled.
-   * @env VITE_UMAMI_API_KEY
-   */
-  apiKey: UMAMI_API_KEY,
-
-  /**
-   * Custom URL for the Umami tracking script.
-   * Defaults to `{apiUrl}/script.js` when omitted.
-   * Useful if you serve the script from a different path or CDN.
-   * @env VITE_UMAMI_SCRIPT_URL
-   */
-  scriptUrl: UMAMI_SCRIPT_URL,
-
   /**
    * Proxy the Umami tracking script through `/api/uwu.js` on your own domain.
    * Helps avoid ad-blockers that block direct requests to analytics domains.
-   * Requires `apiUrl` to be set. When enabled, `scriptUrl` is ignored.
+   * Requires UMAMI_API_URL env var set in Cloudflare dashboard.
    */
   scriptProxy: true,
 };

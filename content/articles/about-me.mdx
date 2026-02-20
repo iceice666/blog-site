@@ -1,0 +1,95 @@
+---
+title: About Me
+description: A little bit about who am I and what I do.
+category: meta
+categoryName: Meta
+tags: [about]
+publishedAt: 2026-02-20
+draft: false
+lang: en
+---
+
+import SkillGrid from '$/components/mdx/SkillGrid.astro';
+import RepoCard from '$/components/mdx/RepoCard.astro';
+
+
+Hi, I'm **Brian Duan**, also use other username including `iceice666`, `justaslime`.
+Im a student at National Cheng Kung University in Taiwan.
+
+My own bio sums it up pretty well: *"Making projects when I need. A lazy guy."* 
+I build things when I have a real reason to — not for the sake of it. 
+This blog exists because I needed somewhere to put my thoughts.
+
+## What I Work With
+
+I bounce between languages depending on what the problem calls for. 
+Lately it's been a lot of **Rust** and **Zig** for systems stuff, **Haskell** and **ReScript** 
+when I want to think in a more functional way, and **TypeScript** for anything web-related (including the platform this blog runs on).
+
+:::|> The full tech stack list if you're curious
+
+<SkillGrid label="Languages" skills={[
+    "Rust",
+    "Zig",
+    "Haskell",
+    "TypeScript",
+    {"ReScript":"not quite familiar though"},
+    "Python",
+    "Lua",
+    {"Bash":"Worst script language"}
+    ]} />
+<SkillGrid label="Frameworks" skills={["React", "Astro", "Axum"]} />
+<SkillGrid label="Infrastructure" skills={[
+    "Alpine Linux",
+    {"Arch":"I use Arch, btw"},
+    {"Nix":"Best package manager ever"},
+    "Nginx",
+    "Docker"
+    ]} />
+<SkillGrid label="Other Tools" skills={[
+    "Neovim",
+    {"Emacs":"Planned, still learning it"},
+    "zed",
+    "fish shell",
+    {"mise-en-place":"Package, Env, Task manager all in one"},
+    {"OpenCode":"Still learning how to use AI to increase productivity"}
+    ]} />
+
+:::
+
+
+## Things I've Made
+
+Most of time I'm hopping between projects, but I'm always working on something.
+
+
+### WIP
+
+<RepoCard url="https://github.com/iceice666/dynamic" 
+          description = "the framework powering this blog" />
+<RepoCard url="https://code.justaslime.dev/justaslime/slime_os" 
+          description = "a small OS in Rust, because why not" />
+<RepoCard url="https://code.justaslime.dev/justaslime/borsa-twskcb" 
+          description = "Taiwan stock market connector written in Rust" />
+<RepoCard url="https://code.justaslime.dev/justaslime/WriteMyselfAScheme" 
+          description = "working through the classic Haskell Scheme interpreter exercise" />
+
+### Done (wont update anymore)
+
+<RepoCard url="https://github.com/iceice666/TpManager" 
+          description = "Teleportation Manager for Minecraft" />
+<RepoCard url="https://github.com/iceice666/Chronos-Descent" 
+          description = "a game built in C# for [Hackclub Juice](https://juice.hackclub.com/games)" />
+<RepoCard url="https://github.com/iceice666/YetJustAnotherSilver" 
+          description = "Adding Silver to the game" />
+
+## Outside of Code
+
+I'm interested in functional programming paradigms, Linux tooling, Neovim, and occasionally game development. 
+I also have a soft spot for Minecraft modding.
+
+## Portals
+
+- GitHub: [github.com/iceice666](https://github.com/iceice666)
+- Code: [code.justaslime.dev/justaslime](https://code.justaslime.dev/justaslime)
+- Email: iceice666@outlook.com

@@ -1,13 +1,11 @@
-import type { Author, Friend } from './src/types';
-
 // --- Site Configuration ---
 export const site = {
   /** The production URL of your site */
   url: 'https://www.justaslime.dev',
   /** The site title, used for RSS/Sitemap */
-  title: 'Just A Slime',
+  title: "Brian Duan's Blog",
   /** The site description, used for RSS/Sitemap */
-  description: 'Just A Slime',
+  description: "A lazy guy's blog",
 };
 
 // --- Giscus Comments ---
@@ -39,13 +37,12 @@ export const umami = {
 
 export const author: Author = {
   name: 'Brian Duan',
-  tagline: '一般路過史萊姆',
+  tagline: 'Making projects when I need. A lazy guy.',
   avatar: 'https://avatars.githubusercontent.com/u/56882049?v=4&size=400',
   socials: [
     { kind: 'email', address: 'me@justaslime.dev' },
     { kind: 'github', url: 'https://github.com/iceice666' },
     { kind: 'website', url: 'https://code.justaslime.dev/explore/repos' },
-    { kind: 'rss', url: '/rss.xml' },
   ],
 };
 

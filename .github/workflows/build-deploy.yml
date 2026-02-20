@@ -2,6 +2,8 @@ name: Build & Deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 concurrency:
   group: deploy
@@ -20,12 +22,21 @@ jobs:
       - name: Get target dynamic SHA
         id: dynamic_sha
         run: |
-          if [ -f blog-site/.last-dynamic-sha ]; then
-            SHA=$(cat blog-site/.last-dynamic-sha)
-            echo "Using SHA from .last-dynamic-sha: $SHA"
+          SHA_FILE="blog-site/.last-dynamic-sha"
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            SHA=$(git ls-remote https://github.com/iceice666/dynamic.git refs/heads/main | cut -f1)
+            if [ "$SHA" != "$(cat "$SHA_FILE" 2>/dev/null)" ]; then
+              echo "$SHA" > "$SHA_FILE"
+              git -C blog-site config user.name "github-actions[bot]"
+              git -C blog-site config user.email "github-actions[bot]@users.noreply.github.com"
+              git -C blog-site add .last-dynamic-sha
+              git -C blog-site commit -m "chore: update dynamic platform SHA to $SHA"
+              git -C blog-site push
+            fi
+          elif [ -f "$SHA_FILE" ]; then
+            SHA=$(< "$SHA_FILE")
           else
             SHA=$(git ls-remote https://github.com/iceice666/dynamic.git refs/heads/main | cut -f1)
-            echo "No .last-dynamic-sha found, using latest: $SHA"
           fi
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
@@ -77,3 +88,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
           workingDirectory: platform
+

@@ -21,17 +21,6 @@ jobs:
         with:
           path: blog-site
 
-      - name: Get target dynamic SHA
-        id: dynamic_sha
-        run: |
-          SHA_FILE="blog-site/.last-dynamic-sha"
-          if [ -f "$SHA_FILE" ]; then
-            SHA=$(< "$SHA_FILE")
-          else
-            SHA=$(git ls-remote https://github.com/iceice666/dynamic.git refs/heads/main | cut -f1)
-          fi
-          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
-
       - name: Clone dynamic platform
         run: git clone --depth 1 --branch main https://github.com/iceice666/dynamic.git platform
 

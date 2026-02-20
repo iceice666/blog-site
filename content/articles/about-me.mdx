@@ -1,96 +1,97 @@
 ---
 title: About Me
-desc: A little bit about who am I and what I do.
+description: A little about who I am and what I do.
 category: meta
-categoryName: Meta
 tags: [about]
 publishedAt: 2026-02-20
-draft: false
-lang: en
 ---
 
 import SkillGrid from '$/components/mdx/SkillGrid.astro';
 import RepoCard from '$/components/mdx/RepoCard.astro';
 
+Hi, I'm **Brian Duan**. You might also find me as `iceice666` or `justaslime`.
+I'm a student at 🇹🇼 National Cheng Kung University.
 
-Hi, I'm **Brian Duan**, also use other username including `iceice666`, `justaslime`.
-Im a student at National Cheng Kung University in Taiwan.
+My motto is pretty straightforward: 
+"A lazy guy, only build project when I need." 
+I build things when there's a reason, not to show off.
+This blog is mostly a place to stash thoughts (and occasionally drop a spicy take).
 
-My own bio sums it up pretty well: *"Making projects when I need. A lazy guy."* 
-I build things when I have a real reason to — not for the sake of it. 
-This blog exists because I needed somewhere to put my thoughts.
+## Tech Stack
 
-## What I Work With
+I like using the right tool for the job:
+- **Rust/Zig** for systems-level work
+- **Python/Lua** for scripting (I try not to make Bash do anything heroic)
+- **TypeScript/ReScript** for anything web-related (including this blog)
 
-I bounce between languages depending on what the problem calls for. 
-Lately it's been a lot of **Rust** and **Zig** for systems stuff, **Haskell** and **ReScript** 
-when I want to think in a more functional way, and **TypeScript** for anything web-related (including the platform this blog runs on).
-
-:::|> The full tech stack list if you're curious
+:::|> If you're curious, here's the full stack list
 
 <SkillGrid label="Languages" skills={[
     "rust",
     "zig",
     "haskell",
     "typescript",
-    {"rescript":"not quite familiar though"},
+    {"rescript":"still getting comfortable"},
     "python",
     "lua",
-    {"gnubash":"Worst script language"}
+    {"gnubash":"the least pleasant scripting language 🤮"}
     ]} />
 <SkillGrid label="Frameworks" skills={["react", "astro", "axum"]} />
 <SkillGrid label="Infrastructure" skills={[
     "alpinelinux",
     {"archlinux":"I use Arch, btw"},
-    {"nixos":"The best way to manage my system"},
+    {"nixos":"the ultimate sysadmin solution"},
     "proxmox",
     "nginx",
     "docker"
     ]} />
 <SkillGrid label="Other Tools" skills={[
-    {"neovim":"My beloved"},
-    {"gnuemacs":"Planned, still learning it"},
-    {"zedindustries":"My main editor, which have nice VIM mode"},
+    {"neovim":"my forever editor"},
+    {"gnuemacs":"planned, currently learning"},
+    {"zedindustries":"my daily driver, with a great Vim mode"},
     "fish shell",
-    {"mise-en-place":"Package, Env, Task manager all in one"},
-    {"opencode":"Still learning how to use AI to increase productivity"}
+    {"mise-en-place":"pkg, env, task, all in one"},
+    {"opencode":"exploring AI-assisted coding"}
     ]} />
 
 :::
 
+## Things I've Built
 
-## Things I've Made
+My projects have a habit of slipping… but I'm always tinkering with something.
 
-Most of time I'm hopping between projects, but I'm always working on something.
+### (Maybe) Work In Progress
 
+<RepoCard url="https://github.com/iceice666/dynamic"
+          desc = "the static site generator/framework behind this blog" />
+<RepoCard url="https://code.justaslime.dev/justaslime/slime_os"
+          desc = "a toy OS written in Rust because why not" />
+<RepoCard url="https://code.justaslime.dev/justaslime/borsa-twskcb"
+          desc = "a Taiwan stock market API connector" />
+<RepoCard url="https://code.justaslime.dev/justaslime/WriteMyselfAScheme"
+          desc = "a Scheme interpreter in Haskell" />
 
-### WIP
+### Past Projects
 
-<RepoCard url="https://github.com/iceice666/dynamic" 
-          desc = "the framework powering this blog" />
-<RepoCard url="https://code.justaslime.dev/justaslime/slime_os" 
-          desc = "a small OS in Rust, because why not" />
-<RepoCard url="https://code.justaslime.dev/justaslime/borsa-twskcb" 
-          desc = "Taiwan stock market connector written in Rust" />
-<RepoCard url="https://code.justaslime.dev/justaslime/WriteMyselfAScheme" 
-          desc = "working through the classic Haskell Scheme interpreter exercise" />
+<RepoCard url="https://github.com/iceice666/TpManager"
+          desc = "a Minecraft teleport management mod" />
+<RepoCard url="https://github.com/iceice666/Chronos-Descent"
+          desc = "a C# game made for [Hackclub Juice](https://juice.hackclub.com/games)" />
+<RepoCard url="https://github.com/HPK-dev/YetJustAnotherSilver"
+          desc = "adds silver to Minecraft" />
+<RepoCard url="https://github.com/iceice666/turing-complete-assembler"
+          desc = "An ~~sed~~ assembler for the Turing Complete game" />
 
-### Done (wont update anymore)
+## Other Interests
 
-<RepoCard url="https://github.com/iceice666/TpManager" 
-          desc = "Teleportation Manager for Minecraft" />
-<RepoCard url="https://github.com/iceice666/Chronos-Descent" 
-          desc = "a game built in C# for [Hackclub Juice](https://juice.hackclub.com/games)" />
-<RepoCard url="https://github.com/HPK-dev/YetJustAnotherSilver" 
-          desc = "Adding Silver to the game" />
+- I'm into functional programming theory.
+- I mess with the Linux toolchain for fun.
+- I'm a deep Neovim user.
+- I sometimes make Minecraft mods.
+- I play a bit of chess too—badly, but enthusiastically.
 
-## Outside of Code
-
-I'm interested in functional programming paradigms, Linux tooling, Neovim, and occasionally game development. 
-I also have a soft spot for Minecraft modding.
-
-## Portals
+## Links
 
 - GitHub: [github.com/iceice666](https://github.com/iceice666)
-- Code: [code.justaslime.dev/justaslime](https://code.justaslime.dev/justaslime)
+- Self-hosted Git: [code.justaslime.dev/justaslime](https://code.justaslime.dev/justaslime)
 - Email: iceice666@outlook.com

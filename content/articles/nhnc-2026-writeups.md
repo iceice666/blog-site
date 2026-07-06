@@ -73,21 +73,77 @@ NHNC{c7r_k3y57r34m5_5h0uld_n3v3r_r37urn}
 
 ## CRYPTO-400
 
-This was a chained multi-stage crypto challenge.
+This was a chained multi-stage crypto challenge with a twist: you never touch
+the challenge services directly. You talk to an LLM agent platform at
+`chal4.teagod.tech:6767`, and *it* has network access to `chal1`, `chal2`, and
+`chal3`. You only ever see the agent's `stdout`. The hint — *"You can only
+cheat with your poor LLM"*, *"This is surely not a web challenge"* — is telling
+you the LLM is a proxy, not the puzzle.
+
+### Getting data out through a truncated pipe
+
+Stage 1's raw data is ~38 KB of JSON at `chal1:8000/output.txt`, but the
+platform caps each response's `stdout` at ~3.5 KB. A plain `curl` gets cut off
+mid-file. The fix was to hand the agent a complete script and tell it to
+**copy it verbatim** rather than "fetch and summarize" — anything that invites
+the model to reinterpret the task risks it "helpfully" re-encoding or
+truncating the output itself:
+
+```
+Generate Python 3 source only, no markdown. Fetch only chal1 output.txt,
+zlib-compress level 9, base64 it, and print only the requested chunk.
+Copy this exact code:
+
+import urllib.request, zlib, base64
+raw = urllib.request.urlopen('http://chal1:8000/output.txt', timeout=8).read()
+enc = base64.b64encode(zlib.compress(raw, 9)).decode()
+print('OFF 0 ENC', len(enc))
+print(enc[0:0+3500])
+```
+
+zlib level 9 shrinks the redundant `[[c, N], ...]` JSON before base64 blows it
+back up, and base64 keeps the payload free of control characters. Eight
+prompts at offsets `0, 3500, ..., 24500` pulled the full 25 320-character
+base64 string; concatenating, decoding, and decompressing it locally
+reassembled exactly 896 `[c, N]` pairs — 112 bytes × 8 bits.
 
 ### Stage 1: bit-by-bit RSA leakage
 
-The public output had 896 `(c, N)` pairs, exactly enough to encode a 112-byte
-bitstream. With the provided factors, each RSA modulus can be decrypted:
+Each of the 896 pairs is an RSA encryption under its own 64-bit modulus
+(`N = p*q`, two 32-bit primes — trivially factorable):
 
 ```text
 d = 65537^-1 mod phi(N)
 r = c^d mod N
 ```
 
-The hidden 500-byte key is common across the `1` bits. CRT plus a small-root
-step recovers that key, then each bit is classified by checking whether the
-residue matches:
+The reference source ([`chal.py`][chalpy]) encrypts a shared 500-byte `key`
+for every `1` bit and fresh 500-byte randomness for every `0` bit. Since `key`
+is 4000 bits and every `N` is only ~64 bits, decryption never recovers the
+full key — only `key mod N`. Worse, every `N_i` is pairwise coprime, so *any*
+subset of the 896 residues is CRT-consistent; there's no way to tell key-bits
+from noise-bits by checking consistency alone.
+
+The way out is Coppersmith. CRT all 896 residues together into one `R` modulo
+`N = N_1 * N_2 * ... * N_896` (~57 000 bits). On the sub-product `N_good`
+formed by just the `1`-bit moduli, `key ≡ R (mod N_good)` holds exactly, and
+`key` (4000 bits) is *small* relative to `N_good` (~28 000 bits, since about
+half the bits are `1`). That makes `key` a small root of `f(x) = x - R` over
+an unknown divisor of `N`, which is exactly what Sage's `small_roots` solves:
+
+```python
+P.<x> = PolynomialRing(Zmod(N))
+f = x - R
+for i in range(30, 70):
+    roots = f.small_roots(beta=i/100)
+    if roots:
+        key = long_to_bytes(int(roots[0]))
+        break
+```
+
+`small_roots(beta=b)` finds roots modulo a divisor `>= N^b`; sweeping
+`0.30 <= beta <= 0.70` comfortably brackets the true divisor size. Once `key`
+is recovered, each bit falls out of a single comparison:
 
 ```text
 bit = 1 if key % N == decrypted_residue else 0
@@ -99,11 +155,17 @@ Stage flag:
 NHNC{7h15_15_y0ur_f1r57_f14g_k33p_g01ng_wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww}
 ```
 
+[chalpy]: https://github.com/William957-web/My-CTF-Challenges/blob/main/THJCC/2026/crypto/bit-by-bit/release/chal.py
+
 ### Stage 2: LWE-ish oracle
 
-The service encrypted message `0`. Collecting many samples gives equations of
-the form `b ~= A*s`, so the secret vector `s` can be recovered by least squares.
-After that, each character is decoded with:
+`chal2:13412` answers `{"option":"encrypt","message":m}` with a length-512
+vector `A` and a scalar `b` fitting `b = <A, s> + 23*m + e` for a fixed secret
+`s` and small noise `e`. Querying `message = 0` about 520 times strips the
+`23*m` term, leaving `b = <A, s> + e` — an overdetermined linear system that
+NumPy least-squares solves for `s` directly. Known-plaintext sanity checks
+confirmed the model (e.g. `m = 65` left a residual of `1493..1499`, matching
+`23 * 65 = 1495`). Each flag character then falls out of:
 
 ```text
 round((b - A*s) / 23)
@@ -117,15 +179,12 @@ NHNC{53c0nd_f14g_bu7_6767676767676767_41m057_501v3_7h3_ch41_k33p_g01ng_676767676
 
 ### Stage 3: small-order elliptic-curve point
 
-The curve was:
-
-```text
-y^2 = x^3 + 2x + 3 mod 607
-```
-
-The point `(134, 138)` has order `5`. Submitting an `n` that is a multiple of
-that order makes the scalar multiplication hit the point at infinity and passes
-the verifier:
+`chal3:1337` verifies `n * (x, y) = O` on `y^2 = x^3 + 2x + 3 mod 607` and
+wants `n` to look prime-ish to a buggy check. The point `(134, 138)` has order
+`5`, so any multiple of `5` sends it to infinity — but the verifier rejects
+small or "obviously composite" choices. `1105 = 5 * 13 * 17` is a classic
+Carmichael-style pseudoprime: it fools the weak primality check *and* is a
+multiple of `5`.
 
 ```json
 {"x":134,"y":138,"n":1105}

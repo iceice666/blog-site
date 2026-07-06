@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: blog-site
+          fetch-depth: 0
 
       - name: Clone dynamic platform
         run: git clone --depth 1 --branch main https://github.com/iceice666/dynamic.git platform
@@ -50,9 +51,11 @@ jobs:
       - name: Build
         run: pnpm build
         working-directory: platform
+        env:
+          DYNAMIC_CONTENT_GIT_ROOT: ../blog-site
 
       - name: Ignore _worker.js
-        run: echo dist/_worker.js > dist/.assetsignore
+        run: echo '_worker.js' >> dist/client/.assetsignore
         working-directory: platform
 
       - name: Upload build artifacts

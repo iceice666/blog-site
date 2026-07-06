@@ -12,3 +12,8 @@ enabled = true
 [[routes]]
 pattern = "www.justaslime.dev"
 custom_domain = true
+
+# Draft storage for the GitHub-powered admin editor (see the `dynamic` platform repo's src/pages/admin).
+[[kv_namespaces]]
+binding = "DRAFTS"
+id = "ad24531ef54043d4aab47482370c011d"

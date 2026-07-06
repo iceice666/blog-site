@@ -17,7 +17,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout blog-site
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: blog-site
 
@@ -32,14 +32,14 @@ jobs:
           cp blog-site/wrangler.toml platform/wrangler.toml
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
-          version: 10.28.2
+          version: 10.34.3
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
           cache-dependency-path: platform/pnpm-lock.yaml
 
@@ -56,17 +56,18 @@ jobs:
         working-directory: platform
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-dist
           path: platform/dist
           retention-days: 30
 
       - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: 4.107.0
           command: deploy
           workingDirectory: platform
 

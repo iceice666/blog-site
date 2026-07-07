@@ -35,12 +35,14 @@ export const umami = {
 
 // --- Author ---
 
+const primaryContactEmail = 'me@justaslime.dev';
+
 export const author: Author = {
   name: 'Brian Duan',
   tagline: 'Making projects when I need. A lazy guy.',
   avatar: 'https://avatars.githubusercontent.com/u/56882049?v=4&size=400',
   socials: [
-    { kind: 'email', address: 'me@justaslime.dev' },
+    { kind: 'email', address: primaryContactEmail },
     { kind: 'github', url: 'https://github.com/iceice666' },
     { kind: 'website', url: 'https://code.justaslime.dev/explore/repos' },
   ],

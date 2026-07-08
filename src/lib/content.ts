@@ -20,6 +20,14 @@ export function getArticleHref(id: string) {
   return isAboutArticleId(id) ? `/${slug}` : `/articles/${slug}/`;
 }
 
+export function getPostSlug(id: string) {
+  return id;
+}
+
+export function getPostHref(id: string) {
+  return `/posts/${encodeURIComponent(getPostSlug(id))}/`;
+}
+
 /** Posts with no frontmatter date at all — mirrors the old build script's git-history fallback. */
 const POST_FALLBACK_DATES: Record<string, string> = {
   '111': '2026-02-19',
@@ -105,7 +113,7 @@ export async function getFeedItems(): Promise<FeedItem[]> {
   const postItems: FeedItem[] = posts.map((entry) => {
     // A post stub sharing an id with a real article (e.g. the nhnc-2026-writeups
     // index stub) links through to that article instead of standing on its own.
-    const href = articleIds.has(entry.id) ? getArticleHref(entry.id) : null;
+    const href = articleIds.has(entry.id) ? getArticleHref(entry.id) : getPostHref(entry.id);
     const units = countUnits(stripMarkdown(entry.body ?? ''));
     const { title: leadingTitle, rest: bodyHtml } = extractLeadingH1(entry.rendered?.html ?? '');
     return {

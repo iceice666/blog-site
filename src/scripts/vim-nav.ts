@@ -42,6 +42,7 @@ function initVimNav() {
   let pendingKey = '';
   let pendingTimer: ReturnType<typeof window.setTimeout> | undefined;
   let statusTimer: ReturnType<typeof window.setTimeout> | undefined;
+  let editorStatus: string | null = null;
 
   function getInitialVimPreference() {
     try {
@@ -84,9 +85,15 @@ function initVimNav() {
     statusEl.textContent = text;
     if (temporary) {
       statusTimer = window.setTimeout(() => {
-        if (mode === 'normal') statusEl.textContent = STATUS_IDLE;
+        if (mode === 'normal') statusEl.textContent = currentIdleStatus();
       }, 1400);
     }
+  }
+
+  function currentIdleStatus() {
+    if (!deviceCanUseVim) return STATUS_UNAVAILABLE;
+    if (!vimEnabled) return STATUS_DISABLED;
+    return editorStatus ?? STATUS_IDLE;
   }
 
   function syncVimToggle() {
@@ -268,7 +275,7 @@ function initVimNav() {
     if (!vimEnabled) clearSelection();
     syncVimToggle();
     saveVimPreference();
-    setStatus(deviceCanUseVim ? (vimEnabled ? STATUS_IDLE : STATUS_DISABLED) : STATUS_UNAVAILABLE);
+    setStatus(currentIdleStatus());
   }
 
   function refreshVimDeviceAvailability() {
@@ -282,7 +289,7 @@ function initVimNav() {
     clearHints();
     if (!vimEnabled) clearSelection();
     syncVimToggle();
-    setStatus(deviceCanUseVim ? (vimEnabled ? STATUS_IDLE : STATUS_DISABLED) : STATUS_UNAVAILABLE);
+    setStatus(currentIdleStatus());
   }
 
   function watchDeviceCapability(query: string) {
@@ -328,7 +335,7 @@ function initVimNav() {
     if (key === 'Escape') {
       mode = 'normal';
       clearHints();
-      setStatus(STATUS_IDLE);
+      setStatus(currentIdleStatus());
       return;
     }
 
@@ -399,7 +406,7 @@ function initVimNav() {
     lastSearch = searchBuffer;
     mode = 'normal';
     if (!searchBuffer) {
-      setStatus(STATUS_IDLE);
+      setStatus(currentIdleStatus());
       return;
     }
 
@@ -418,7 +425,7 @@ function initVimNav() {
   function updateSearchMode(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       mode = 'normal';
-      setStatus(STATUS_IDLE);
+      setStatus(currentIdleStatus());
       return;
     }
     if (event.key === 'Enter') {
@@ -471,7 +478,7 @@ function initVimNav() {
   function updateCommandMode(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       mode = 'normal';
-      setStatus(STATUS_IDLE);
+      setStatus(currentIdleStatus());
       return;
     }
     if (event.key === 'Enter') {
@@ -497,7 +504,7 @@ function initVimNav() {
     switch (event.key) {
       case 'Escape':
         clearSelection();
-        setStatus(STATUS_IDLE);
+        setStatus(currentIdleStatus());
         break;
       case 'j':
         moveSelection(1);
@@ -588,6 +595,26 @@ function initVimNav() {
     handleNormalMode(event);
   }
 
+  function editorStatusForTarget(target: EventTarget | null) {
+    if (!(target instanceof HTMLElement)) return null;
+    if (!target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return null;
+
+    if (target.closest('.comment-form')) return '-- INSERT COMMENT --';
+
+    const editor = target.closest<HTMLElement>('[data-admin-editor]');
+    if (!editor) return null;
+
+    const path = editor.querySelector<HTMLElement>('.admin-path')?.textContent ?? '';
+    if (path.includes('/posts/')) return '-- INSERT POST --';
+    if (path.includes('/articles/')) return '-- INSERT ARTICLE --';
+    return '-- INSERT EDITOR --';
+  }
+
+  function syncEditorStatus(target: EventTarget | null) {
+    editorStatus = editorStatusForTarget(target);
+    if (mode === 'normal') setStatus(currentIdleStatus());
+  }
+
   archiveInput?.addEventListener('input', () => {
     if (selectedTarget && !isRendered(selectedTarget)) clearSelection();
   });
@@ -598,8 +625,12 @@ function initVimNav() {
   ['(pointer: coarse)', '(hover: none)', '(any-pointer: coarse)', '(any-hover: hover)'].forEach(watchDeviceCapability);
   vimToggle?.addEventListener('click', () => setVimEnabled(!vimEnabled));
   document.addEventListener('keydown', handleKeydown);
+  document.addEventListener('focusin', (event) => syncEditorStatus(event.target));
+  document.addEventListener('focusout', () => {
+    window.setTimeout(() => syncEditorStatus(document.activeElement), 0);
+  });
   syncVimToggle();
-  setStatus(deviceCanUseVim ? (vimEnabled ? STATUS_IDLE : STATUS_DISABLED) : STATUS_UNAVAILABLE);
+  setStatus(currentIdleStatus());
 }
 
 if (document.readyState === 'loading') {

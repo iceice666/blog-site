@@ -1,0 +1,27 @@
+---
+export const prerender = false;
+import Shell from '../../layouts/Shell.astro';
+---
+
+<Shell
+  title="Editor | Brian Duan"
+  activeKey="feed"
+  extraWindow={{ label: 'admin/edit' }}
+  paneTitle="admin-editor.ts"
+  description="Private editor for blog posts and articles."
+  wide
+>
+  <section class="admin-editor" data-admin-editor>
+    <div class="admin-editor-head">
+      <div>
+        <h1>Editor</h1>
+        <p class="admin-editor-sub">Loading GitHub session...</p>
+      </div>
+      <a class="comments-action" href="/api/auth/github/start?returnTo=/admin/edit">login</a>
+    </div>
+  </section>
+
+  <script>
+    import '../../scripts/admin-editor';
+  </script>
+</Shell>

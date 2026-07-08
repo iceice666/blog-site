@@ -49,19 +49,21 @@ export const site = {
   description: "A lazy guy's blog",
 };
 
-// --- Giscus Comments ---
-// Configure via https://giscus.app/ — leave repo empty to disable comments entirely.
-// Not wired into any page yet — restored for future use.
-export const giscus = {
+// --- GitHub Discussions Comments ---
+// Used by the custom on-site comment UI. Keep these values in sync with the
+// repository/category that will hold public discussion threads.
+export const githubDiscussions = {
   /** GitHub repository in "owner/repo" format (e.g. 'alice/my-blog') */
   repo: "iceice666/blog-site" as `${string}/${string}`,
-  /** Repository ID from giscus.app */
+  /** Repository node ID from GitHub GraphQL/giscus.app */
   repoId: "R_kgDORS7QPA",
   /** GitHub Discussions category name */
   category: "Announcements",
-  /** Category ID from giscus.app */
+  /** Discussion category node ID from GitHub GraphQL/giscus.app */
   categoryId: "DIC_kwDORS7QPM4C2saZ",
 };
+
+export const giscus = githubDiscussions;
 
 // --- Author ---
 

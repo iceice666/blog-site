@@ -9,14 +9,18 @@ type MarkdownNode = {
   [key: string]: unknown;
 };
 
-/** Rewrite legacy content-authored /posts/<slug>/ links to real routes. */
+const LEGACY_POST_ROUTES: Record<string, string> = {
+  'nhnc-2026-writeups': '/articles/nhnc-2026-writeups/',
+};
+
+/** Rewrite legacy content-authored /posts/<slug>/ links only when a post moved. */
 export const rewriteInternalLinks: RehypePlugin = () => {
   return (tree) => {
     function visit(node: MarkdownNode) {
       if (node.type === 'element' && node.tagName === 'a' && node.properties?.href) {
         const href = String(node.properties.href);
-        const m = href.match(/^\/posts\/([\w-]+)\/?$/);
-        if (m) node.properties.href = `/${m[1]}`;
+        const m = href.match(/^\/posts\/([^/?#]+)\/?$/);
+        if (m && LEGACY_POST_ROUTES[m[1]]) node.properties.href = LEGACY_POST_ROUTES[m[1]];
       }
       node.children?.forEach(visit);
     }

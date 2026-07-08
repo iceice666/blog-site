@@ -2,6 +2,7 @@
 export const prerender = true;
 import { getCollection, render } from 'astro:content';
 import Shell from '../../layouts/Shell.astro';
+import Comments from '../../components/Comments.astro';
 import { countUnits, getArticleSlug, inferLang, isAboutArticleId, readingTime, stripMarkdown } from '../../lib/content';
 
 export async function getStaticPaths() {
@@ -43,4 +44,6 @@ const readMin = readingTime(units);
   <div class="prose" lang={lang}>
     <Content />
   </div>
+
+  <Comments entryType="article" entryId={entry.id} title={entry.data.title} path={`/articles/${slug}/`} />
 </Shell>

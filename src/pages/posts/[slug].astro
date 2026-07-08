@@ -1,0 +1,49 @@
+---
+export const prerender = true;
+import { getCollection, render } from 'astro:content';
+import Shell from '../../layouts/Shell.astro';
+import Comments from '../../components/Comments.astro';
+import { countUnits, getPostHref, getPostSlug, inferLang, readingTime, stripMarkdown } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const [posts, articles] = await Promise.all([getCollection('posts'), getCollection('articles')]);
+  const articleIds = new Set(articles.map((entry) => entry.id));
+
+  return posts.filter((entry) => !articleIds.has(entry.id)).map((entry) => {
+    return { params: { slug: getPostSlug(entry.id) }, props: { entry } };
+  });
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const slug = getPostSlug(entry.id);
+const title = entry.data.title ?? entry.id;
+const lang = inferLang(entry.id, entry.data.lang, entry.body ?? '');
+const units = countUnits(stripMarkdown(entry.body ?? ''));
+const readMin = readingTime(units);
+---
+
+<Shell
+  title={`${title} | Brian Duan`}
+  activeKey="feed"
+  extraWindow={{ label: `posts/${slug}` }}
+  paneTitle={`${entry.id}.md`}
+  description={entry.data.description}
+  lang={lang}
+>
+  <div class="art-meta">
+    <span class="pill">POST</span>
+    <span>{lang}</span>
+    <span>{entry.data.publishedAt}</span>
+  </div>
+  <h1>{title}</h1>
+  <p class="art-stats">{units} words · {readMin} min read</p>
+  <hr class="art-rule" />
+
+  <div class="prose" lang={lang}>
+    <Content />
+  </div>
+
+  <Comments entryType="post" entryId={entry.id} title={title} path={getPostHref(entry.id)} />
+</Shell>

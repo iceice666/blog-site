@@ -1,0 +1,33 @@
+---
+interface Props {
+  entryType: 'article' | 'post';
+  entryId: string;
+  title: string;
+  path: string;
+}
+
+const { entryType, entryId, title, path } = Astro.props;
+const id = `comments-${entryType}-${entryId}`.replace(/[^\w-]/g, '-');
+---
+
+<section
+  class="comments"
+  data-comments
+  data-entry-type={entryType}
+  data-entry-id={entryId}
+  data-title={title}
+  data-path={path}
+  aria-labelledby={id}
+>
+  <div class="comments-head">
+    <div>
+      <h2 id={id} class="comments-title">comments</h2>
+      <p class="comments-meta">GitHub Discussions</p>
+    </div>
+  </div>
+  <p class="fold-note" data-comments-status>Loading comments...</p>
+</section>
+
+<script>
+  import '../scripts/comments';
+</script>

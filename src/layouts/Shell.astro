@@ -3,7 +3,7 @@ import "../styles/global.css";
 import { NAV_ITEMS, getBlogStats } from "../lib/content";
 import { getGithubData } from "../lib/github";
 import Sidebar from "../components/Sidebar.mdx";
-import { site } from "../../config";
+import { author, site } from "../../config";
 
 interface Props {
     title: string;
@@ -38,6 +38,8 @@ const extraWindowIndex =
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content={description} />
+        <link rel="icon" type="image/png" href={author.avatar} />
+        <link rel="apple-touch-icon" href={author.avatar} />
         <title>{title}</title>
     </head>
     <body>

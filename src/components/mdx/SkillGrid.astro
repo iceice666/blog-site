@@ -6,11 +6,40 @@ interface Props {
 }
 const { label, skills } = Astro.props;
 
+const iconOverrides: Record<string, string> = {
+  'fish shell': 'fishshell',
+  'Nix Flakes': 'nixos',
+};
+
+const monogramFallbacks = new Set(['axum', 'Oh My Pi', 'Zutai']);
+
 function nameOf(s: Skill) {
   return typeof s === 'string' ? s : Object.keys(s)[0];
 }
+
 function noteOf(s: Skill) {
   return typeof s === 'string' ? null : Object.values(s)[0];
+}
+
+function iconSlugOf(name: string) {
+  return iconOverrides[name] ?? name;
+}
+
+function hasBrandIcon(name: string) {
+  return !monogramFallbacks.has(name);
+}
+
+function monogramOf(name: string) {
+  return name
+    .split(/[\s-]+/)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 3)
+    .toUpperCase();
+}
+
+function labelOf(name: string, note: string | null) {
+  return note ? `${name}: ${note}` : name;
 }
 ---
 
@@ -18,12 +47,26 @@ function noteOf(s: Skill) {
   <div class="skillgrid-label">{label}</div>
   <div class="skillgrid-chips">
     {
-      skills.map((s) => (
-        <span>
-          {nameOf(s)}
-          {noteOf(s) && <small>{noteOf(s)}</small>}
-        </span>
-      ))
+      skills.map((s) => {
+        const name = nameOf(s);
+        const note = noteOf(s);
+
+        return (
+          <span
+            aria-label={labelOf(name, note)}
+            title={labelOf(name, note)}
+            class:list={[!hasBrandIcon(name) && 'is-monogram']}
+            style={hasBrandIcon(name) ? `--skill-icon: url("https://cdn.simpleicons.org/${iconSlugOf(name)}");` : undefined}
+          >
+            {hasBrandIcon(name) ? (
+              <span class="skillgrid-icon" aria-hidden="true" />
+            ) : (
+              <span class="skillgrid-monogram" aria-hidden="true">{monogramOf(name)}</span>
+            )}
+            <small class="sr-only">{labelOf(name, note)}</small>
+          </span>
+        );
+      })
     }
   </div>
 </div>

@@ -1,12 +1,4 @@
-import { author } from '../../config';
-
-export function linkOf(social) {
-  return social.kind === 'email' ? `mailto:${social.address}` : social.url;
-}
-
-export function labelOf(social) {
-  return social.kind === 'email' ? 'mail' : social.kind === 'github' ? 'github' : 'site';
-}
+import { author, socialDisplayName, socialHref, socialIsExternal } from '../../config';
 
 <aside className="sidebar">
   <div className="widget">
@@ -23,19 +15,11 @@ export function labelOf(social) {
     <div className="widget-body sidebar-profile-links">
       <div className="profile-links">
         {author.socials.map((social) => (
-          <a href={linkOf(social)} target={social.kind === 'email' ? undefined : '_blank'} rel={social.kind === 'email' ? undefined : 'noopener noreferrer'}>
-            {labelOf(social)}
+          <a href={socialHref(social)} target={socialIsExternal(social) ? '_blank' : undefined} rel={socialIsExternal(social) ? 'noopener noreferrer' : undefined}>
+            {socialDisplayName(social)}
           </a>
         ))}
       </div>
-      {author.avatarCredit ? (
-        <p className="avatar-credit">
-          avatar:{' '}
-          <a href={author.avatarCredit} target="_blank" rel="noopener noreferrer">
-            pixiv artwork ↗
-          </a>
-        </p>
-      ) : null}
     </div>
   </div>
 

@@ -232,9 +232,6 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 .profile-links a:hover { color: var(--accent); border-color: var(--accent); }
 .sidebar-profile-links { padding-top: 0; }
 .gh-caption { color: var(--text-muted); font-size: 9.5px; font-style: italic; margin: 8px 0 0; }
-.avatar-credit { color: var(--text-muted); font-size: 9.5px; margin: 10px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.avatar-credit a { color: var(--text-muted); text-decoration: underline; text-underline-offset: 2px; }
-.avatar-credit a:hover { color: var(--accent); }
 .repo-card { display: block; border: 1px solid var(--border); padding: 10px 12px; border-radius: 2px; }
 .repo-card:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 5%, transparent); }
 .repo-card + .repo-card { margin-top: 8px; }

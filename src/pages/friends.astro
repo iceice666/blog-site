@@ -2,14 +2,7 @@
 export const prerender = true;
 import Shell from '../layouts/Shell.astro';
 import { renderInlineMarkdown } from '../lib/markdown';
-import { friends, type SocialLink } from '../../config';
-
-function linkOf(social: SocialLink) {
-  return social.kind === 'email' ? `mailto:${social.address}` : social.url;
-}
-function labelOf(social: SocialLink) {
-  return social.kind === 'email' ? 'mail' : social.kind === 'github' ? 'github' : 'site';
-}
+import { friends, socialDisplayName, socialHref, socialIsExternal } from '../../config';
 
 const renderedFriends = await Promise.all(
   friends.map(async (friend) => ({
@@ -38,8 +31,12 @@ const renderedFriends = await Promise.all(
             {f.socials.length > 0 && (
               <div class="friend-links">
                 {f.socials.map((s) => (
-                  <a href={linkOf(s)} target={s.kind === 'email' ? undefined : '_blank'} rel="noopener noreferrer">
-                    {labelOf(s)}
+                  <a
+                    href={socialHref(s)}
+                    target={socialIsExternal(s) ? '_blank' : undefined}
+                    rel={socialIsExternal(s) ? 'noopener noreferrer' : undefined}
+                  >
+                    {socialDisplayName(s)}
                   </a>
                 ))}
               </div>

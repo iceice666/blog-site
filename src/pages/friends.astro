@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 import Shell from '../layouts/Shell.astro';
+import { renderInlineMarkdown } from '../lib/markdown';
 import { friends, type SocialLink } from '../../config';
 
 function linkOf(social: SocialLink) {
@@ -9,6 +10,13 @@ function linkOf(social: SocialLink) {
 function labelOf(social: SocialLink) {
   return social.kind === 'email' ? 'mail' : social.kind === 'github' ? 'github' : 'site';
 }
+
+const renderedFriends = await Promise.all(
+  friends.map(async (friend) => ({
+    ...friend,
+    descHtml: await renderInlineMarkdown(friend.desc),
+  }))
+);
 ---
 
 <Shell title="Friends | Brian Duan" activeKey="friends" paneTitle="friends.md">
@@ -17,7 +25,7 @@ function labelOf(social: SocialLink) {
 
   <div class="friends-grid">
     {
-      friends.map((f) => (
+      renderedFriends.map((f) => (
         <div class="friend-card">
           <a href={f.url} class="avatar friend-avatar" target="_blank" rel="noopener noreferrer">
             <img src={f.img} alt={f.name} loading="lazy" />
@@ -26,7 +34,7 @@ function labelOf(social: SocialLink) {
             <a href={f.url} class="friend-name" target="_blank" rel="noopener noreferrer">
               {f.name}
             </a>
-            <p class="friend-desc">{f.desc}</p>
+            <div class="friend-desc" set:html={f.descHtml} />
             {f.socials.length > 0 && (
               <div class="friend-links">
                 {f.socials.map((s) => (

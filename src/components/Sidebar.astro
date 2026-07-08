@@ -1,6 +1,7 @@
 ---
 import { PINNED_REPOS, type GithubData } from '../lib/github';
 import type { BlogStats } from '../lib/content';
+import { renderInlineMarkdown } from '../lib/markdown';
 import { author, type SocialLink } from '../../config';
 
 interface Props {
@@ -20,6 +21,13 @@ function linkOf(social: SocialLink) {
 function labelOf(social: SocialLink) {
   return social.kind === 'email' ? 'mail' : social.kind === 'github' ? 'github' : 'site';
 }
+
+const pinnedRepos = await Promise.all(
+  PINNED_REPOS.map(async (repo) => ({
+    ...repo,
+    descHtml: await renderInlineMarkdown(repo.desc),
+  }))
+);
 ---
 
 <aside class="sidebar">
@@ -84,10 +92,10 @@ function labelOf(social: SocialLink) {
     <div class="pane-title">{windowIndex}.3 — pinned repos</div>
     <div class="widget-body">
       {
-        PINNED_REPOS.map((repo) => (
+        pinnedRepos.map((repo) => (
           <div class="repo-card">
             <div class="repo-name">{repo.name}</div>
-            <p class="repo-desc">{repo.desc}</p>
+            <div class="repo-desc" set:html={repo.descHtml} />
             <div class="repo-lang">
               <i style={`background:var(${repo.langVar})`} />
               {repo.lang}

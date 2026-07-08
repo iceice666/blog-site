@@ -78,8 +78,7 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
   outline: 3px solid var(--accent);
   outline-offset: 5px;
   box-shadow:
-    0 0 0 8px color-mix(in srgb, var(--accent) 18%, transparent),
-    inset 5px 0 0 var(--accent);
+    0 0 0 8px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 .vim-hint {
   position: fixed;

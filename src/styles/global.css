@@ -299,6 +299,9 @@ html[data-vim-available="false"] .vim-help { display: none; }
 .comments-user img, .comment-author img { width: 20px; height: 20px; border-radius: 2px; border: 1px solid var(--border); background: var(--surface-2); }
 .comment-list { border-top: 1px dashed var(--border); }
 .comment { padding: 15px 0; border-bottom: 1px dashed var(--border); }
+.comment-replies { margin-top: 12px; padding-left: 18px; border-left: 2px solid var(--border); display: flex; flex-direction: column; gap: 0; }
+.comment-replies .comment { padding: 12px 0; border-bottom: 1px dashed var(--border); }
+.comment-replies .comment:last-child { border-bottom: none; }
 .comment-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 .comment-time { color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .comment-delete { margin-left: auto; color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
@@ -314,6 +317,8 @@ html[data-vim-available="false"] .vim-help { display: none; }
 .comment-form textarea { width: 100%; min-height: 104px; resize: vertical; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 12px 13px; font: 13.5px/1.6 var(--font-prose-active); border-radius: 2px; outline: none; }
 .comment-form textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent); }
 .comment-form textarea::placeholder { color: var(--text-muted); }
+.comment-reply-form { margin-top: 10px; }
+.comment-reply-form textarea { min-height: 72px; }
 .comment-form-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
 .comments-action.is-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
 

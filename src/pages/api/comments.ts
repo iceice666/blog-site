@@ -12,6 +12,7 @@ interface CommentBody {
   path?: string;
   body?: string;
   commentId?: string;
+  replyToId?: string;
 }
 
 export const GET: APIRoute = async ({ request }) => {
@@ -42,7 +43,8 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await readJson<CommentBody>(request);
     const entry = parseCommentEntry(body);
 
-    const discussion = await addComment(entry, body.body ?? '', session.accessToken);
+    const replyToId = typeof body.replyToId === 'string' ? body.replyToId : undefined;
+    const discussion = await addComment(entry, body.body ?? '', session.accessToken, replyToId);
 
     return json({ discussion, user: session.user }, { status: 201 });
   } catch (error) {

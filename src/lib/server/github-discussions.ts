@@ -12,7 +12,7 @@ export interface CommentEntry {
   path: string;
 }
 
-export interface PublicComment {
+export interface PublicReply {
   id: string;
   body: string;
   bodyHTML: string;
@@ -31,6 +31,14 @@ export interface PublicComment {
   } | null;
 }
 
+export interface PublicComment extends PublicReply {
+  replies: {
+    totalCount: number;
+    hasMore: boolean;
+    nodes: PublicReply[];
+  };
+}
+
 export interface PublicDiscussion {
   id: string;
   number: number;
@@ -46,6 +54,16 @@ interface GraphQLResponse<T> {
   errors?: Array<{ message?: string }>;
 }
 
+interface RawCommentNode extends PublicReply {
+  replies: {
+    totalCount: number;
+    pageInfo: {
+      hasNextPage: boolean;
+    };
+    nodes: PublicReply[];
+  };
+}
+
 interface DiscussionNode {
   id: string;
   number: number;
@@ -57,7 +75,7 @@ interface DiscussionNode {
     pageInfo: {
       hasNextPage: boolean;
     };
-    nodes: PublicComment[];
+    nodes: RawCommentNode[];
   };
 }
 
@@ -79,7 +97,7 @@ interface CreateDiscussionResponse {
 
 interface AddCommentResponse {
   addDiscussionComment: {
-    comment: PublicComment;
+    comment: PublicReply;
   };
 }
 
@@ -130,6 +148,15 @@ const DISCUSSION_FIELDS = `
       }
       nodes {
         ...CommentFields
+        replies(first: 50) {
+          totalCount
+          pageInfo {
+            hasNextPage
+          }
+          nodes {
+            ...CommentFields
+          }
+        }
       }
     }
   }
@@ -172,8 +199,8 @@ const CREATE_DISCUSSION_MUTATION = `
 
 const ADD_COMMENT_MUTATION = `
   ${COMMENT_FIELDS}
-  mutation AddDiscussionComment($discussionId: ID!, $body: String!) {
-    addDiscussionComment(input: { discussionId: $discussionId, body: $body }) {
+  mutation AddDiscussionComment($discussionId: ID!, $body: String!, $replyToId: ID) {
+    addDiscussionComment(input: { discussionId: $discussionId, body: $body, replyToId: $replyToId }) {
       comment {
         ...CommentFields
       }
@@ -236,7 +263,7 @@ export async function getDiscussion(entry: CommentEntry, token = getSiteToken())
   return findDiscussion(token, entry);
 }
 
-export async function addComment(entry: CommentEntry, body: string, userToken: string) {
+export async function addComment(entry: CommentEntry, body: string, userToken: string, replyToId?: string) {
   const trimmedBody = body.trim();
   if (!trimmedBody) throw new HttpError(400, 'Comment body is required.', 'empty_comment');
   if (trimmedBody.length > 4_000) {
@@ -247,6 +274,7 @@ export async function addComment(entry: CommentEntry, body: string, userToken: s
   await githubGraphQL<AddCommentResponse>(userToken, ADD_COMMENT_MUTATION, {
     discussionId: discussion.id,
     body: trimmedBody,
+    replyToId: replyToId || undefined,
   });
 
   return getDiscussionById(userToken, discussion.id);
@@ -311,7 +339,18 @@ function toPublicDiscussion(discussion: DiscussionNode): PublicDiscussion {
     url: discussion.url,
     totalCount: discussion.comments.totalCount,
     hasMore: discussion.comments.pageInfo.hasNextPage,
-    comments: discussion.comments.nodes.filter(Boolean),
+    comments: discussion.comments.nodes.filter(Boolean).map(toPublicComment),
+  };
+}
+
+function toPublicComment(comment: RawCommentNode): PublicComment {
+  return {
+    ...comment,
+    replies: {
+      totalCount: comment.replies.totalCount,
+      hasMore: comment.replies.pageInfo.hasNextPage,
+      nodes: comment.replies.nodes.filter(Boolean),
+    },
   };
 }
 

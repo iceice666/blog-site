@@ -9,7 +9,7 @@ interface AuthUser {
   profileUrl: string;
 }
 
-interface PublicComment {
+interface PublicReply {
   id: string;
   bodyHTML: string;
   bodyText: string;
@@ -23,6 +23,14 @@ interface PublicComment {
     avatarUrl: string;
     url: string;
   } | null;
+}
+
+interface PublicComment extends PublicReply {
+  replies: {
+    totalCount: number;
+    hasMore: boolean;
+    nodes: PublicReply[];
+  };
 }
 
 interface PublicDiscussion {
@@ -54,6 +62,8 @@ interface WidgetState {
   loading: boolean;
   submitting: boolean;
   error: string | null;
+  replyTo: string | null;
+  replySubmitting: boolean;
 }
 
 declare global {
@@ -79,6 +89,8 @@ function initComments() {
       loading: true,
       submitting: false,
       error: null,
+      replyTo: null,
+      replySubmitting: false,
     };
     render(widget, state);
     void load(widget, state);
@@ -215,8 +227,8 @@ function renderList(widget: HTMLElement, state: WidgetState) {
   }
 }
 
-function renderComment(comment: PublicComment, widget: HTMLElement, state: WidgetState) {
-  const item = el('article', 'comment');
+function renderComment(comment: PublicComment | PublicReply, widget: HTMLElement, state: WidgetState, isReply = false) {
+  const item = el('article', isReply ? 'comment is-reply' : 'comment');
   const meta = el('div', 'comment-meta');
 
   if (comment.author) {
@@ -239,6 +251,16 @@ function renderComment(comment: PublicComment, widget: HTMLElement, state: Widge
   time.target = '_blank';
   time.rel = 'noopener noreferrer';
   appendNodes(meta, time);
+
+  if (!isReply && state.user) {
+    const isOpen = state.replyTo === comment.id;
+    const reply = button(isOpen ? 'cancel' : 'reply', 'comments-action');
+    reply.addEventListener('click', () => {
+      state.replyTo = isOpen ? null : comment.id;
+      render(widget, state);
+    });
+    appendNodes(meta, reply);
+  }
 
   if (state.user && comment.author?.login.toLowerCase() === state.user.login.toLowerCase()) {
     const remove = button('delete', 'comment-delete');
@@ -270,7 +292,73 @@ function renderComment(comment: PublicComment, widget: HTMLElement, state: Widge
   }
 
   appendNodes(item, meta, body);
+
+  if (!isReply && 'replies' in comment && comment.replies.nodes.length > 0) {
+    const replies = el('div', 'comment-replies');
+    for (const reply of comment.replies.nodes) {
+      appendNodes(replies, renderComment(reply, widget, state, true));
+    }
+    if (comment.replies.hasMore) {
+      const more = renderStatus('More replies are available on GitHub.');
+      appendNodes(replies, more);
+    }
+    appendNodes(item, replies);
+  }
+
+  if (!isReply && state.replyTo === comment.id) {
+    appendNodes(item, renderReplyForm(comment.id, widget, state));
+  }
+
   return item;
+}
+
+function renderReplyForm(parentId: string, widget: HTMLElement, state: WidgetState) {
+  const form = document.createElement('form');
+  form.className = 'comment-form comment-reply-form';
+
+  const textarea = document.createElement('textarea');
+  textarea.name = 'body';
+  textarea.maxLength = 4000;
+  textarea.required = true;
+  textarea.placeholder = 'Write a reply...';
+  textarea.autofocus = true;
+
+  const actions = el('div', 'comment-form-actions');
+  const cancel = button('cancel', 'comments-action');
+  cancel.addEventListener('click', () => {
+    state.replyTo = null;
+    render(widget, state);
+  });
+  const submit = button(state.replySubmitting ? 'sending' : 'reply', 'comments-action');
+  submit.type = 'submit';
+  submit.disabled = state.replySubmitting;
+  appendNodes(actions, cancel, submit);
+
+  appendNodes(form, textarea, actions);
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    state.replySubmitting = true;
+    state.error = null;
+    render(widget, state);
+
+    try {
+      const payload = await api<CommentsResponse>('/api/comments', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ...state.entry, body: textarea.value, replyToId: parentId }),
+      });
+      state.discussion = payload.discussion;
+      state.user = payload.user;
+      state.replyTo = null;
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : 'Could not post reply.';
+    } finally {
+      state.replySubmitting = false;
+      render(widget, state);
+    }
+  });
+
+  return form;
 }
 
 function renderForm(widget: HTMLElement, state: WidgetState) {

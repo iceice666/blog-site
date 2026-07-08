@@ -14,6 +14,8 @@ const STATUS_DISABLED = '-- VIM OFF --';
 const STATUS_UNAVAILABLE = '-- VIM N/A --';
 const VIM_STORAGE_KEY = 'blog:vim-enabled';
 const SIDEBAR_STORAGE_KEY = 'blog:sidebar-visible';
+const EDITABLE_CONTROL_SELECTOR =
+  'input:not([type="hidden"]):not(:disabled), textarea:not(:disabled), select:not(:disabled), [contenteditable]:not([contenteditable="false"])';
 const EDIT_COMMANDS = new Set(['e', 'ed', 'edi', 'edit']);
 const HELP_COMMANDS = new Set(['?', 'help']);
 const NAV_BY_KEY: Record<string, string> = {
@@ -36,7 +38,7 @@ const HELP_SECTIONS = [
       ['d / u', 'half page down / up'],
       ['gg / G', 'top / bottom'],
       ['h / l', 'browser back / forward'],
-      ['f / F', 'hint link / new tab'],
+      ['f / F', 'hint target / new tab'],
       ['o / Enter', 'open target'],
       ['1-4', 'switch window'],
     ],
@@ -331,6 +333,12 @@ function initVimNav() {
       return;
     }
 
+    if (el.matches(EDITABLE_CONTROL_SELECTOR)) {
+      el.focus({ preventScroll: true });
+      syncEditorStatus(el);
+      return;
+    }
+
     if (
       el instanceof HTMLButtonElement ||
       el instanceof HTMLDetailsElement ||
@@ -364,7 +372,7 @@ function initVimNav() {
   }
 
   function hintSelector() {
-    return 'a[href], button:not([disabled]), summary, [role="button"], [data-vim-open]';
+    return `a[href], button:not([disabled]), summary, [role="button"], [data-vim-open], ${EDITABLE_CONTROL_SELECTOR}`;
   }
 
   function getHintCandidates() {
@@ -444,11 +452,11 @@ function initVimNav() {
     mode = 'hint';
     hintNewTab = newTab;
     renderHints();
-    setStatus(`${newTab ? 'HINT-TAB' : 'HINT'} ${hints.length} links`);
+    setStatus(`${newTab ? 'HINT-TAB' : 'HINT'} ${hints.length} targets`);
     if (hints.length === 0) {
       mode = 'normal';
       clearHints();
-      setStatus('no visible links', true);
+      setStatus('no visible targets', true);
     }
   }
 

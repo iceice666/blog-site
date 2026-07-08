@@ -12,14 +12,14 @@ const renderedFriends = await Promise.all(
 );
 ---
 
-<Shell title="Friends | Brian Duan" activeKey="friends" paneTitle="friends.md">
+<Shell title="Friends | Brian Duan" activeKey="friends" paneTitle="friends.md" wide>
   <h1>Friends</h1>
   <p class="friends-sub">Blogs and sites I like to read.</p>
 
   <div class="friends-grid">
     {
       renderedFriends.map((f) => (
-        <div class="friend-card">
+        <div class="friend-card" lang="zh-tw">
           <a href={f.url} class="avatar friend-avatar" target="_blank" rel="noopener noreferrer">
             <img src={f.img} alt={f.name} loading="lazy" />
           </a>

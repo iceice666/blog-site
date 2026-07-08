@@ -27,7 +27,7 @@ for (const item of items) {
 const sortedKeys = [...groups.keys()].sort().reverse();
 ---
 
-<Shell title="Archive | Brian Duan" activeKey="archive" paneTitle={`archive.md (${items.length} entries)`}>
+<Shell title="Archive | Brian Duan" activeKey="archive" paneTitle={`archive.md (${items.length} entries)`} wide>
   <h1>Archive</h1>
   <p class="archive-sub">Every article and note, in one place — newest first.</p>
 
@@ -58,6 +58,7 @@ const sortedKeys = [...groups.keys()].sort().reverse();
                 class={`arch-row ${item.kind === 'ARTICLE' ? 'is-article' : 'is-note'}`}
                 data-archive-row
                 data-search={search}
+                lang={item.lang}
               >
                 <span class="kind">{item.kind}</span>
                 {item.href ? (

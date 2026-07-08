@@ -2,7 +2,7 @@
 export const prerender = true;
 import { getCollection, render } from 'astro:content';
 import Shell from '../../layouts/Shell.astro';
-import { countUnits, getArticleSlug, isAboutArticleId, readingTime, stripMarkdown } from '../../lib/content';
+import { countUnits, getArticleSlug, inferLang, isAboutArticleId, readingTime, stripMarkdown } from '../../lib/content';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
@@ -15,7 +15,7 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 
 const slug = getArticleSlug(entry.id);
-const lang = entry.data.lang ?? (entry.id.includes('.zh-tw') ? 'zh-tw' : 'en');
+const lang = inferLang(entry.id, entry.data.lang, entry.body ?? '');
 const units = countUnits(stripMarkdown(entry.body ?? ''));
 const readMin = readingTime(units);
 ---
@@ -26,6 +26,7 @@ const readMin = readingTime(units);
   extraWindow={{ label: `articles/${slug}` }}
   paneTitle={`${entry.id}.mdx`}
   description={entry.data.description}
+  lang={lang}
 >
   <div class="art-meta">
     <span class="pill">ARTICLE</span>
@@ -39,7 +40,7 @@ const readMin = readingTime(units);
   <p class="art-tags">{entry.data.tags.map((t) => `#${t}`).join(' ')}</p>
   <hr class="art-rule" />
 
-  <div class="prose">
+  <div class="prose" lang={lang}>
     <Content />
   </div>
 </Shell>

@@ -12,8 +12,19 @@ interface Props {
   paneTitle: string;
   langHref?: string | null;
   description?: string;
+  lang?: string;
+  wide?: boolean;
 }
-const { title, activeKey, extraWindow, paneTitle, langHref = null, description = site.description } = Astro.props;
+const {
+  title,
+  activeKey,
+  extraWindow,
+  paneTitle,
+  langHref = null,
+  description = site.description,
+  lang = 'en',
+  wide = false,
+} = Astro.props;
 
 const stats = await getBlogStats();
 const github = await getGithubData();
@@ -22,7 +33,7 @@ const activeNavItem = NAV_ITEMS.find((n) => n.key === activeKey)!;
 const windowIndex = extraWindow ? 4 : activeNavItem.windowIndex;
 ---
 
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -63,7 +74,7 @@ const windowIndex = extraWindow ? 4 : activeNavItem.windowIndex;
         <div class="pane-main">
           <div class="pane-title">{windowIndex}.0 — {paneTitle}</div>
           <div class="scroll-area">
-            <div class="reading">
+            <div class={`reading${wide ? ' is-wide' : ''}`}>
               <slot />
             </div>
           </div>

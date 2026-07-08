@@ -27,7 +27,14 @@ const POST_FALLBACK_DATES: Record<string, string> = {
 };
 
 const CJK_RE = /[一-鿿]/g;
+const CJK_PRESENT_RE = /[一-鿿]/;
 const LATIN_WORD_RE = /[A-Za-z0-9']+/g;
+
+export function inferLang(id: string, explicit?: string, body = '') {
+  if (explicit) return explicit;
+  if (id.includes('.zh-tw')) return 'zh-tw';
+  return CJK_PRESENT_RE.test(body) ? 'zh-tw' : 'en';
+}
 
 export function countUnits(text: string) {
   const cjk = text.match(CJK_RE)?.length ?? 0;
@@ -78,7 +85,7 @@ export async function getFeedItems(): Promise<FeedItem[]> {
   const articleIds = new Set(articles.map((a) => a.id));
 
   const articleItems: FeedItem[] = articles.map((entry) => {
-    const lang = entry.data.lang ?? (entry.id.includes('.zh-tw') ? 'zh-tw' : 'en');
+    const lang = inferLang(entry.id, entry.data.lang, entry.body ?? '');
     const units = countUnits(stripMarkdown(entry.body ?? ''));
     return {
       kind: 'ARTICLE',
@@ -109,7 +116,7 @@ export async function getFeedItems(): Promise<FeedItem[]> {
       description: entry.data.description ?? '',
       category: entry.data.category ?? '',
       tags: entry.data.tags,
-      lang: entry.data.lang ?? 'en',
+      lang: inferLang(entry.id, entry.data.lang, entry.body ?? ''),
       publishedAt: entry.data.publishedAt ?? POST_FALLBACK_DATES[entry.id] ?? '',
       units,
       readMin: readingTime(units),

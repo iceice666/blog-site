@@ -273,12 +273,17 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 .skillgrid { padding: 14px; }
 .skillgrid + .skillgrid { border-top: 1px solid var(--border); }
 .skillgrid-label { font-size: 11px; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 9px; text-transform: uppercase; }
-.skillgrid-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.skillgrid-chips > span { width: 34px; height: 34px; border: 1px solid var(--border); padding: 7px; display: inline-grid; place-items: center; color: var(--text); background: var(--surface); }
+.skillgrid-chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.skillgrid-chips > span { min-height: 58px; border: 1px solid var(--border); padding: 9px; display: flex; align-items: center; gap: 9px; color: var(--text); background: var(--surface); }
 .skillgrid-chips > span:hover { color: var(--accent); border-color: var(--accent); }
-.skillgrid-icon { width: 100%; height: 100%; display: block; background: currentColor; mask: var(--skill-icon) center / contain no-repeat; -webkit-mask: var(--skill-icon) center / contain no-repeat; }
-.skillgrid-monogram { font-size: 10px; line-height: 1; font-weight: 700; letter-spacing: 0.02em; color: var(--text-muted); }
-.skillgrid-chips > span:hover .skillgrid-monogram { color: var(--accent); }
+.skillgrid-mark { width: 30px; height: 30px; flex: 0 0 30px; display: inline-grid; place-items: center; color: currentColor; }
+.skillgrid-icon { width: 26px; height: 26px; display: block; background: currentColor; mask: var(--skill-icon) center / contain no-repeat; -webkit-mask: var(--skill-icon) center / contain no-repeat; }
+.skillgrid-monogram { font-size: 11px; line-height: 1; font-weight: 700; letter-spacing: 0.02em; color: var(--text-muted); }
+.skillgrid-copy { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.skillgrid-name { font-size: 12.5px; line-height: 1.25; font-weight: 700; color: var(--text); }
+.skillgrid-note { font-family: var(--font-prose-active); font-size: 12px; line-height: 1.35; color: var(--text-muted); }
+.skillgrid-chips > span:hover .skillgrid-monogram,
+.skillgrid-chips > span:hover .skillgrid-name { color: var(--accent); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 .subhead { font-size: 10px; letter-spacing: 0.08em; color: var(--text-muted); text-transform: uppercase; margin: 20px 0 10px; }

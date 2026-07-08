@@ -58,12 +58,17 @@ function labelOf(name: string, note: string | null) {
             class:list={[!hasBrandIcon(name) && 'is-monogram']}
             style={hasBrandIcon(name) ? `--skill-icon: url("https://cdn.simpleicons.org/${iconSlugOf(name)}");` : undefined}
           >
-            {hasBrandIcon(name) ? (
-              <span class="skillgrid-icon" aria-hidden="true" />
-            ) : (
-              <span class="skillgrid-monogram" aria-hidden="true">{monogramOf(name)}</span>
-            )}
-            <small class="sr-only">{labelOf(name, note)}</small>
+            <span class="skillgrid-mark" aria-hidden="true">
+              {hasBrandIcon(name) ? (
+                <span class="skillgrid-icon" />
+              ) : (
+                <span class="skillgrid-monogram">{monogramOf(name)}</span>
+              )}
+            </span>
+            <span class="skillgrid-copy">
+              <span class="skillgrid-name">{name}</span>
+              {note && <span class="skillgrid-note">{note}</span>}
+            </span>
           </span>
         );
       })

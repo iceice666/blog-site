@@ -29,10 +29,7 @@ const {
 const stats = await getBlogStats();
 const github = await getGithubData();
 
-const activeNavItem = NAV_ITEMS.find((n) => n.key === activeKey)!;
 const extraWindowIndex = Math.max(...NAV_ITEMS.map((item) => item.windowIndex)) + 1;
-const windowIndex = extraWindow ? extraWindowIndex : activeNavItem.windowIndex;
-const sidebarIndex = 0;
 ---
 
 <html lang={lang}>
@@ -61,7 +58,8 @@ const sidebarIndex = 0;
           {extraWindow && <span class="win active">{extraWindowIndex}:{extraWindow.label}*</span>}
         </div>
         <div class="status-right">
-          <button id="theme-toggle" class="chip mode" type="button" aria-label="toggle color theme">NORMAL</button>
+          <button id="vim-toggle" class="chip mode" type="button" aria-label="toggle Vim navigation" aria-pressed="true">VIM ON</button>
+          <button id="theme-toggle" class="chip" type="button" aria-label="toggle color theme">THEME</button>
           {
             langHref ? (
               <a href={langHref} class="chip">en/中</a>
@@ -74,7 +72,7 @@ const sidebarIndex = 0;
 
       <div class="panes">
         <div class="pane-main">
-          <div class="pane-title">{windowIndex}.0 — {paneTitle}</div>
+          <div class="pane-title">{paneTitle}</div>
           <div class="scroll-area">
             <div class={`reading${wide ? ' is-wide' : ''}`}>
               <slot />
@@ -82,17 +80,20 @@ const sidebarIndex = 0;
           </div>
         </div>
 
-        <Sidebar windowIndex={sidebarIndex} stats={stats} github={github} />
+        <Sidebar stats={stats} github={github} />
       </div>
 
       <div class="status-bar bottom">
         <slot name="footer-hints">
           <span>j/k move</span><span>gg/G top/bottom</span><span>/ search</span><span>:q back</span>
         </slot>
+        <span id="vim-status" class="vim-status" aria-live="polite">-- NORMAL --</span>
       </div>
     </div>
 
     <script>
+      import '../scripts/vim-nav';
+
       (function () {
         const root = document.documentElement;
         const btn = document.getElementById('theme-toggle');

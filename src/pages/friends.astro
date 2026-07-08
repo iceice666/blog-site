@@ -19,7 +19,7 @@ const renderedFriends = await Promise.all(
   <div class="friends-grid">
     {
       renderedFriends.map((f) => (
-        <div class="friend-card" lang="zh-tw">
+        <div class="friend-card" lang="zh-tw" data-vim-target data-vim-open={f.url}>
           <a href={f.url} class="avatar friend-avatar" target="_blank" rel="noopener noreferrer">
             <img src={f.img} alt={f.name} loading="lazy" />
           </a>

@@ -19,7 +19,13 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
 <Shell title="Feed | Brian Duan" activeKey="feed" paneTitle={`feed.md (${displayedItemCount} entries)`}>
   {
     promotedArticle && (
-      <section class="article-spotlight" aria-labelledby="spotlight-title" lang={promotedArticle.lang}>
+      <section
+        class="article-spotlight"
+        aria-labelledby="spotlight-title"
+        lang={promotedArticle.lang}
+        data-vim-target
+        data-vim-open={promotedArticle.href}
+      >
         <div class="spot-kicker">LATEST ARTICLE</div>
         <div class="meta">
           <span class="pill">ARTICLE</span>
@@ -42,7 +48,7 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
   {
     feedItems.map((item) =>
       item.kind === 'ARTICLE' ? (
-        <article class="entry-w" lang={item.lang}>
+        <article class="entry-w" lang={item.lang} data-vim-target data-vim-open={item.href}>
           <div class="meta">
             <span class="pill">ARTICLE</span>
             <span>{item.category}</span>
@@ -59,7 +65,7 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
           <p class="tags">{item.tags.map((t) => `#${t}`).join(' ')}</p>
         </article>
       ) : (
-        <article class="entry-w is-post" lang={item.lang}>
+        <article class="entry-w is-post" lang={item.lang} data-vim-target data-vim-open={item.href ?? undefined}>
           <div class="meta">
             <span class="pill">POST</span>
             <span>{item.publishedAt}</span>

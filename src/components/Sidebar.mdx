@@ -2,7 +2,7 @@ import { author, socialDisplayName, socialHref, socialIsExternal } from '../../c
 
 <aside className="sidebar">
   <div className="widget">
-    <div className="pane-title">{props.windowIndex}.1 — whoami</div>
+    <div className="pane-title sidebar-whoami-title">whoami</div>
     <div className="widget-body profile">
       <div className="avatar">
         <img src={author.avatar} alt={author.name} loading="lazy" />
@@ -24,7 +24,7 @@ import { author, socialDisplayName, socialHref, socialIsExternal } from '../../c
   </div>
 
   <div className="widget">
-    <div className="pane-title">{props.windowIndex}.2 — active repos</div>
+    <div className="pane-title">active repos</div>
     <div className="widget-body">
       {props.github.repos.map((repo) => (
         <a className="repo-card" href={repo.url} target="_blank" rel="noopener noreferrer">
@@ -44,7 +44,7 @@ import { author, socialDisplayName, socialHref, socialIsExternal } from '../../c
   </div>
 
   <div className="widget sidebar-final-widget">
-    <div className="pane-title">{props.windowIndex}.3 — stats</div>
+    <div className="pane-title">stats</div>
     <div className="widget-body">
       <div className="stat-row"><dt>entries</dt><dd>{props.stats.entries}</dd></div>
       <div className="stat-row"><dt>articles</dt><dd>{props.stats.articles}</dd></div>

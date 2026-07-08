@@ -73,7 +73,7 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 .chip[aria-disabled="true"] { opacity: 0.4; cursor: default; pointer-events: none; }
 .vim-help { display: contents; }
 .vim-help > span { display: inline; }
-.vim-status { margin-left: auto; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+.vim-status { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
 .vim-selected {
   outline: 3px solid var(--accent);
   outline-offset: 5px;

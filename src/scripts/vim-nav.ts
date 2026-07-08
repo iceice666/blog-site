@@ -201,10 +201,30 @@ function initVimNav() {
     return rect.width > 0 && rect.height > 0;
   }
 
-  function isVisible(el: HTMLElement) {
-    if (!isRendered(el)) return false;
+  /** The part of the element inside the viewport AND every clipping ancestor
+   * (e.g. .scroll-area), or null when fully clipped — a window-only check
+   * would leave hints floating over the status bars for elements scrolled
+   * out of a pane. */
+  function clippedRect(el: HTMLElement): { top: number; left: number } | null {
     const rect = el.getBoundingClientRect();
-    return rect.bottom >= 0 && rect.top <= window.innerHeight;
+    let top = Math.max(rect.top, 0);
+    let left = Math.max(rect.left, 0);
+    let bottom = Math.min(rect.bottom, window.innerHeight);
+    let right = Math.min(rect.right, window.innerWidth);
+    for (let parent = el.parentElement; parent; parent = parent.parentElement) {
+      const style = window.getComputedStyle(parent);
+      if (!/(auto|scroll|hidden|clip)/.test(style.overflowX + style.overflowY)) continue;
+      const parentRect = parent.getBoundingClientRect();
+      top = Math.max(top, parentRect.top);
+      left = Math.max(left, parentRect.left);
+      bottom = Math.min(bottom, parentRect.bottom);
+      right = Math.min(right, parentRect.right);
+    }
+    return bottom > top && right > left ? { top, left } : null;
+  }
+
+  function isVisible(el: HTMLElement) {
+    return isRendered(el) && clippedRect(el) !== null;
   }
 
   function getTargets() {
@@ -357,11 +377,14 @@ function initVimNav() {
     const fragment = document.createDocumentFragment();
     hints.forEach((hint) => {
       const rect = hint.el.getBoundingClientRect();
+      // Candidates are pre-filtered by isVisible, so the fallback only guards
+      // against layout changes between collection and render.
+      const pos = clippedRect(hint.el) ?? { top: Math.max(4, rect.top), left: Math.max(4, rect.left) };
       const marker = document.createElement('span');
       marker.className = 'vim-hint';
       marker.textContent = hint.label;
-      marker.style.left = `${Math.max(4, rect.left)}px`;
-      marker.style.top = `${Math.max(4, rect.top)}px`;
+      marker.style.left = `${pos.left}px`;
+      marker.style.top = `${pos.top}px`;
       fragment.append(marker);
     });
     document.body.appendChild(fragment);

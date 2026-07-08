@@ -30,7 +30,9 @@ const stats = await getBlogStats();
 const github = await getGithubData();
 
 const activeNavItem = NAV_ITEMS.find((n) => n.key === activeKey)!;
-const windowIndex = extraWindow ? 4 : activeNavItem.windowIndex;
+const extraWindowIndex = Math.max(...NAV_ITEMS.map((item) => item.windowIndex)) + 1;
+const windowIndex = extraWindow ? extraWindowIndex : activeNavItem.windowIndex;
+const sidebarIndex = 0;
 ---
 
 <html lang={lang}>
@@ -56,7 +58,7 @@ const windowIndex = extraWindow ? 4 : activeNavItem.windowIndex;
               );
             })
           }
-          {extraWindow && <span class="win active">4:{extraWindow.label}*</span>}
+          {extraWindow && <span class="win active">{extraWindowIndex}:{extraWindow.label}*</span>}
         </div>
         <div class="status-right">
           <button id="theme-toggle" class="chip mode" type="button" aria-label="toggle color theme">NORMAL</button>
@@ -80,7 +82,7 @@ const windowIndex = extraWindow ? 4 : activeNavItem.windowIndex;
           </div>
         </div>
 
-        <Sidebar windowIndex={windowIndex} stats={stats} github={github} />
+        <Sidebar windowIndex={sidebarIndex} stats={stats} github={github} />
       </div>
 
       <div class="status-bar bottom">

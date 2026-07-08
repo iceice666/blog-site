@@ -18,22 +18,22 @@ export interface GithubData {
 
 export const PINNED_REPOS = [
   {
-    name: 'dynamic',
-    desc: 'The platform engine powering justaslime.dev.',
-    lang: 'TypeScript',
-    langVar: '--lang-ts',
-  },
-  {
     name: 'blog-site',
-    desc: 'Content & Cloudflare config for this blog.',
+    desc: 'Self-contained Astro site for justaslime.dev, deployed on Cloudflare Workers.',
     lang: 'Markdown',
     langVar: '--lang-md',
+  },
+  {
+    name: 'dynamic',
+    desc: 'Previous TypeScript site-engine experiment that used to power justaslime.dev.',
+    lang: 'TypeScript',
+    langVar: '--lang-ts',
   },
 ];
 
 const FALLBACK_ACTIVITY: GithubActivityItem[] = [
   { ev: 'push', repo: 'blog-site', when: '—' },
-  { ev: 'pr', repo: 'dynamic', when: '—' },
+  { ev: 'pr', repo: 'blog-site', when: '—' },
 ];
 
 function relativeTime(iso: string, now: number): string {

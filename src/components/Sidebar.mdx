@@ -1,0 +1,74 @@
+import { author } from '../../config';
+
+export function linkOf(social) {
+  return social.kind === 'email' ? `mailto:${social.address}` : social.url;
+}
+
+export function labelOf(social) {
+  return social.kind === 'email' ? 'mail' : social.kind === 'github' ? 'github' : 'site';
+}
+
+<aside className="sidebar">
+  <div className="widget">
+    <div className="pane-title">{props.windowIndex}.1 — whoami</div>
+    <div className="widget-body profile">
+      <div className="avatar">
+        <img src={author.avatar} alt={author.name} loading="lazy" />
+      </div>
+      <div>
+        <div className="profile-name">{author.name}</div>
+        <div className="profile-tag">{author.tagline}</div>
+      </div>
+    </div>
+    <div className="widget-body sidebar-profile-links">
+      <div className="profile-links">
+        {author.socials.map((social) => (
+          <a href={linkOf(social)} target={social.kind === 'email' ? undefined : '_blank'} rel={social.kind === 'email' ? undefined : 'noopener noreferrer'}>
+            {labelOf(social)}
+          </a>
+        ))}
+      </div>
+      {author.avatarCredit ? (
+        <p className="avatar-credit">
+          avatar:{' '}
+          <a href={author.avatarCredit} target="_blank" rel="noopener noreferrer">
+            pixiv artwork ↗
+          </a>
+        </p>
+      ) : null}
+    </div>
+  </div>
+
+  <div className="widget">
+    <div className="pane-title">{props.windowIndex}.2 — active repos</div>
+    <div className="widget-body">
+      {props.github.repos.map((repo) => (
+        <a className="repo-card" href={repo.url} target="_blank" rel="noopener noreferrer">
+          <div className="repo-name">{repo.name}</div>
+          {repo.description ? <div className="repo-desc">{repo.description}</div> : null}
+          <div className="repo-lang">
+            <i />
+            <span>{repo.language ?? 'unknown'}</span>
+            <span className="repo-activity">{repo.pushed}</span>
+          </div>
+        </a>
+      ))}
+      <p className="gh-caption">
+        {props.github.live ? 'top public repos by latest push' : 'fallback repos — live GitHub fetch unavailable at build time'}
+      </p>
+    </div>
+  </div>
+
+  <div className="widget sidebar-final-widget">
+    <div className="pane-title">{props.windowIndex}.3 — stats</div>
+    <div className="widget-body">
+      <div className="stat-row"><dt>entries</dt><dd>{props.stats.entries}</dd></div>
+      <div className="stat-row"><dt>articles</dt><dd>{props.stats.articles}</dd></div>
+      <div className="stat-row"><dt>words</dt><dd>{props.stats.words.toLocaleString()}</dd></div>
+      <div className="stat-row"><dt>langs</dt><dd>{props.stats.langs.join(' / ')}</dd></div>
+      <div className="toptags">
+        {props.stats.topTags.map((tag) => <span>{tag}</span>)}
+      </div>
+    </div>
+  </div>
+</aside>

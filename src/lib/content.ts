@@ -7,6 +7,19 @@ export const ARTICLE_SLUGS: Record<string, string> = {
   'about-me.zh-tw': 'about-zh-tw',
 };
 
+export function isAboutArticleId(id: string) {
+  return id === 'about-me' || id === 'about-me.zh-tw';
+}
+
+export function getArticleSlug(id: string) {
+  return ARTICLE_SLUGS[id] ?? id;
+}
+
+export function getArticleHref(id: string) {
+  const slug = getArticleSlug(id);
+  return isAboutArticleId(id) ? `/${slug}` : `/articles/${slug}/`;
+}
+
 /** Posts with no frontmatter date at all — mirrors the old build script's git-history fallback. */
 const POST_FALLBACK_DATES: Record<string, string> = {
   '111': '2026-02-19',
@@ -65,13 +78,12 @@ export async function getFeedItems(): Promise<FeedItem[]> {
   const articleIds = new Set(articles.map((a) => a.id));
 
   const articleItems: FeedItem[] = articles.map((entry) => {
-    const slug = ARTICLE_SLUGS[entry.id] ?? entry.id;
     const lang = entry.data.lang ?? (entry.id.includes('.zh-tw') ? 'zh-tw' : 'en');
     const units = countUnits(stripMarkdown(entry.body ?? ''));
     return {
       kind: 'ARTICLE',
       id: entry.id,
-      href: `/${slug}`,
+      href: getArticleHref(entry.id),
       title: entry.data.title,
       description: entry.data.description,
       category: entry.data.category,
@@ -86,7 +98,7 @@ export async function getFeedItems(): Promise<FeedItem[]> {
   const postItems: FeedItem[] = posts.map((entry) => {
     // A post stub sharing an id with a real article (e.g. the nhnc-2026-writeups
     // index stub) links through to that article instead of standing on its own.
-    const href = articleIds.has(entry.id) ? `/${ARTICLE_SLUGS[entry.id] ?? entry.id}` : null;
+    const href = articleIds.has(entry.id) ? getArticleHref(entry.id) : null;
     const units = countUnits(stripMarkdown(entry.body ?? ''));
     const { title: leadingTitle, rest: bodyHtml } = extractLeadingH1(entry.rendered?.html ?? '');
     return {
@@ -105,7 +117,7 @@ export async function getFeedItems(): Promise<FeedItem[]> {
     };
   });
 
-  return [...articleItems, ...postItems].sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+  return [...articleItems, ...postItems].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
 export interface BlogStats {

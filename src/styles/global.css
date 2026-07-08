@@ -69,6 +69,17 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 @media (min-width: 901px) { .scroll-area { flex: 1; min-height: 0; overflow-y: auto; } }
 .reading { max-width: 720px; padding: 30px 34px 50px; }
 
+/* ---- homepage spotlight ---- */
+.article-spotlight { border: 1px solid var(--border); border-left: 3px solid var(--accent); background: var(--surface); padding: 16px 18px; margin: 0 0 22px; }
+.article-spotlight .spot-kicker { margin: 0 0 10px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
+.article-spotlight .meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10.5px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.article-spotlight .meta .pill { font-size: 9.5px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.article-spotlight h1 { margin: 0 0 9px; font-size: 23px; line-height: 1.25; letter-spacing: 0; overflow-wrap: anywhere; }
+.article-spotlight h1 a:hover { color: var(--accent); }
+.article-spotlight .desc { margin: 0 0 10px; color: var(--text-muted); font-size: 13px; line-height: 1.7; max-width: 60ch; }
+.article-spotlight .stats { margin: 0 0 6px; color: var(--text-muted); font-size: 10.5px; }
+.article-spotlight .tags { margin: 0; color: var(--accent); font-size: 10.5px; line-height: 1.6; }
+
 /* ---- feed rows ---- */
 .entry-w { padding: 26px 0; border-bottom: 1px solid var(--border); }
 .entry-w:first-child { padding-top: 6px; }

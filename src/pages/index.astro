@@ -1,14 +1,46 @@
 ---
 export const prerender = true;
 import Shell from '../layouts/Shell.astro';
-import { getFeedItems } from '../lib/content';
+import { getFeedItems, type FeedItem } from '../lib/content';
 
 const items = await getFeedItems();
+
+type ArticleFeedItem = FeedItem & { kind: 'ARTICLE'; href: string };
+
+function isLongFormArticle(item: FeedItem): item is ArticleFeedItem {
+  return item.kind === 'ARTICLE' && item.href?.startsWith('/articles/') === true;
+}
+
+const promotedArticle = items.find(isLongFormArticle);
+const feedItems = promotedArticle ? items.filter((item) => item.id !== promotedArticle.id) : items;
+const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
 ---
 
-<Shell title="Feed | Brian Duan" activeKey="feed" paneTitle={`feed.md (${items.length} entries)`}>
+<Shell title="Feed | Brian Duan" activeKey="feed" paneTitle={`feed.md (${displayedItemCount} entries)`}>
   {
-    items.map((item) =>
+    promotedArticle && (
+      <section class="article-spotlight" aria-labelledby="spotlight-title">
+        <div class="spot-kicker">LATEST ARTICLE</div>
+        <div class="meta">
+          <span class="pill">ARTICLE</span>
+          <span>{promotedArticle.category}</span>
+          <span>{promotedArticle.lang}</span>
+          <span>{promotedArticle.publishedAt}</span>
+        </div>
+        <h1 id="spotlight-title">
+          <a href={promotedArticle.href}>{promotedArticle.title}</a>
+        </h1>
+        <p class="desc">{promotedArticle.description}</p>
+        <p class="stats">
+          {promotedArticle.units} words · {promotedArticle.readMin} min read
+        </p>
+        <p class="tags">{promotedArticle.tags.map((t) => `#${t}`).join(' ')}</p>
+      </section>
+    )
+  }
+
+  {
+    feedItems.map((item) =>
       item.kind === 'ARTICLE' ? (
         <article class="entry-w">
           <div class="meta">

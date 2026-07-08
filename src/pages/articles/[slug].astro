@@ -1,22 +1,20 @@
 ---
 export const prerender = true;
 import { getCollection, render } from 'astro:content';
-import Shell from '../layouts/Shell.astro';
-import { countUnits, getArticleSlug, isAboutArticleId, readingTime, stripMarkdown } from '../lib/content';
+import Shell from '../../layouts/Shell.astro';
+import { countUnits, getArticleSlug, isAboutArticleId, readingTime, stripMarkdown } from '../../lib/content';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
-  return articles.filter((entry) => isAboutArticleId(entry.id)).map((entry) => {
-    const slug = getArticleSlug(entry.id);
-    return { params: { slug }, props: { entry } };
+  return articles.filter((entry) => !isAboutArticleId(entry.id)).map((entry) => {
+    return { params: { slug: getArticleSlug(entry.id) }, props: { entry } };
   });
 }
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
-const langHref = entry.id === 'about-me' ? '/about-zh-tw' : entry.id === 'about-me.zh-tw' ? '/about' : null;
-
+const slug = getArticleSlug(entry.id);
 const lang = entry.data.lang ?? (entry.id.includes('.zh-tw') ? 'zh-tw' : 'en');
 const units = countUnits(stripMarkdown(entry.body ?? ''));
 const readMin = readingTime(units);
@@ -24,9 +22,9 @@ const readMin = readingTime(units);
 
 <Shell
   title={`${entry.data.title} | Brian Duan`}
-  activeKey="about"
+  activeKey="feed"
+  extraWindow={{ label: `articles/${slug}` }}
   paneTitle={`${entry.id}.mdx`}
-  langHref={langHref}
   description={entry.data.description}
 >
   <div class="art-meta">

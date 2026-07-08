@@ -9,14 +9,14 @@ type MarkdownNode = {
   [key: string]: unknown;
 };
 
-/** Rewrite content-authored /articles/<slug>/ and /posts/<slug>/ links to real routes. */
+/** Rewrite legacy content-authored /posts/<slug>/ links to real routes. */
 export const rewriteInternalLinks: RehypePlugin = () => {
   return (tree) => {
     function visit(node: MarkdownNode) {
       if (node.type === 'element' && node.tagName === 'a' && node.properties?.href) {
         const href = String(node.properties.href);
-        const m = href.match(/^\/(articles|posts)\/([\w-]+)\/?$/);
-        if (m) node.properties.href = `/${m[2]}`;
+        const m = href.match(/^\/posts\/([\w-]+)\/?$/);
+        if (m) node.properties.href = `/${m[1]}`;
       }
       node.children?.forEach(visit);
     }

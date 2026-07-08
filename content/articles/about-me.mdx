@@ -1,6 +1,6 @@
 ---
 title: About Me
-description: A little about who I am and what I do.
+description: A little about who I am, what I build, and why I keep building weird tools.
 category: meta
 tags: [about]
 publishedAt: 2026-02-20
@@ -9,20 +9,61 @@ publishedAt: 2026-02-20
 import SkillGrid from '$/components/mdx/SkillGrid.astro';
 import RepoCard from '$/components/mdx/RepoCard.astro';
 
-Hi, I'm **Brian Duan**. You might also find me as `iceice666` or `justaslime`.
-I'm a student at 🇹🇼 National Cheng Kung University.
+Hi, I'm **Brian Duan**. You might also find me online as `iceice666` or `justaslime` (`abignoob` when PWNing CTF, since I just a noob).
 
-My motto is pretty straightforward: 
-"A lazy guy, only build project when I need." 
-I build things when there's a reason, not to show off.
-This blog is mostly a place to stash thoughts (and occasionally drop a spicy take).
+I'm a student at 🇹🇼 **National Cheng Kung University**,
+and I build personal tools, infrastructure, and experiments for the way I want computers to work.
+
+My motto is still pretty simple:
+
+> A lazy guy, only build project when I need.
+
+That sounds like a joke, but it is also fairly accurate.
+I usually do not build things to show off.
+I build them when the existing tools feel too heavy,
+too opaque, too cloud-dependent, too mouse-driven, or simply not shaped for how I think.
+
+This blog is where I stash notes, experiments, writeups, unfinished thoughts,
+and occasionally spicy takes before they disappear into some forgotten chat log or random Markdown file.
+
+## What I Care About
+
+Most of my projects orbit around a few recurring themes:
+
+- **Personal computing environments** — tools that make my own workflow feel less broken.
+- **Developer experience** — terminals, browsers, editors, navigation, project management, and the glue between them.
+- **Local-first AI agents** — not just "AI wrappers", but agents that can fit into real workflows without turning everything into an opaque black box.
+- **Systems and infrastructure** — Linux, NixOS, self-hosting, homelabs, networking, and things that should be boring but rarely are.
+- **Programming languages and compilers** — interpreters, IRs, parsing, effects, functional programming, and language implementation.
+- **Creative technical projects** — games, Minecraft mods, embedded experiments, and anything else that looks fun enough to justify the rabbit hole.
+
+I like small, composable tools. I like explicit state. I like keyboard-first interfaces. I like systems that can be inspected, repaired, and rebuilt when they inevitably break.
+
+I also use AI heavily as a thinking and implementation assistant, but I care about reviewability, reproducibility, and actually understanding the final system. If the result cannot be debugged, it is not really mine yet.
+
+## Current Focus
+
+Right now, I am mostly exploring:
+
+- local AI agents and personal assistants
+- project-oriented developer environments
+- minimal browser and terminal UX
+- Nix-based personal infrastructure
+- edge AI and embedded hardware
+- self-hosted services that do not become a second job
+- language tooling, compilers, and weird DSL ideas
+
+This changes often, because my attention span is apparently implemented as a work-stealing scheduler.
 
 ## Tech Stack
 
-I like using the right tool for the job:
-- **Rust/Zig** for systems-level work
-- **Python/Lua** for scripting (I try not to make Bash do anything heroic)
-- **TypeScript/ReScript** for anything web-related (including this blog)
+I like using the right tool for the job, though I definitely have preferences.
+
+- **Rust / Zig** for systems-level work
+- **TypeScript / ReScript** for web projects
+- **Python / Lua** for scripting and automation
+- **Haskell** when I want to think in types and suffer productively
+- **Nix** when I want my machines to be reproducible and my disk drain faster
 
 :::|> If you're curious, here's the full stack list
 
@@ -31,7 +72,7 @@ I like using the right tool for the job:
     "zig",
     "haskell",
     "typescript",
-    {"rescript":"still getting comfortable"},
+    {"Zutai":"my own language, iceice666/zutai"},
     "python",
     "lua",
     {"gnubash":"the least pleasant scripting language 🤮"}
@@ -41,57 +82,114 @@ I like using the right tool for the job:
     "alpinelinux",
     {"archlinux":"I use Arch, btw"},
     {"nixos":"the ultimate sysadmin solution"},
-    "proxmox",
+    {"Nix Flakes":"reproducible Nix setups"},
     "nginx",
-    "docker"
+    "docker",
+    "cloudflare"
     ]} />
 <SkillGrid label="Other Tools" skills={[
     {"neovim":"my forever editor"},
-    {"gnuemacs":"planned, currently learning"},
     {"zedindustries":"my daily driver, with a great Vim mode"},
     "fish shell",
-    {"mise-en-place":"pkg, env, task, all in one"},
-    {"opencode":"exploring AI-assisted coding"}
+    {"Oh My Pi":"the agentic coding harness I use"}
     ]} />
 
 :::
 
 ## Things I've Built
 
-My projects have a habit of slipping… but I'm always tinkering with something.
+My projects have a habit of slipping, mutating, or getting replaced by a better idea halfway through.
+Still, there are always a few things being built, rewritten, or resurrected.
 
-### (Maybe) Work In Progress
+### Active / Living Projects
+
+<RepoCard url="https://github.com/iceice666/zutai"
+          desc="my own experimental language" />
+
+<RepoCard url="https://github.com/mozufu/TempestMiku"
+        desc="a self-hosted personal AI companion and project-aware coding agent, rewritten in Rust because apparently the agent needed systems programming too" />
 
 <RepoCard url="https://github.com/iceice666/blog-site"
-          desc = "the current self-contained Astro site for this blog, deployed on Cloudflare Workers" />
-<RepoCard url="https://github.com/iceice666/dynamic"
-          desc = "the previous TypeScript site-engine experiment that used to power this blog" />
-<RepoCard url="https://code.justaslime.dev/justaslime/slime_os"
-          desc = "a toy OS written in Rust because why not" />
-<RepoCard url="https://code.justaslime.dev/justaslime/WriteMyselfAScheme"
-          desc = "a Scheme interpreter in Haskell" />
+       desc="the current self-contained Astro site for this blog, deployed on Cloudflare Workers" />
 
-### Past Projects
+This blog is also part of the experiment: articles, short posts, custom MDX components,
+GitHub Discussions-backed comments, and a private GitHub-backed admin editor.
+I like when the writing system itself is hackable.
+
+I am also working on several personal tooling ideas around AI agents, project management, and developer workflows.
+The general direction is simple: I want an assistant that understands projects, context, code, notes,
+and tasks without turning my computer into a SaaS dashboard.
+
+### Systems, Languages, and Toys
+
+<RepoCard url="https://github.com/iceice666/materwelon"
+          desc="a tiny functional shell for the Raspberry Pi Pico 2; proof that even a microcontroller with a 64 KB heap deserves pipelines, currying, and suffering" />
+
+<RepoCard url="https://github.com/iceice666/slime_os"
+       desc="a toy OS written in Rust because apparently that is a normal thing to do" />
+
+<RepoCard url="https://github.com/iceice666/WriteMyselfAScheme"
+       desc="a Scheme interpreter in Haskell" />
+
+<RepoCard url="https://github.com/iceice666/turing-complete-assembler"
+       desc="an assembler-ish tool for the Turing Complete game; basically structured search and replace, but useful" />
+
+These projects are not necessarily polished products.
+Some are learning projects, some are experiments, and some exist because I got annoyed enough to implement the thing myself.
+
+### Games and Minecraft
+
+<RepoCard url="https://github.com/iceice666/Chronos-Descent"
+       desc="a C# game made for Hack Club Juice" />
 
 <RepoCard url="https://github.com/iceice666/TpManager"
-          desc = "a Minecraft teleport management mod" />
-<RepoCard url="https://github.com/iceice666/Chronos-Descent"
-          desc = "a C# game made for [Hackclub Juice](https://juice.hackclub.com/games)" />
+       desc="a Minecraft teleport management mod" />
+
 <RepoCard url="https://github.com/HPK-dev/YetJustAnotherSilver"
-          desc = "adds silver to Minecraft" />
-<RepoCard url="https://github.com/iceice666/turing-complete-assembler"
-          desc = "An ~~sed~~ assembler for the Turing Complete game" />
+       desc="adds silver to Minecraft" />
+
+Minecraft is one of the reasons I started programming in the first place, so it keeps leaking back into my projects.
+
+## How I Work
+
+My preferred workflow is keyboard-first, local-first, and heavily customized.
+
+I spend a lot of time thinking about how tools shape attention. A lot of modern software feels optimized for being impressive in screenshots, not for helping someone stay inside a deep working context. I prefer interfaces that are quiet, fast, scriptable, and composable.
+
+My ideal setup is something like:
+
+* a project-aware terminal
+* a browser that behaves more like a programmable research environment
+* an editor that understands both code and intent
+* local agents that can help without hiding the system
+* reproducible machines that can be rebuilt instead of manually blessed
+
+I do not think every tool needs to be minimal. But I do think every tool should be honest about what state it owns, what it changes, and how I can recover when it breaks.
+
+## What I Write About
+
+You can expect posts about:
+
+* AI agents and coding workflows
+* Linux, NixOS, and personal infrastructure
+* systems programming
+* browsers, terminals, and UI experiments
+* programming language implementation
+* compilers, parsing, IRs, and type systems
+* embedded devices and edge AI
+* CTF writeups
+* Minecraft, games, and creative coding
+* random technical rabbit holes I fell into that week
+
+Some posts are polished. Some are notes. Some are mostly there so future me can stop rediscovering the same thing from scratch.
 
 ## Other Interests
 
-- I'm into functional programming theory.
-- I mess with the Linux toolchain for fun.
-- I'm a deep Neovim user.
-- I sometimes make Minecraft mods.
-- I play a bit of chess too—badly, but enthusiastically.
+Outside of code, I like chess, keyboards, hardware tinkering, and thinking too much about tool design.
+
+I am also interested in how people learn technical subjects, especially the gap between "I know the concept" and "I can actually build something with it." A lot of my projects are basically attempts to make that gap smaller for myself.
 
 ## Links
 
-- GitHub: [github.com/iceice666](https://github.com/iceice666)
-- Self-hosted Git: [code.justaslime.dev/justaslime](https://code.justaslime.dev/justaslime)
-- Email: [brian1061225@gmail.com](mailto:brian1061225@gmail.com) (S/MIME available)
+* GitHub: [github.com/iceice666](https://github.com/iceice666)
+* Email: [brian1061225@gmail.com](mailto:brian1061225@gmail.com) — S/MIME available

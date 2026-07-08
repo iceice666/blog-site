@@ -1,6 +1,6 @@
 ---
 title: 關於我
-description: 一點關於我是誰以及我在做什麼的介紹。
+description: 一點關於我是誰、我在做什麼，以及為什麼一直在搞些奇怪的東西。
 category: meta
 tags: [about]
 publishedAt: 2026-02-20
@@ -9,29 +9,70 @@ publishedAt: 2026-02-20
 import SkillGrid from '$/components/mdx/SkillGrid.astro';
 import RepoCard from '$/components/mdx/RepoCard.astro';
 
+嗨，我是 **Brian Duan**。你大概也會在網路上看到我用 `iceice666` 或 `justaslime` 這些 ID（打 CTF 的時候會叫 `abignoob`，因為我就真的是個菜雞）。
 
-嗨，我是 **Brian Duan**，也用過 `iceice666` 和 `justaslime` 這些ID。
-我是🇹🇼國立成功大學的學生。
+我是🇹🇼 **國立成功大學**的學生，
+平常搞一些個人工具、基礎設施和各種實驗，目標就是讓電腦照我喜歡的方式運作。
 
-我的座右銘很直白：「需要時才寫程式，本質上是條鹹魚。」
-我只在有必要時才動手開發 —— 從不為了炫技而寫代碼。
-這個部落格純粹是想找個地方記錄想法~~順便暴言~~。
+我的座右銘依然簡單粗暴：
+
+> 一條鹹魚，只在需要的時候才寫程式。
+
+聽起來像在開玩笑，但其實挺準確的。
+我通常不會為了炫技而開發東西。
+我會動手，通常是因為現有工具太重、
+太不透明、太依賴雲端、太依賴滑鼠，或者單純就不是照我的思考方式設計的。
+
+這個部落格就是我堆放筆記、實驗、writeup、未完成想法，
+偶爾還有一些~~暴言~~的地方——趁它們還沒消失在不知名的聊天記錄或某個隨機 Markdown 檔案裡之前。
+
+## 我在乎的事
+
+我大多數的專案都圍繞著幾個反覆出現的主題：
+
+- **個人運算環境** —— 讓自己的 workflow 少壞一點的工具。
+- **開發者體驗** —— 終端機、瀏覽器、編輯器、導覽、專案管理，還有它們之間的銜接。
+- **本地優先的 AI agent** —— 不只是「AI 包裝紙」，而是能真正嵌入實際工作流程、又不會把所有東西變成黑箱的 agent。
+- **系統與基礎設施** —— Linux、NixOS、自託管、homelab、網路，還有那些「理論上應該很無聊但實際上從不無聊」的東西。
+- **程式語言與編譯器** —— 直譯器、中間表示、解析、副作用系統、函數式程式設計、語言實作。
+- **有趣的技術專案** —— 遊戲、Minecraft 模組、嵌入式實驗，還有任何看起來夠好玩、值得跳坑的東西。
+
+我喜歡小巧、可組合的工具。我喜歡明確的狀態。我喜歡鍵盤優先的介面。我喜歡可以被檢查、修復、以及在它無可避免壞掉時能重建的系統。
+
+我也大量使用 AI 作為思考和實作助手，但我很在乎可審查性、可重現性，以及最後我真的有搞懂這個系統。如果結果沒辦法被 debug，那它還不算是我的東西。
+
+## 目前在搞的事
+
+最近主要在探索：
+
+- 本地 AI agent 和個人助手
+- 以專案為導向的開發環境
+- 極簡的瀏覽器和終端機 UX
+- 基於 Nix 的個人基礎設施
+- 邊緣 AI 和嵌入式硬體
+- 不會變成第二份工作的自託管服務
+- 語言工具鏈、編譯器和奇怪的 DSL 點子
+
+這些常常在變，因為我的注意力跨度顯然是用 work-stealing scheduler 實作的。
 
 ## 技術棧
 
-我習慣用合適的工具解決特定問題：
-- **Rust/Zig** 搞系統級開發
-- 寫腳本用**Python/Lua** ~~Bash什麼垃圾~~
-- **TypeScript/ReScript** 負責所有網頁相關（包括這個部落格）
+我習慣用合適的工具解決特定問題，不過偏好還是很明顯的。
 
-:::|> 完整技術清單如下
+* **Rust / Zig** 搞系統級開發
+* **TypeScript / ReScript** 負責網頁專案
+* **Python / Lua** 寫腳本和自動化
+* **Haskell** 當我想用型別思考並且有生產力地受苦
+* **Nix** 當我想讓機器可重現、同時讓硬碟空間更快消失
+
+::::|> 好奇的話，完整技術清單如下
 
 <SkillGrid label="語言" skills={[
     "rust",
     "zig",
     "haskell",
     "typescript",
-    {"rescript":"還在熟悉階段"},
+    {"Zutai":"我自己的程式語言，iceice666/zutai"},
     "python",
     "lua",
     {"gnubash":"最難用的腳本語言 🤮"}
@@ -40,57 +81,114 @@ import RepoCard from '$/components/mdx/RepoCard.astro';
 <SkillGrid label="基礎設施" skills={[
     "alpinelinux",
     {"archlinux":"I use Arch, btw"},
-    {"nixos":"終極系統管理方案，就是有點不太適合Linux"},
-    "proxmox",
+    {"nixos":"終極系統管理方案"},
+    {"Nix Flakes":"可重現的 Nix 設定"},
     "nginx",
-    "docker"
+    "docker",
+    "cloudflare"
     ]} />
 <SkillGrid label="其他工具" skills={[
-    {"neovim":"本命編輯器"},
-    {"gnuemacs":"計畫中，還在學"},
-    {"zedindustries":"我的主力編輯器，有很棒的 VIM 模式"},
+    {"neovim":"我的本命編輯器"},
+    {"zedindustries":"我的日常主力，有很棒的 Vim 模式"},
     "fish shell",
-    {"mise-en-place":"一站式開發環境管理"},
-    {"opencode":"正在研究AI輔助編程"}
+    {"Oh My Pi":"我使用的 agentic coding harness"}
     ]} />
 
-:::
-
+::::
 
 ## 我做過的東西
 
-我的專案經常跳票，但手頭總有些東西在搞...
+我的專案有經常跳票、變異、或被更好的點子半路取代的習慣。
+儘管如此，總是有些東西在開發、重寫或復活中。
 
+### 進行中 / 活躍項目
 
-### （大概）進行中
+<RepoCard url="https://github.com/iceice666/zutai"
+          desc="我自己的程式語言實驗" />
+<RepoCard url="https://github.com/mozufu/TempestMiku"
+       desc="自託管的個人 AI 夥伴兼專案感知 coding agent，用 Rust 重寫 bcuz why not" />
+
 
 <RepoCard url="https://github.com/iceice666/blog-site"
-          desc = "目前這個部落格使用的自包含 Astro 專案，部署在 Cloudflare Workers 上" />
-<RepoCard url="https://github.com/iceice666/dynamic" 
-          desc = "以前支撐這個部落格的 TypeScript 網站引擎實驗" />
-<RepoCard url="https://code.justaslime.dev/justaslime/slime_os" 
-          desc = "用Rust寫的玩具級OS" />
-<RepoCard url="https://code.justaslime.dev/justaslime/WriteMyselfAScheme" 
-          desc = "用Haskell實現Scheme解釋器" />
+       desc="目前這個部落格使用的自包含 Astro 專案，部署在 Cloudflare Workers 上" />
 
-### 歷史項目
+這個部落格本身也是實驗的一部分：長篇文章、短貼文、自訂 MDX 元件、
+GitHub Discussions 驅動的留言系統，還有一個私人 GitHub 後台編輯器。
+我喜歡寫作系統本身也是可以 hack 的。
 
-<RepoCard url="https://github.com/iceice666/TpManager" 
-          desc = "Minecraft傳送管理模組" />
-<RepoCard url="https://github.com/iceice666/Chronos-Descent" 
-          desc = "為 [Hackclub Juice](https://juice.hackclub.com/games) 用 C# 開發的遊戲" />
-<RepoCard url="https://github.com/HPK-dev/YetJustAnotherSilver" 
-          desc = "在Minecraft中加入銀" />
+我同時也在搞幾個圍繞 AI agent、專案管理和開發者 workflow 的個人工具點子。
+大致方向很簡單：我想要一個能理解專案、上下文、程式碼、筆記和任務的助手，
+同時不會把我的電腦變成一個 SaaS 儀表板。
+
+### 系統、語言和小玩具
+
+<RepoCard url="https://github.com/iceice666/materwelon"
+       desc="給 Raspberry Pi Pico 2 用的迷你函數式 shell；證明即使是只有 64 KB heap 的微控制器也值得擁有管線、Currying 和 suffering" />
+
+<RepoCard url="https://github.com/iceice666/slime_os"
+       desc="用 Rust 寫的玩具作業系統——因為這好像是件正常人會做的事" />
+
+<RepoCard url="https://github.com/iceice666/WriteMyselfAScheme"
+       desc="用 Haskell 寫的 Scheme 直譯器" />
+
 <RepoCard url="https://github.com/iceice666/turing-complete-assembler"
-          desc = "一個給Turing Complete用的組譯器~~本質上是搜尋&替換~~" />
+       desc="一個給 Turing Complete 用的組譯器~~本質上是結構化搜尋與替換，但還挺實用的~~" />
+
+這些專案不見得是打磨好的產品。有些是學習專案、有些是實驗，有些則是因為我被煩到決定自己動手實作。
+
+### 遊戲與 Minecraft
+
+<RepoCard url="https://github.com/iceice666/Chronos-Descent"
+       desc="為 Hack Club Juice 用 C# 開發的遊戲" />
+
+<RepoCard url="https://github.com/iceice666/TpManager"
+       desc="Minecraft 傳送管理模組" />
+
+<RepoCard url="https://github.com/HPK-dev/YetJustAnotherSilver"
+       desc="在 Minecraft 中加入銀" />
+
+Minecraft 是我一開始學寫程式的理由之一，所以它總是不斷滲回我的專案裡。
+
+## 我的工作方式
+
+我偏好的 workflow 是鍵盤優先、本地優先、重度客製化的。
+
+我花很多時間思考工具如何塑造注意力。很多現代軟體感覺是為了在截圖裡看起來很厲害而最佳化的，而不是為了幫人待在深層工作狀態裡。我偏好安靜、快速、可腳本化、可組合的介面。
+
+我理想中的配置大概是這樣：
+
+* 一個有專案感知能力的終端機
+* 一個更像可程式化研究環境的瀏覽器
+* 一個同時理解程式碼和意圖的編輯器
+* 能在不隱藏系統的情況下提供幫助的本地 agent
+* 可以重建而不是手動加持的可重現機器
+
+我不認為每個工具都需要極簡。但我認為每個工具都應該誠實：它擁有什麼狀態、它會改變什麼、以及它壞掉的時候我該怎麼復原。
+
+## 我會寫些什麼
+
+你可以預期看到這些主題的文章：
+
+* AI agent 和寫程式 workflow
+* Linux、NixOS 和個人基礎設施
+* 系統程式設計
+* 瀏覽器、終端機和 UI 實驗
+* 程式語言實作
+* 編譯器、解析、中間表示和型別系統
+* 嵌入式裝置和邊緣 AI
+* CTF writeup
+* Minecraft、遊戲和創意程式
+* 當週掉進去的某個隨機技術坑
+
+有些文章經過打磨，有些只是筆記，有些主要是為了讓未來的我可以不用再從零開始重新發現同一件事。
 
 ## 其他興趣
 
-沉迷函數式編程理論，折騰Linux工具鏈，深度Neovim用戶，偶爾做Minecraft模組。  
-會下點西洋棋，但水平很菜。
+程式之外，我喜歡西洋棋、鍵盤、硬體折騰，以及對工具設計想太多。
+
+我也對「人們如何學習技術主題」很感興趣，特別是「我知道這個概念」和「我真的能用它做出東西」之間的落差。我的很多專案基本上都是在試著幫自己把這個落差縮小一點。
 
 ## 傳送門
 
-- GitHub: [github.com/iceice666](https://github.com/iceice666)
-- 自架Git: [code.justaslime.dev/justaslime](https://code.justaslime.dev/justaslime)
-- 電子郵件: [brian1061225@gmail.com](mailto:brian1061225@gmail.com)（支援 S/MIME）
+* GitHub: [github.com/iceice666](https://github.com/iceice666)
+* 電子郵件: [brian1061225@gmail.com](mailto:brian1061225@gmail.com) — 支援 S/MIME

@@ -1,111 +1,149 @@
 ---
-import '../styles/global.css';
-import { NAV_ITEMS, getBlogStats } from '../lib/content';
-import { getGithubData } from '../lib/github';
-import Sidebar from '../components/Sidebar.mdx';
-import { site } from '../../config';
+import "../styles/global.css";
+import { NAV_ITEMS, getBlogStats } from "../lib/content";
+import { getGithubData } from "../lib/github";
+import Sidebar from "../components/Sidebar.mdx";
+import { site } from "../../config";
 
 interface Props {
-  title: string;
-  activeKey: 'feed' | 'about' | 'friends' | 'archive';
-  extraWindow?: { label: string };
-  paneTitle: string;
-  langHref?: string | null;
-  description?: string;
-  lang?: string;
-  wide?: boolean;
+    title: string;
+    activeKey: "feed" | "about" | "friends" | "archive";
+    extraWindow?: { label: string };
+    paneTitle: string;
+    langHref?: string | null;
+    description?: string;
+    lang?: string;
+    wide?: boolean;
 }
 const {
-  title,
-  activeKey,
-  extraWindow,
-  paneTitle,
-  langHref = null,
-  description = site.description,
-  lang = 'en',
-  wide = false,
+    title,
+    activeKey,
+    extraWindow,
+    paneTitle,
+    langHref = null,
+    description = site.description,
+    lang = "en",
+    wide = false,
 } = Astro.props;
 
 const stats = await getBlogStats();
 const github = await getGithubData();
 
-const extraWindowIndex = Math.max(...NAV_ITEMS.map((item) => item.windowIndex)) + 1;
+const extraWindowIndex =
+    Math.max(...NAV_ITEMS.map((item) => item.windowIndex)) + 1;
 ---
 
 <html lang={lang}>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
-    <title>{title}</title>
-  </head>
-  <body>
-    <div class="tmux">
-      <div class="status-bar top">
-        <div class="session">justaslime</div>
-        <div class="windows">
-          {
-            NAV_ITEMS.map((item) => {
-              const isActive = item.key === activeKey && !extraWindow;
-              return (
-                <a href={item.href} class={`win${isActive ? ' active' : ''}`}>
-                  {item.windowIndex}:{item.label}
-                  {isActive ? '*' : ''}
-                </a>
-              );
-            })
-          }
-          {extraWindow && <span class="win active">{extraWindowIndex}:{extraWindow.label}*</span>}
-        </div>
-        <div class="status-right">
-          <button id="vim-toggle" class="chip mode" type="button" aria-label="toggle Vim navigation" aria-pressed="true">VIM ON</button>
-          <button id="theme-toggle" class="chip" type="button" aria-label="toggle color theme">THEME</button>
-          {
-            langHref ? (
-              <a href={langHref} class="chip">en/中</a>
-            ) : (
-              <span class="chip" aria-disabled="true">en/中</span>
-            )
-          }
-        </div>
-      </div>
-
-      <div class="panes">
-        <div class="pane-main">
-          <div class="pane-title">{paneTitle}</div>
-          <div class="scroll-area">
-            <div class={`reading${wide ? ' is-wide' : ''}`}>
-              <slot />
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content={description} />
+        <title>{title}</title>
+    </head>
+    <body>
+        <div class="tmux">
+            <div class="status-bar top">
+                <div class="session">justaslime</div>
+                <div class="windows">
+                    {
+                        NAV_ITEMS.map((item) => {
+                            const isActive =
+                                item.key === activeKey && !extraWindow;
+                            return (
+                                <a
+                                    href={item.href}
+                                    class={`win${isActive ? " active" : ""}`}
+                                >
+                                    {item.windowIndex}:{item.label}
+                                    {isActive ? "*" : ""}
+                                </a>
+                            );
+                        })
+                    }
+                    {
+                        extraWindow && (
+                            <span class="win active">
+                                {extraWindowIndex}:{extraWindow.label}*
+                            </span>
+                        )
+                    }
+                </div>
+                <div class="status-right">
+                    <button
+                        id="vim-toggle"
+                        class="chip mode"
+                        type="button"
+                        aria-label="toggle Vim navigation"
+                        aria-pressed="true">VIM ON</button
+                    >
+                    <button
+                        id="theme-toggle"
+                        class="chip"
+                        type="button"
+                        aria-label="toggle color theme">THEME</button
+                    >
+                    {
+                        langHref ? (
+                            <a href={langHref} class="chip">
+                                en/中
+                            </a>
+                        ) : (
+                            <span class="chip" aria-disabled="true">
+                                en/中
+                            </span>
+                        )
+                    }
+                </div>
             </div>
-          </div>
+
+            <div class="panes">
+                <div class="pane-main">
+                    <div class="pane-title">{paneTitle}</div>
+                    <div class="scroll-area">
+                        <div class={`reading${wide ? " is-wide" : ""}`}>
+                            <slot />
+                        </div>
+                    </div>
+                </div>
+
+                <Sidebar stats={stats} github={github} />
+            </div>
+
+            <div class="status-bar bottom">
+                <span id="vim-status" class="vim-status" aria-live="polite"
+                    >-- NORMAL --</span
+                >
+                <span class="vim-help">
+                    <slot name="footer-hints">
+                        <span>j/k move</span>
+                        <span>gg/G top/bottom</span>
+                        <span>/ search</span>
+                        <span>:? help</span>
+                    </slot>
+                </span>
+            </div>
         </div>
 
-        <Sidebar stats={stats} github={github} />
-      </div>
+        <script>
+            import "../scripts/vim-nav";
 
-      <div class="status-bar bottom">
-        <span class="vim-help">
-          <slot name="footer-hints">
-            <span>j/k move</span><span>gg/G top/bottom</span><span>/ search</span><span>:q back</span>
-          </slot>
-        </span>
-        <span id="vim-status" class="vim-status" aria-live="polite">-- NORMAL --</span>
-      </div>
-    </div>
-
-    <script>
-      import '../scripts/vim-nav';
-
-      (function () {
-        const root = document.documentElement;
-        const btn = document.getElementById('theme-toggle');
-        btn?.addEventListener('click', function () {
-          const current = root.getAttribute('data-theme');
-          const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-          const effectiveIsDark = current ? current === 'dark' : prefersDark;
-          root.setAttribute('data-theme', effectiveIsDark ? 'light' : 'dark');
-        });
-      })();
-    </script>
-  </body>
+            (function () {
+                const root = document.documentElement;
+                const btn = document.getElementById("theme-toggle");
+                btn?.addEventListener("click", function () {
+                    const current = root.getAttribute("data-theme");
+                    const prefersDark = window.matchMedia?.(
+                        "(prefers-color-scheme: dark)",
+                    ).matches;
+                    const effectiveIsDark = current
+                        ? current === "dark"
+                        : prefersDark;
+                    root.setAttribute(
+                        "data-theme",
+                        effectiveIsDark ? "light" : "dark",
+                    );
+                });
+            })();
+        </script>
+    </body>
 </html>

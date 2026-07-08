@@ -11,6 +11,8 @@ const STATUS_IDLE = '-- NORMAL --';
 const STATUS_DISABLED = '-- VIM OFF --';
 const STATUS_UNAVAILABLE = '-- VIM N/A --';
 const VIM_STORAGE_KEY = 'blog:vim-enabled';
+const EDIT_COMMANDS = new Set(['e', 'ed', 'edi', 'edit']);
+const HELP_COMMANDS = new Set(['?', 'help']);
 const NAV_BY_KEY: Record<string, string> = {
   '1': '/',
   '2': '/about',
@@ -23,6 +25,36 @@ const COMMAND_ROUTES: Record<string, string> = {
   friends: '/friends',
   archive: '/archive',
 };
+const HELP_SECTIONS = [
+  {
+    title: 'motion',
+    items: [
+      ['j / k', 'move target'],
+      ['gg / G', 'top / bottom'],
+      ['h / l', 'browser back / forward'],
+      ['f / F', 'hint link / new tab'],
+      ['o / Enter', 'open target'],
+    ],
+  },
+  {
+    title: 'search',
+    items: [
+      ['/text', 'search page or archive'],
+      ['n / N', 'next / previous match'],
+      [':noh', 'clear target selection'],
+    ],
+  },
+  {
+    title: 'commands',
+    items: [
+      [':e[dit]', 'open admin editor'],
+      [':? / :help', 'show this help'],
+      [':login', 'start GitHub OAuth'],
+      [':logout', 'clear GitHub OAuth session'],
+      [':q', 'back or feed'],
+    ],
+  },
+] as const;
 
 function initVimNav() {
   const statusEl = document.getElementById('vim-status');
@@ -43,6 +75,7 @@ function initVimNav() {
   let pendingTimer: ReturnType<typeof window.setTimeout> | undefined;
   let statusTimer: ReturnType<typeof window.setTimeout> | undefined;
   let editorStatus: string | null = null;
+  let helpEl: HTMLElement | null = null;
 
   function getInitialVimPreference() {
     try {
@@ -450,7 +483,107 @@ function initVimNav() {
     setStatus(':');
   }
 
-  function executeCommand(command: string) {
+  function returnToCurrentPage() {
+    return `${location.pathname}${location.search}${location.hash}`;
+  }
+
+  function openGitHubLogin() {
+    const loginUrl = new URL('/api/auth/github/start', location.origin);
+    loginUrl.searchParams.set('returnTo', returnToCurrentPage());
+    setStatus('opening GitHub login...', true);
+    window.location.assign(loginUrl.toString());
+  }
+
+  async function logoutGitHub() {
+    setStatus('logging out of GitHub...');
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || `logout failed with ${response.status}`);
+      }
+      setStatus('logged out', true);
+      window.setTimeout(() => window.location.reload(), 180);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'logout failed', true);
+    }
+  }
+
+  function closeHelp() {
+    helpEl?.remove();
+    helpEl = null;
+    document.removeEventListener('keydown', closeHelpOnEscape);
+    setStatus(currentIdleStatus());
+  }
+
+  function closeHelpOnEscape(event: KeyboardEvent) {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    closeHelp();
+  }
+
+  function showHelp() {
+    closeHelp();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'vim-command-help';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'vim-command-help-title');
+
+    const panel = document.createElement('div');
+    panel.className = 'vim-command-help-panel';
+
+    const head = document.createElement('div');
+    head.className = 'vim-command-help-head';
+    const title = document.createElement('h2');
+    title.id = 'vim-command-help-title';
+    title.textContent = 'vim help';
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'vim-command-help-close';
+    close.textContent = 'close';
+    close.addEventListener('click', closeHelp);
+    head.appendChild(title);
+    head.appendChild(close);
+
+    const body = document.createElement('div');
+    body.className = 'vim-command-help-body';
+    for (const section of HELP_SECTIONS) {
+      const group = document.createElement('section');
+      const heading = document.createElement('h3');
+      heading.textContent = section.title;
+      const list = document.createElement('dl');
+      for (const [keys, label] of section.items) {
+        const term = document.createElement('dt');
+        term.textContent = keys;
+        const detail = document.createElement('dd');
+        detail.textContent = label;
+        list.appendChild(term);
+        list.appendChild(detail);
+      }
+      group.appendChild(heading);
+      group.appendChild(list);
+      body.appendChild(group);
+    }
+
+    panel.appendChild(head);
+    panel.appendChild(body);
+    overlay.appendChild(panel);
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) closeHelp();
+    });
+    document.body.appendChild(overlay);
+    helpEl = overlay;
+    document.addEventListener('keydown', closeHelpOnEscape);
+    close.focus();
+    setStatus('help');
+  }
+
+  async function executeCommand(command: string) {
     const normalized = command.trim().toLowerCase();
     mode = 'normal';
 
@@ -463,6 +596,26 @@ function initVimNav() {
     if (normalized === 'noh') {
       clearSelection();
       setStatus('cleared', true);
+      return;
+    }
+
+    if (EDIT_COMMANDS.has(normalized)) {
+      window.location.assign('/admin/edit');
+      return;
+    }
+
+    if (HELP_COMMANDS.has(normalized)) {
+      showHelp();
+      return;
+    }
+
+    if (normalized === 'login') {
+      openGitHubLogin();
+      return;
+    }
+
+    if (normalized === 'logout') {
+      await logoutGitHub();
       return;
     }
 
@@ -482,7 +635,7 @@ function initVimNav() {
       return;
     }
     if (event.key === 'Enter') {
-      executeCommand(commandBuffer);
+      void executeCommand(commandBuffer);
       return;
     }
     if (event.key === 'Backspace') {

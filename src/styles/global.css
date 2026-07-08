@@ -96,6 +96,59 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 }
 .vim-hint.is-dim { opacity: 0.28; }
 .vim-hint.is-match { background: var(--accent); color: var(--bg); }
+.vim-command-help {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+}
+.vim-command-help-panel {
+  width: min(560px, 100%);
+  max-height: min(620px, calc(100vh - 40px));
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  box-shadow: 0 18px 60px color-mix(in srgb, #000 28%, transparent);
+}
+.vim-command-help-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.vim-command-help h2, .vim-command-help h3 { margin: 0; font-family: var(--font-ui); letter-spacing: 0; }
+.vim-command-help h2 { color: var(--accent); font-size: 12px; }
+.vim-command-help h3 { color: var(--text-muted); font-size: 10px; text-transform: uppercase; }
+.vim-command-help-close {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 10.5px;
+}
+.vim-command-help-close:hover { color: var(--accent); border-color: var(--accent); }
+.vim-command-help-body {
+  display: grid;
+  gap: 14px;
+  padding: 14px 16px 16px;
+}
+.vim-command-help dl {
+  display: grid;
+  grid-template-columns: minmax(86px, max-content) minmax(0, 1fr);
+  gap: 7px 14px;
+  margin: 8px 0 0;
+}
+.vim-command-help dt { color: var(--accent); font-weight: 700; }
+.vim-command-help dd { margin: 0; color: var(--text); }
 html[data-vim-available="false"] .vim-help { display: none; }
 @media (hover: none), (pointer: coarse) {
   .vim-help { display: none; }

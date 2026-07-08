@@ -6,6 +6,8 @@ export interface Author {
   name: string;
   tagline: string;
   avatar: string;
+  /** Link to the original artwork, if the avatar is commissioned/fan art rather than a photo. */
+  avatarCredit?: string;
   socials: SocialLink[];
 }
 
@@ -48,7 +50,8 @@ const primaryContactEmail = 'brian1061225@gmail.com';
 export const author: Author = {
   name: 'Brian Duan',
   tagline: 'Making projects when I need. A lazy guy.',
-  avatar: 'https://avatars.githubusercontent.com/u/56882049?v=4&size=400',
+  avatar: '/avatar.png',
+  avatarCredit: 'https://www.pixiv.net/artworks/72701405',
   socials: [
     { kind: 'email', address: primaryContactEmail },
     { kind: 'github', url: 'https://github.com/iceice666' },

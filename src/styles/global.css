@@ -214,6 +214,9 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 .profile-links a { border: 1px solid var(--border); padding: 3px 8px; font-size: 10px; color: var(--text-muted); }
 .profile-links a:hover { color: var(--accent); border-color: var(--accent); }
 .gh-caption { color: var(--text-muted); font-size: 9.5px; font-style: italic; margin: 8px 0 0; }
+.avatar-credit { color: var(--text-muted); font-size: 9.5px; margin: 10px 0 0; }
+.avatar-credit a { color: var(--text-muted); text-decoration: underline; text-underline-offset: 2px; }
+.avatar-credit a:hover { color: var(--accent); }
 .heat-grid { display: grid; grid-template-columns: repeat(18, 1fr); gap: 2px; }
 .heat-grid i { display: block; aspect-ratio: 1; border-radius: 1px; background: var(--surface-2); font-style: normal; }
 .heat-grid i.l1 { background: color-mix(in srgb, var(--accent) 30%, var(--surface-2)); }

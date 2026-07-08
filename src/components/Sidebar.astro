@@ -44,6 +44,16 @@ function labelOf(social: SocialLink) {
           ))
         }
       </div>
+      {
+        author.avatarCredit && (
+          <p class="avatar-credit">
+            avatar:{' '}
+            <a href={author.avatarCredit} target="_blank" rel="noopener noreferrer">
+              pixiv artwork ↗
+            </a>
+          </p>
+        )
+      }
     </div>
   </div>
 

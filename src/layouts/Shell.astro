@@ -70,6 +70,15 @@ const extraWindowIndex =
                         savedTheme,
                     );
                 }
+                var savedSidebar = window.localStorage.getItem(
+                    "blog:sidebar-visible",
+                );
+                if (savedSidebar === "false") {
+                    document.documentElement.setAttribute(
+                        "data-sidebar",
+                        "hidden",
+                    );
+                }
             } catch {}
         </script>
     </head>

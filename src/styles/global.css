@@ -415,6 +415,7 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 
 /* ---- sidebar ---- */
 .sidebar { flex: 0 0 300px; border-left: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; }
+html[data-sidebar="hidden"] .sidebar { display: none; }
 @media (min-width: 901px) { .sidebar { min-height: 0; overflow-y: auto; } }
 .widget { border-bottom: 1px solid var(--border); }
 .widget-body { padding: 14px 16px; }

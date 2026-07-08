@@ -13,6 +13,7 @@ const STATUS_IDLE = '-- NORMAL --';
 const STATUS_DISABLED = '-- VIM OFF --';
 const STATUS_UNAVAILABLE = '-- VIM N/A --';
 const VIM_STORAGE_KEY = 'blog:vim-enabled';
+const SIDEBAR_STORAGE_KEY = 'blog:sidebar-visible';
 const EDIT_COMMANDS = new Set(['e', 'ed', 'edi', 'edit']);
 const HELP_COMMANDS = new Set(['?', 'help']);
 const NAV_BY_KEY: Record<string, string> = {
@@ -55,6 +56,7 @@ const HELP_SECTIONS = [
       [':? / :help', 'show this help'],
       [':login', 'start GitHub OAuth'],
       [':logout', 'clear GitHub OAuth session'],
+      [':sidebar', 'toggle sidebar pane'],
       [':q', 'back or feed'],
     ],
   },
@@ -116,6 +118,14 @@ function initVimNav() {
   function saveVimPreference() {
     try {
       window.localStorage.setItem(VIM_STORAGE_KEY, String(vimEnabled));
+    } catch {
+      // Local storage can be unavailable in private or embedded contexts.
+    }
+  }
+
+  function saveSidebarPreference(hidden: boolean) {
+    try {
+      window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(!hidden));
     } catch {
       // Local storage can be unavailable in private or embedded contexts.
     }
@@ -239,6 +249,35 @@ function initVimNav() {
   function clearSelection() {
     selectedTarget?.classList.remove('vim-selected');
     selectedTarget = null;
+  }
+
+  function getSidebar() {
+    return document.querySelector<HTMLElement>('.sidebar');
+  }
+
+  function isSidebarHidden() {
+    return document.documentElement.dataset.sidebar === 'hidden';
+  }
+
+  function applySidebarHidden(hidden: boolean) {
+    const sidebar = getSidebar();
+    if (hidden) document.documentElement.dataset.sidebar = 'hidden';
+    else delete document.documentElement.dataset.sidebar;
+    if (sidebar) {
+      if (hidden) sidebar.setAttribute('aria-hidden', 'true');
+      else sidebar.removeAttribute('aria-hidden');
+    }
+    if (hidden && selectedTarget && sidebar?.contains(selectedTarget)) clearSelection();
+  }
+
+  function setSidebarHidden(hidden: boolean, temporaryStatus = false) {
+    applySidebarHidden(hidden);
+    saveSidebarPreference(hidden);
+    setStatus(`sidebar ${hidden ? 'hidden' : 'shown'}`, temporaryStatus);
+  }
+
+  function toggleSidebar() {
+    setSidebarHidden(!isSidebarHidden(), true);
   }
 
   function selectTarget(el: HTMLElement) {
@@ -827,6 +866,11 @@ function initVimNav() {
       return;
     }
 
+    if (normalized === 'sidebar') {
+      toggleSidebar();
+      return;
+    }
+
     const route = COMMAND_ROUTES[normalized];
     if (route) {
       window.location.assign(route);
@@ -993,6 +1037,7 @@ function initVimNav() {
     { capture: true, passive: true },
   );
   ['(pointer: coarse)', '(hover: none)', '(any-pointer: coarse)', '(any-hover: hover)'].forEach(watchDeviceCapability);
+  applySidebarHidden(isSidebarHidden());
   vimToggle?.addEventListener('click', () => setVimEnabled(!vimEnabled));
   document.addEventListener('keydown', handleKeydown);
   document.addEventListener('focusin', (event) => syncEditorStatus(event.target));

@@ -85,6 +85,8 @@ export interface FeedItem {
   readMin: number;
   /** Rendered body HTML — posts have no title, so their body IS the content. */
   bodyHtml?: string;
+  /** True for a post that only links through to the article with the same id. */
+  isStub?: boolean;
 }
 
 export async function getFeedItems(): Promise<FeedItem[]> {
@@ -113,7 +115,8 @@ export async function getFeedItems(): Promise<FeedItem[]> {
   const postItems: FeedItem[] = posts.map((entry) => {
     // A post stub sharing an id with a real article (e.g. the nhnc-2026-writeups
     // index stub) links through to that article instead of standing on its own.
-    const href = articleIds.has(entry.id) ? getArticleHref(entry.id) : getPostHref(entry.id);
+    const isStub = articleIds.has(entry.id);
+    const href = isStub ? getArticleHref(entry.id) : getPostHref(entry.id);
     const units = countUnits(stripMarkdown(entry.body ?? ''));
     const { title: leadingTitle, rest: bodyHtml } = extractLeadingH1(entry.rendered?.html ?? '');
     return {
@@ -129,6 +132,7 @@ export async function getFeedItems(): Promise<FeedItem[]> {
       units,
       readMin: readingTime(units),
       bodyHtml,
+      isStub,
     };
   });
 

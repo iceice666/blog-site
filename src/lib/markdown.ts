@@ -50,6 +50,28 @@ export const labelCodeLang: RehypePlugin = () => {
   };
 };
 
+/** Wrap tables in a scroll container so wide ones don't force page-level
+ * horizontal scroll on phones. */
+export const wrapTables: RehypePlugin = () => {
+  return (tree) => {
+    function visit(node: MarkdownNode) {
+      node.children?.forEach((child, index) => {
+        if (child.type === 'element' && child.tagName === 'table') {
+          node.children![index] = {
+            type: 'element',
+            tagName: 'div',
+            properties: { className: ['table-scroll'] },
+            children: [child],
+          };
+        } else {
+          visit(child);
+        }
+      });
+    }
+    visit(tree as MarkdownNode);
+  };
+};
+
 function paragraphText(node: MarkdownNode) {
   if (!node || node.type !== 'paragraph') return null;
   return (node.children ?? []).map((c) => c.value ?? '').join('');
@@ -104,7 +126,7 @@ export const remarkCollapsibleAside: RemarkPlugin = () => {
 
 export const markdownProcessor = unified({
   remarkPlugins: [remarkCollapsibleAside],
-  rehypePlugins: [rewriteInternalLinks, labelCodeLang],
+  rehypePlugins: [rewriteInternalLinks, labelCodeLang, wrapTables],
   gfm: true,
 });
 

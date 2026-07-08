@@ -85,7 +85,9 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
   z-index: 1000;
   pointer-events: none;
   background: var(--flag);
-  color: var(--bg);
+  /* --code-bg is near-black in both themes; --bg would be unreadable on the
+     yellow chip in light mode (1.8:1). */
+  color: var(--code-bg);
   border: 1px solid var(--bg);
   border-radius: 2px;
   padding: 1px 4px;
@@ -235,6 +237,8 @@ html[data-vim-available="false"] .vim-help { display: none; }
 .prose pre[data-lang="shell"] { border-left-color: var(--danger); }
 .prose :not(pre) > code { white-space: normal; }
 
+.prose .table-scroll { overflow-x: auto; margin: 4px 0 22px; }
+.prose .table-scroll table { margin: 0; }
 .prose table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 12px; }
 .prose th { text-align: left; font-size: 9.5px; letter-spacing: 0.05em; color: var(--text-muted); padding: 6px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
 .prose td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -244,7 +248,8 @@ html[data-vim-available="false"] .vim-help { display: none; }
 .prose blockquote { margin: 0 0 16px; padding-left: 14px; border-left: 2px solid var(--border); color: var(--text-muted); font-style: italic; }
 
 .article-repo { border: 1px solid var(--border); padding: 10px 14px; border-radius: 2px; margin: 0 0 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.article-repo a.url { color: var(--accent); font-weight: 700; font-size: 13.5px; }
+.article-repo > div { min-width: 0; }
+.article-repo a.url { color: var(--accent); font-weight: 700; font-size: 13.5px; overflow-wrap: anywhere; }
 .article-repo a.url:hover { color: var(--accent-strong); }
 .article-repo .repo-desc { margin: 5px 0 0; color: var(--text-muted); font-size: 13px; line-height: 1.55; }
 .article-repo .repo-desc p { margin: 0; }
@@ -429,6 +434,10 @@ html[data-vim-available="false"] .vim-help { display: none; }
 .sidebar-final-widget { border-bottom: none; }
 
 @media (max-width: 900px) {
+  /* The chip row can't shrink; without wrapping it forces horizontal page
+     scroll on narrow phones (and on article pages with long window labels). */
+  .status-bar.top { flex-wrap: wrap; overflow-x: auto; }
+  .status-right { flex-basis: 100%; flex-wrap: wrap; justify-content: flex-end; }
   .panes { flex-direction: column; }
   .sidebar { flex: none; width: 100%; border-left: none; border-top: 1px solid var(--border); }
   .reading { padding: 24px 18px 40px; }

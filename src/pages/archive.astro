@@ -3,7 +3,8 @@ export const prerender = true;
 import Shell from '../layouts/Shell.astro';
 import { getFeedItems, type FeedItem } from '../lib/content';
 
-const items = await getFeedItems();
+// Stub posts only link through to an article that already has its own row here.
+const items = (await getFeedItems()).filter((item) => !item.isStub);
 
 function stripTags(html?: string) {
   return (html ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();

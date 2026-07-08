@@ -84,9 +84,11 @@ const extraWindowIndex = Math.max(...NAV_ITEMS.map((item) => item.windowIndex)) 
       </div>
 
       <div class="status-bar bottom">
-        <slot name="footer-hints">
-          <span>j/k move</span><span>gg/G top/bottom</span><span>/ search</span><span>:q back</span>
-        </slot>
+        <span class="vim-help">
+          <slot name="footer-hints">
+            <span>j/k move</span><span>gg/G top/bottom</span><span>/ search</span><span>:q back</span>
+          </slot>
+        </span>
         <span id="vim-status" class="vim-status" aria-live="polite">-- NORMAL --</span>
       </div>
     </div>

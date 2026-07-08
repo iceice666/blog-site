@@ -9,6 +9,7 @@ const HINT_CHARS = 'asdfghjklqwertyuiopzxcvbnm';
 const SCROLL_LINE = 80;
 const STATUS_IDLE = '-- NORMAL --';
 const STATUS_DISABLED = '-- VIM OFF --';
+const STATUS_UNAVAILABLE = '-- VIM N/A --';
 const VIM_STORAGE_KEY = 'blog:vim-enabled';
 const NAV_BY_KEY: Record<string, string> = {
   '1': '/',
@@ -29,7 +30,8 @@ function initVimNav() {
   const archiveInput = document.getElementById('archive-filter');
 
   let mode: VimMode = 'normal';
-  let vimEnabled = getInitialVimPreference();
+  let deviceCanUseVim = canUseVimOnCurrentDevice();
+  let vimEnabled = deviceCanUseVim && getInitialVimPreference();
   let selectedTarget: HTMLElement | null = null;
   let searchBuffer = '';
   let commandBuffer = '';
@@ -47,6 +49,25 @@ function initVimNav() {
     } catch {
       return true;
     }
+  }
+
+  function isMobileOrTabletUserAgent() {
+    const ua = navigator.userAgent;
+    const platform = navigator.platform;
+    const isIpadOsDesktopUa = platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    return /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(ua) || isIpadOsDesktopUa;
+  }
+
+  function mediaMatches(query: string) {
+    const media = window.matchMedia?.(query);
+    return media?.matches ?? false;
+  }
+
+  function canUseVimOnCurrentDevice() {
+    const touchPrimaryPointer = mediaMatches('(pointer: coarse)');
+    const noHoverPointer = mediaMatches('(hover: none)');
+    const touchOnlyPointers = mediaMatches('(any-pointer: coarse)') && !mediaMatches('(any-hover: hover)');
+    return !(isMobileOrTabletUserAgent() || touchPrimaryPointer || noHoverPointer || touchOnlyPointers);
   }
 
   function saveVimPreference() {
@@ -69,10 +90,13 @@ function initVimNav() {
   }
 
   function syncVimToggle() {
+    document.documentElement.dataset.vimAvailable = String(deviceCanUseVim);
     if (!vimToggle) return;
-    vimToggle.textContent = vimEnabled ? 'VIM ON' : 'VIM OFF';
+    vimToggle.textContent = deviceCanUseVim ? (vimEnabled ? 'VIM ON' : 'VIM OFF') : 'VIM N/A';
     vimToggle.setAttribute('aria-pressed', String(vimEnabled));
+    vimToggle.setAttribute('aria-disabled', String(!deviceCanUseVim));
     vimToggle.classList.toggle('is-off', !vimEnabled);
+    vimToggle.toggleAttribute('disabled', !deviceCanUseVim);
   }
 
   function resetPendingKey() {
@@ -237,14 +261,39 @@ function initVimNav() {
   }
 
   function setVimEnabled(nextEnabled: boolean) {
-    vimEnabled = nextEnabled;
+    vimEnabled = deviceCanUseVim && nextEnabled;
     mode = 'normal';
     resetPendingKey();
     clearHints();
     if (!vimEnabled) clearSelection();
     syncVimToggle();
     saveVimPreference();
-    setStatus(vimEnabled ? STATUS_IDLE : STATUS_DISABLED);
+    setStatus(deviceCanUseVim ? (vimEnabled ? STATUS_IDLE : STATUS_DISABLED) : STATUS_UNAVAILABLE);
+  }
+
+  function refreshVimDeviceAvailability() {
+    const nextDeviceCanUseVim = canUseVimOnCurrentDevice();
+    if (nextDeviceCanUseVim === deviceCanUseVim) return;
+
+    deviceCanUseVim = nextDeviceCanUseVim;
+    vimEnabled = deviceCanUseVim && getInitialVimPreference();
+    mode = 'normal';
+    resetPendingKey();
+    clearHints();
+    if (!vimEnabled) clearSelection();
+    syncVimToggle();
+    setStatus(deviceCanUseVim ? (vimEnabled ? STATUS_IDLE : STATUS_DISABLED) : STATUS_UNAVAILABLE);
+  }
+
+  function watchDeviceCapability(query: string) {
+    const media = window.matchMedia?.(query);
+    if (!media) return;
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', refreshVimDeviceAvailability);
+    } else {
+      const addLegacyListener = (media as unknown as { addListener?: (listener: () => void) => void }).addListener;
+      addLegacyListener?.call(media, refreshVimDeviceAvailability);
+    }
   }
 
   function renderHints() {
@@ -543,12 +592,14 @@ function initVimNav() {
     if (selectedTarget && !isRendered(selectedTarget)) clearSelection();
   });
   window.addEventListener('resize', () => {
+    refreshVimDeviceAvailability();
     if (vimEnabled && mode === 'hint') renderHints();
   });
+  ['(pointer: coarse)', '(hover: none)', '(any-pointer: coarse)', '(any-hover: hover)'].forEach(watchDeviceCapability);
   vimToggle?.addEventListener('click', () => setVimEnabled(!vimEnabled));
   document.addEventListener('keydown', handleKeydown);
   syncVimToggle();
-  setStatus(vimEnabled ? STATUS_IDLE : STATUS_DISABLED);
+  setStatus(deviceCanUseVim ? (vimEnabled ? STATUS_IDLE : STATUS_DISABLED) : STATUS_UNAVAILABLE);
 }
 
 if (document.readyState === 'loading') {

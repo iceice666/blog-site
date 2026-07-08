@@ -71,6 +71,8 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 .chip.mode.is-off { background: transparent; color: var(--text-muted); border-color: var(--border); }
 .chip.mode.is-off:hover { color: var(--accent); border-color: var(--accent); }
 .chip[aria-disabled="true"] { opacity: 0.4; cursor: default; pointer-events: none; }
+.vim-help { display: contents; }
+.vim-help > span { display: inline; }
 .vim-status { margin-left: auto; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
 .vim-selected { outline: 1px solid var(--accent); outline-offset: 3px; box-shadow: inset 3px 0 0 var(--accent); }
 .vim-hint {
@@ -89,6 +91,10 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 }
 .vim-hint.is-dim { opacity: 0.28; }
 .vim-hint.is-match { background: var(--accent); color: var(--bg); }
+html[data-vim-available="false"] .vim-help { display: none; }
+@media (hover: none), (pointer: coarse) {
+  .vim-help { display: none; }
+}
 
 .panes { display: flex; align-items: stretch; border: 1px solid var(--border); border-top: none; }
 @media (min-width: 901px) { .panes { flex: 1; min-height: 0; } }

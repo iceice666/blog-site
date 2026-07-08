@@ -50,6 +50,27 @@ export const labelCodeLang: RehypePlugin = () => {
   };
 };
 
+function textOf(node: MarkdownNode): string {
+  if (typeof node.value === 'string') return node.value;
+  return (node.children ?? []).map(textOf).join('');
+}
+
+/** The layout already renders the frontmatter title as the page heading, so a
+ * body that opens with the same `# Title` would show it twice — drop it. */
+export const stripDuplicateLeadingH1: RehypePlugin = () => {
+  return (tree, file) => {
+    const title = (file?.data as { astro?: { frontmatter?: { title?: unknown } } })?.astro?.frontmatter?.title;
+    if (typeof title !== 'string' || !title.trim()) return;
+    const root = tree as MarkdownNode;
+    const children = root.children ?? [];
+    const first = children.find((c) => c.type === 'element');
+    if (!first || first.tagName !== 'h1') return;
+    const normalize = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (normalize(textOf(first)) !== normalize(title)) return;
+    root.children = children.filter((c) => c !== first);
+  };
+};
+
 /** Wrap tables in a scroll container so wide ones don't force page-level
  * horizontal scroll on phones. */
 export const wrapTables: RehypePlugin = () => {
@@ -126,7 +147,7 @@ export const remarkCollapsibleAside: RemarkPlugin = () => {
 
 export const markdownProcessor = unified({
   remarkPlugins: [remarkCollapsibleAside],
-  rehypePlugins: [rewriteInternalLinks, labelCodeLang, wrapTables],
+  rehypePlugins: [rewriteInternalLinks, labelCodeLang, wrapTables, stripDuplicateLeadingH1],
   gfm: true,
 });
 

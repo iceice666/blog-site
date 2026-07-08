@@ -30,10 +30,12 @@ const HELP_SECTIONS = [
     title: 'motion',
     items: [
       ['j / k', 'move target'],
+      ['d / u', 'half page down / up'],
       ['gg / G', 'top / bottom'],
       ['h / l', 'browser back / forward'],
       ['f / F', 'hint link / new tab'],
       ['o / Enter', 'open target'],
+      ['1-4', 'switch window'],
     ],
   },
   {
@@ -58,6 +60,7 @@ const HELP_SECTIONS = [
 
 function initVimNav() {
   const statusEl = document.getElementById('vim-status');
+  const announceEl = document.getElementById('vim-status-announce');
   const vimToggle = document.getElementById('vim-toggle');
   const archiveInput = document.getElementById('archive-filter');
 
@@ -74,6 +77,7 @@ function initVimNav() {
   let pendingKey = '';
   let pendingTimer: ReturnType<typeof window.setTimeout> | undefined;
   let statusTimer: ReturnType<typeof window.setTimeout> | undefined;
+  let announceTimer: ReturnType<typeof window.setTimeout> | undefined;
   let editorStatus: string | null = null;
   let helpEl: HTMLElement | null = null;
 
@@ -112,10 +116,21 @@ function initVimNav() {
     }
   }
 
+  /** Mirror statuses into the screen-reader live region, debounced so rapid
+   * keystroke echoes (search/command buffers) collapse into one announcement. */
+  function announce(text: string) {
+    if (!announceEl) return;
+    window.clearTimeout(announceTimer);
+    announceTimer = window.setTimeout(() => {
+      announceEl.textContent = text === STATUS_IDLE ? '' : text;
+    }, 500);
+  }
+
   function setStatus(text: string, temporary = false) {
     if (!statusEl) return;
     window.clearTimeout(statusTimer);
     statusEl.textContent = text;
+    announce(text);
     if (temporary) {
       statusTimer = window.setTimeout(() => {
         if (mode === 'normal') statusEl.textContent = currentIdleStatus();
@@ -775,6 +790,14 @@ function initVimNav() {
     refreshVimDeviceAvailability();
     if (vimEnabled && mode === 'hint') renderHints();
   });
+  // Hint markers are position: fixed, so scrolling any pane leaves them stale.
+  document.addEventListener(
+    'scroll',
+    () => {
+      if (vimEnabled && mode === 'hint') renderHints();
+    },
+    { capture: true, passive: true },
+  );
   ['(pointer: coarse)', '(hover: none)', '(any-pointer: coarse)', '(any-hover: hover)'].forEach(watchDeviceCapability);
   vimToggle?.addEventListener('click', () => setVimEnabled(!vimEnabled));
   document.addEventListener('keydown', handleKeydown);

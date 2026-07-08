@@ -1,8 +1,8 @@
 :root {
   --bg: #eef2f1; --surface: #e5ebe9; --surface-2: #dae2df; --text: #16211f;
-  --text-muted: #5c6b68; --accent: #1f7d72; --accent-strong: #145c53;
-  --border: #c7d2cf; --pill-post: #8a948f; --lang-ts: #2f7dbf; --lang-md: #7c8b90;
-  --code-bg: #12181a; --code-text: #dfe7e3; --code-lang: #7c9490; --flag: #d8b23f; --danger: #b3452f;
+  --text-muted: #566360; --accent: #1b6f65; --accent-strong: #145c53;
+  --border: #c7d2cf; --pill-post: #5b6461; --lang-ts: #2f7dbf; --lang-md: #7c8b90;
+  --code-bg: #12181a; --code-text: #dfe7e3; --code-lang: #7c9490; --flag: #d8b23f; --danger: #a8402c;
   --font-ui: "Sarasa Term TC", "Sarasa Term SC", "Sarasa Term J", "Sarasa Term K", ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
   --font-code: "Sarasa Fixed TC", "Sarasa Fixed SC", "Sarasa Fixed J", "Sarasa Fixed K", var(--font-ui);
   --font-prose-latin: "Sarasa UI TC", "Sarasa UI SC", "Sarasa UI J", "Sarasa UI K", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Helvetica Neue", Arial;
@@ -15,19 +15,19 @@
   :root {
     --bg: #0f1417; --surface: #161c20; --surface-2: #1c2328; --text: #dbe4e6;
     --text-muted: #7c8b90; --accent: #4fb8ad; --accent-strong: #86e0d4;
-    --border: #2a3338; --pill-post: #59656a; --lang-ts: #5b9bd9; --lang-md: #8a97a0;
+    --border: #2a3338; --pill-post: #87939b; --lang-ts: #5b9bd9; --lang-md: #8a97a0;
     --flag: #e0c261; --danger: #e2775a;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f1417; --surface: #161c20; --surface-2: #1c2328; --text: #dbe4e6;
-  --text-muted: #7c8b90; --accent: #4fb8ad; --accent-strong: #86e0d4; --border: #2a3338; --pill-post: #59656a;
+  --text-muted: #7c8b90; --accent: #4fb8ad; --accent-strong: #86e0d4; --border: #2a3338; --pill-post: #87939b;
   --lang-ts: #5b9bd9; --lang-md: #8a97a0; --flag: #e0c261; --danger: #e2775a;
 }
 :root[data-theme="light"] {
   --bg: #eef2f1; --surface: #e5ebe9; --surface-2: #dae2df; --text: #16211f;
-  --text-muted: #5c6b68; --accent: #1f7d72; --accent-strong: #145c53; --border: #c7d2cf; --pill-post: #8a948f;
-  --lang-ts: #2f7dbf; --lang-md: #7c8b90; --flag: #d8b23f; --danger: #b3452f;
+  --text-muted: #566360; --accent: #1b6f65; --accent-strong: #145c53; --border: #c7d2cf; --pill-post: #5b6461;
+  --lang-ts: #2f7dbf; --lang-md: #7c8b90; --flag: #d8b23f; --danger: #a8402c;
 }
 
 * { box-sizing: border-box; }
@@ -35,6 +35,9 @@ html, body { margin: 0; background: var(--bg); color: var(--text); }
 body { font-family: var(--font-ui); font-size: 13px; }
 a { color: inherit; text-decoration: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 1200; background: var(--accent); color: var(--bg); font-weight: 700; font-size: 11px; padding: 5px 10px; border-radius: 2px; transform: translateY(-200%); }
+.skip-link:focus { transform: none; }
+#main-content:focus { outline: none; }
 button { font-family: inherit; }
 :lang(zh), :lang(zh-Hant), :lang(zh-TW) { --font-prose-active: var(--font-prose-zh-tw); }
 :lang(zh-Hans), :lang(zh-CN) { --font-prose-active: var(--font-prose-zh-cn); }
@@ -151,7 +154,11 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 }
 .vim-command-help dt { color: var(--accent); font-weight: 700; }
 .vim-command-help dd { margin: 0; color: var(--text); }
-html[data-vim-available="false"] .vim-help { display: none; }
+/* On devices that can't use Vim navigation the footer bar and toggle are dead
+   chrome — hide them entirely. */
+html[data-vim-available="false"] .vim-help,
+html[data-vim-available="false"] .status-bar.bottom,
+html[data-vim-available="false"] #vim-toggle { display: none; }
 @media (hover: none), (pointer: coarse) {
   .vim-help { display: none; }
 }
@@ -163,14 +170,14 @@ html[data-vim-available="false"] .vim-help { display: none; }
 
 .scroll-area { min-width: 0; }
 @media (min-width: 901px) { .scroll-area { flex: 1; min-height: 0; overflow-y: auto; } }
-.reading { max-width: 720px; padding: 30px 34px 50px; }
+.reading { max-width: 720px; margin-inline: auto; padding: 30px 34px 50px; }
 .reading.is-wide { max-width: 900px; }
 
 /* ---- homepage spotlight ---- */
 .article-spotlight { border: 1px solid var(--border); border-left: 3px solid var(--accent); background: var(--surface); padding: 16px 18px; margin: 0 0 22px; }
-.article-spotlight .spot-kicker { margin: 0 0 10px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
+.article-spotlight .spot-kicker { margin: 0 0 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
 .article-spotlight .meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10.5px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
-.article-spotlight .meta .pill { font-size: 9.5px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.article-spotlight .meta .pill { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
 .article-spotlight h1 { margin: 0 0 9px; font-family: var(--font-prose-active); font-size: 25px; line-height: 1.25; letter-spacing: 0; overflow-wrap: anywhere; text-autospace: normal; text-spacing-trim: normal; }
 .article-spotlight h1 a:hover { color: var(--accent); }
 .article-spotlight .desc { margin: 0 0 10px; color: var(--text-muted); font-family: var(--font-prose-active); font-size: 15px; line-height: 1.72; max-width: 62ch; text-autospace: normal; text-spacing-trim: normal; }
@@ -181,7 +188,7 @@ html[data-vim-available="false"] .vim-help { display: none; }
 .entry-w { padding: 26px 0; border-bottom: 1px solid var(--border); }
 .entry-w:first-child { padding-top: 6px; }
 .entry-w .meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10.5px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
-.entry-w .meta .pill { font-size: 9.5px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.entry-w .meta .pill { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
 .entry-w.is-post .meta .pill { color: var(--pill-post); }
 .entry-w h2 { margin: 0 0 8px; font-family: var(--font-prose-active); font-size: 20px; line-height: 1.35; text-autospace: normal; text-spacing-trim: normal; }
 .entry-w h2 a:hover { color: var(--accent); }
@@ -194,7 +201,7 @@ html[data-vim-available="false"] .vim-help { display: none; }
 
 /* ---- article / about prose ---- */
 .art-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10.5px; color: var(--text-muted); margin-bottom: 10px; font-variant-numeric: tabular-nums; }
-.art-meta .pill { font-size: 9.5px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.art-meta .pill { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
 .art-meta .pill-danger { color: var(--danger); }
 .reading h1 { font-family: var(--font-prose-active); font-size: 31px; line-height: 1.25; margin: 0 0 10px; letter-spacing: 0; text-autospace: normal; text-spacing-trim: normal; }
 .art-desc { color: var(--text-muted); font-family: var(--font-prose-active); font-size: 15.5px; line-height: 1.75; margin: 0 0 12px; text-autospace: normal; text-spacing-trim: normal; }
@@ -227,7 +234,7 @@ html[data-vim-available="false"] .vim-help { display: none; }
   position: absolute;
   top: 6px;
   right: 10px;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--code-lang);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -240,7 +247,7 @@ html[data-vim-available="false"] .vim-help { display: none; }
 .prose .table-scroll { overflow-x: auto; margin: 4px 0 22px; }
 .prose .table-scroll table { margin: 0; }
 .prose table { width: 100%; border-collapse: collapse; margin: 4px 0 22px; font-size: 12px; }
-.prose th { text-align: left; font-size: 9.5px; letter-spacing: 0.05em; color: var(--text-muted); padding: 6px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+.prose th { text-align: left; font-size: 10px; letter-spacing: 0.05em; color: var(--text-muted); padding: 6px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
 .prose td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .prose tbody tr:nth-child(odd) { background: var(--surface); }
 .prose td:first-child, .prose th:first-child { font-weight: 700; }

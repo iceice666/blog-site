@@ -34,8 +34,14 @@ const sortedKeys = [...groups.keys()].sort().reverse();
 
   <div class="vim-search">
     <span class="glyph">/</span>
-    <input id="archive-filter" type="text" placeholder="type to filter by title or tag" autocomplete="off" />
-    <span class="count" id="archive-count">{items.length} entries</span>
+    <input
+      id="archive-filter"
+      type="text"
+      placeholder="type to filter by title or tag"
+      aria-label="filter entries by title or tag"
+      autocomplete="off"
+    />
+    <span class="count" id="archive-count" aria-live="polite">{items.length} entries</span>
   </div>
 
   <p id="archive-empty-state" class="fold-note" style="display:none">No entries match that filter.</p>

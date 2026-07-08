@@ -14,6 +14,7 @@ interface Props {
     description?: string;
     lang?: string;
     wide?: boolean;
+    ogType?: "website" | "article";
 }
 const {
     title,
@@ -24,7 +25,11 @@ const {
     description = site.description,
     lang = "en",
     wide = false,
+    ogType = "website",
 } = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, site.url).href;
+const ogImage = new URL(author.avatar, site.url).href;
 
 const stats = await getBlogStats();
 const github = await getGithubData();
@@ -40,6 +45,20 @@ const extraWindowIndex =
         <meta name="description" content={description} />
         <link rel="icon" type="image/png" href={author.avatar} />
         <link rel="apple-touch-icon" href={author.avatar} />
+        <link rel="canonical" href={canonicalUrl} />
+        <link
+            rel="alternate"
+            type="application/rss+xml"
+            title={site.title}
+            href="/rss.xml"
+        />
+        <meta property="og:type" content={ogType} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content={site.title} />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:card" content="summary" />
         <title>{title}</title>
         <script is:inline>
             // Inline so the saved theme applies before first paint.
@@ -55,6 +74,7 @@ const extraWindowIndex =
         </script>
     </head>
     <body>
+        <a class="skip-link" href="#main-content">skip to content</a>
         <div class="tmux">
             <div class="status-bar top">
                 <div class="session">justaslime</div>
@@ -114,7 +134,11 @@ const extraWindowIndex =
                 <div class="pane-main">
                     <div class="pane-title">{paneTitle}</div>
                     <div class="scroll-area">
-                        <div class={`reading${wide ? " is-wide" : ""}`}>
+                        <div
+                            class={`reading${wide ? " is-wide" : ""}`}
+                            id="main-content"
+                            tabindex="-1"
+                        >
                             <slot />
                         </div>
                     </div>
@@ -124,9 +148,11 @@ const extraWindowIndex =
             </div>
 
             <div class="status-bar bottom">
-                <span id="vim-status" class="vim-status" aria-live="polite"
+                <span id="vim-status" class="vim-status" aria-hidden="true"
                     >-- NORMAL --</span
                 >
+                <span id="vim-status-announce" class="sr-only" aria-live="polite"
+                ></span>
                 <span class="vim-help">
                     <slot name="footer-hints">
                         <span>j/k move</span>
@@ -140,6 +166,29 @@ const extraWindowIndex =
 
         <script>
             import "../scripts/vim-nav";
+
+            // On desktop the page scrolls inside .scroll-area, which the
+            // browser's native scroll restoration doesn't cover — restore it
+            // ourselves on back/forward navigation.
+            (function () {
+                const scroller =
+                    document.querySelector<HTMLElement>(".scroll-area");
+                if (!scroller) return;
+                const key = "blog:scroll:" + location.pathname;
+                window.addEventListener("pagehide", function () {
+                    try {
+                        sessionStorage.setItem(key, String(scroller.scrollTop));
+                    } catch {}
+                });
+                const nav = performance.getEntriesByType("navigation")[0] as
+                    | PerformanceNavigationTiming
+                    | undefined;
+                if (nav?.type !== "back_forward") return;
+                try {
+                    const saved = sessionStorage.getItem(key);
+                    if (saved) scroller.scrollTop = Number(saved);
+                } catch {}
+            })();
 
             (function () {
                 const root = document.documentElement;

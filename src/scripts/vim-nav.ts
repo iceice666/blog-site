@@ -7,6 +7,8 @@ type HintCandidate = {
 
 const HINT_CHARS = 'asdfghjklqwertyuiopzxcvbnm';
 const SCROLL_LINE = 80;
+const CONTENT_SEARCH_HIGHLIGHT = 'vim-search';
+const CONTENT_SEARCH_CURRENT_HIGHLIGHT = 'vim-search-current';
 const STATUS_IDLE = '-- NORMAL --';
 const STATUS_DISABLED = '-- VIM OFF --';
 const STATUS_UNAVAILABLE = '-- VIM N/A --';
@@ -71,6 +73,9 @@ function initVimNav() {
   let searchBuffer = '';
   let commandBuffer = '';
   let lastSearch = '';
+  let searchRanges: Range[] = [];
+  let searchMatchIndex = -1;
+  let archiveFilterSnapshot: string | null = null;
   let hints: HintCandidate[] = [];
   let hintBuffer = '';
   let hintNewTab = false;
@@ -340,7 +345,10 @@ function initVimNav() {
     mode = 'normal';
     resetPendingKey();
     clearHints();
-    if (!vimEnabled) clearSelection();
+    if (!vimEnabled) {
+      clearSelection();
+      clearContentSearch();
+    }
     syncVimToggle();
     saveVimPreference();
     setStatus(currentIdleStatus());
@@ -355,7 +363,10 @@ function initVimNav() {
     mode = 'normal';
     resetPendingKey();
     clearHints();
-    if (!vimEnabled) clearSelection();
+    if (!vimEnabled) {
+      clearSelection();
+      clearContentSearch();
+    }
     syncVimToggle();
     setStatus(currentIdleStatus());
   }
@@ -443,6 +454,126 @@ function initVimNav() {
     return true;
   }
 
+  function supportsContentHighlight() {
+    return typeof CSS !== 'undefined' && typeof CSS.highlights !== 'undefined' && typeof Highlight !== 'undefined';
+  }
+
+  function getSearchRoot() {
+    return document.getElementById('main-content') ?? document.body;
+  }
+
+  function isInsideCollapsedDetails(el: Element) {
+    for (let node: Element | null = el; node; node = node.parentElement) {
+      if (node instanceof HTMLDetailsElement) return !node.open;
+      if (node.tagName === 'SUMMARY') return false;
+    }
+    return false;
+  }
+
+  /** Flattens visible text under `root` into one string, remembering which
+   * text node backs each character so match offsets can be mapped back to
+   * Ranges — a Range can span multiple text nodes (e.g. a query crossing a
+   * <strong> boundary), which DOM-mutation highlighting (wrapping matches in
+   * <mark>) cannot represent. */
+  function collectSearchableText(root: HTMLElement) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        if (parent.closest('script, style, noscript, .vim-hint, .vim-command-help')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        if (isInsideCollapsedDetails(parent)) return NodeFilter.FILTER_REJECT;
+        return node.textContent ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      },
+    });
+
+    const nodes: Text[] = [];
+    const starts: number[] = [];
+    let text = '';
+    for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+      starts.push(text.length);
+      text += node.textContent ?? '';
+      nodes.push(node);
+    }
+    return { nodes, starts, text };
+  }
+
+  function resolveTextOffset(nodes: Text[], starts: number[], globalIndex: number, fromNodeIndex: number) {
+    let i = fromNodeIndex;
+    while (i < nodes.length - 1 && globalIndex >= starts[i] + (nodes[i].textContent?.length ?? 0)) i++;
+    return { nodeIndex: i, offset: globalIndex - starts[i] };
+  }
+
+  function clearContentSearch() {
+    searchRanges = [];
+    searchMatchIndex = -1;
+    if (!supportsContentHighlight()) return;
+    CSS.highlights.delete(CONTENT_SEARCH_HIGHLIGHT);
+    CSS.highlights.delete(CONTENT_SEARCH_CURRENT_HIGHLIGHT);
+  }
+
+  function runContentSearch(query: string) {
+    clearContentSearch();
+    if (!query || !supportsContentHighlight()) return 0;
+
+    const { nodes, starts, text } = collectSearchableText(getSearchRoot());
+    const haystack = text.toLowerCase();
+    const needle = query.toLowerCase();
+
+    const ranges: Range[] = [];
+    let cursor = 0;
+    let at = haystack.indexOf(needle);
+    while (at !== -1) {
+      const start = resolveTextOffset(nodes, starts, at, cursor);
+      const end = resolveTextOffset(nodes, starts, at + needle.length - 1, start.nodeIndex);
+      cursor = start.nodeIndex;
+      const range = new Range();
+      range.setStart(nodes[start.nodeIndex], start.offset);
+      range.setEnd(nodes[end.nodeIndex], end.offset + 1);
+      ranges.push(range);
+      at = haystack.indexOf(needle, at + 1);
+    }
+
+    searchRanges = ranges;
+    if (ranges.length > 0) {
+      const highlight = new Highlight(...ranges);
+      highlight.priority = 1;
+      CSS.highlights.set(CONTENT_SEARCH_HIGHLIGHT, highlight);
+    }
+    return ranges.length;
+  }
+
+  function scrollRangeIntoView(range: Range) {
+    const rect = range.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return;
+    const scroller = getScroller();
+    const isWindowScroller = scroller === document.documentElement || scroller === document.body;
+    const viewportTop = isWindowScroller ? 0 : scroller.getBoundingClientRect().top;
+    const viewportHeight = isWindowScroller ? window.innerHeight : scroller.clientHeight;
+    const delta = rect.top + rect.height / 2 - (viewportTop + viewportHeight / 2);
+    if (Math.abs(delta) < 4) return;
+    if (isWindowScroller) window.scrollBy({ top: delta, behavior: 'smooth' });
+    else scroller.scrollBy({ top: delta, behavior: 'smooth' });
+  }
+
+  function setCurrentContentMatch(index: number) {
+    const range = searchRanges[index];
+    if (!range) return;
+    searchMatchIndex = index;
+    // Ctrl+F-style reveal: expand any collapsed <details> hiding the match so
+    // cycling with n/N never lands on invisible text.
+    for (let node = range.startContainer.parentElement; node; node = node.parentElement) {
+      if (node instanceof HTMLDetailsElement && !node.open) node.open = true;
+    }
+    if (supportsContentHighlight()) {
+      const highlight = new Highlight(range);
+      highlight.priority = 2;
+      CSS.highlights.set(CONTENT_SEARCH_CURRENT_HIGHLIGHT, highlight);
+    }
+    scrollRangeIntoView(range);
+  }
+
   function repeatSearch(backwards = false) {
     if (!lastSearch) {
       setStatus('no previous search', true);
@@ -456,46 +587,84 @@ function initVimNav() {
         return;
       }
       const current = selectedIndex(targets);
-      const next = current === -1 ? 0 : (current + (backwards ? -1 : 1) + targets.length) % targets.length;
+      const wrapped = current === -1 ? false : backwards ? current === 0 : current === targets.length - 1;
+      const next =
+        current === -1
+          ? backwards
+            ? targets.length - 1
+            : 0
+          : (current + (backwards ? -1 : 1) + targets.length) % targets.length;
       selectTarget(targets[next]);
-      setStatus(`match ${next + 1}/${targets.length}`, true);
+      setStatus(`match ${next + 1}/${targets.length}${wrapped ? ' (wrapped)' : ''}`, true);
       return;
     }
 
-    const finder = window as Window & { find?: (...args: unknown[]) => boolean };
-    const found = finder.find?.(lastSearch, false, backwards, true);
-    setStatus(found ? `${backwards ? '?' : '/'}${lastSearch}` : 'not found', true);
+    if (searchRanges.length === 0) {
+      setStatus('not found', true);
+      return;
+    }
+
+    const wrapped =
+      searchMatchIndex === -1
+        ? false
+        : backwards
+          ? searchMatchIndex === 0
+          : searchMatchIndex === searchRanges.length - 1;
+    const next =
+      searchMatchIndex === -1
+        ? backwards
+          ? searchRanges.length - 1
+          : 0
+        : (searchMatchIndex + (backwards ? -1 : 1) + searchRanges.length) % searchRanges.length;
+    setCurrentContentMatch(next);
+    setStatus(`match ${next + 1}/${searchRanges.length}${wrapped ? ' (wrapped)' : ''}`, true);
   }
 
   function enterSearchMode() {
     mode = 'search';
     searchBuffer = '';
+    archiveFilterSnapshot = archiveInput instanceof HTMLInputElement ? archiveInput.value : null;
     setStatus('/');
   }
 
   function finishSearch() {
     lastSearch = searchBuffer;
     mode = 'normal';
+    archiveFilterSnapshot = null;
     if (!searchBuffer) {
+      clearContentSearch();
       setStatus(currentIdleStatus());
       return;
     }
 
     if (applyArchiveFilter(searchBuffer)) {
-      const firstTarget = getTargets()[0];
-      if (firstTarget) selectTarget(firstTarget);
-      setStatus(`/${searchBuffer}`, true);
+      const targets = getTargets();
+      if (targets.length === 0) {
+        setStatus('not found', true);
+        return;
+      }
+      selectTarget(targets[0]);
+      setStatus(`match 1/${targets.length}`, true);
       return;
     }
 
-    const finder = window as Window & { find?: (...args: unknown[]) => boolean };
-    const found = finder.find?.(searchBuffer, false, false, true);
-    setStatus(found ? `/${searchBuffer}` : 'not found', true);
+    const count = runContentSearch(searchBuffer);
+    if (count === 0) {
+      setStatus('not found', true);
+      return;
+    }
+    setCurrentContentMatch(0);
+    setStatus(`match 1/${count}`, true);
   }
 
   function updateSearchMode(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       mode = 'normal';
+      if (archiveInput instanceof HTMLInputElement && archiveFilterSnapshot !== null) {
+        archiveInput.value = archiveFilterSnapshot;
+        archiveInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      archiveFilterSnapshot = null;
       setStatus(currentIdleStatus());
       return;
     }
@@ -633,6 +802,7 @@ function initVimNav() {
 
     if (normalized === 'noh') {
       clearSelection();
+      clearContentSearch();
       setStatus('cleared', true);
       return;
     }
@@ -695,6 +865,7 @@ function initVimNav() {
     switch (event.key) {
       case 'Escape':
         clearSelection();
+        clearContentSearch();
         setStatus(currentIdleStatus());
         break;
       case 'j':

@@ -74,7 +74,13 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 .vim-help { display: contents; }
 .vim-help > span { display: inline; }
 .vim-status { margin-left: auto; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
-.vim-selected { outline: 1px solid var(--accent); outline-offset: 3px; box-shadow: inset 3px 0 0 var(--accent); }
+.vim-selected {
+  outline: 3px solid var(--accent);
+  outline-offset: 5px;
+  box-shadow:
+    0 0 0 8px color-mix(in srgb, var(--accent) 18%, transparent),
+    inset 5px 0 0 var(--accent);
+}
 .vim-hint {
   position: fixed;
   z-index: 1000;

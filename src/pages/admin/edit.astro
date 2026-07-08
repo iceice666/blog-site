@@ -11,6 +11,13 @@ import Shell from '../../layouts/Shell.astro';
   description="Private editor for blog posts and articles."
   wide
 >
+  <Fragment slot="footer-hints">
+    <span>C-s save draft</span>
+    <span>C-enter preview</span>
+    <span>tab indents</span>
+    <span>autosave on idle</span>
+  </Fragment>
+
   <section class="admin-editor" data-admin-editor>
     <div class="admin-editor-head">
       <div>

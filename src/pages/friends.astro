@@ -1,0 +1,44 @@
+---
+export const prerender = true;
+import Shell from '../layouts/Shell.astro';
+import { friends, type SocialLink } from '../../config';
+
+function linkOf(social: SocialLink) {
+  return social.kind === 'email' ? `mailto:${social.address}` : social.url;
+}
+function labelOf(social: SocialLink) {
+  return social.kind === 'email' ? 'mail' : social.kind === 'github' ? 'github' : 'site';
+}
+---
+
+<Shell title="Friends | Brian Duan" activeKey="friends" paneTitle="friends.md">
+  <h1>Friends</h1>
+  <p class="friends-sub">Blogs and sites I like to read.</p>
+
+  <div class="friends-grid">
+    {
+      friends.map((f) => (
+        <div class="friend-card">
+          <a href={f.url} class="avatar friend-avatar" target="_blank" rel="noopener noreferrer">
+            <img src={f.img} alt={f.name} loading="lazy" />
+          </a>
+          <div class="friend-body">
+            <a href={f.url} class="friend-name" target="_blank" rel="noopener noreferrer">
+              {f.name}
+            </a>
+            <p class="friend-desc">{f.desc}</p>
+            {f.socials.length > 0 && (
+              <div class="friend-links">
+                {f.socials.map((s) => (
+                  <a href={linkOf(s)} target={s.kind === 'email' ? undefined : '_blank'} rel="noopener noreferrer">
+                    {labelOf(s)}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</Shell>

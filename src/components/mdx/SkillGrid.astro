@@ -1,0 +1,29 @@
+---
+type Skill = string | Record<string, string>;
+interface Props {
+  label: string;
+  skills: Skill[];
+}
+const { label, skills } = Astro.props;
+
+function nameOf(s: Skill) {
+  return typeof s === 'string' ? s : Object.keys(s)[0];
+}
+function noteOf(s: Skill) {
+  return typeof s === 'string' ? null : Object.values(s)[0];
+}
+---
+
+<div class="skillgrid">
+  <div class="skillgrid-label">{label}</div>
+  <div class="skillgrid-chips">
+    {
+      skills.map((s) => (
+        <span>
+          {nameOf(s)}
+          {noteOf(s) && <small>{noteOf(s)}</small>}
+        </span>
+      ))
+    }
+  </div>
+</div>

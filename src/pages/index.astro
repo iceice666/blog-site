@@ -1,0 +1,40 @@
+---
+export const prerender = true;
+import Shell from '../layouts/Shell.astro';
+import { getFeedItems } from '../lib/content';
+
+const items = await getFeedItems();
+---
+
+<Shell title="Feed | Brian Duan" activeKey="feed" paneTitle={`feed.md (${items.length} entries)`}>
+  {
+    items.map((item) =>
+      item.kind === 'ARTICLE' ? (
+        <article class="entry-w">
+          <div class="meta">
+            <span class="pill">ARTICLE</span>
+            <span>{item.category}</span>
+            <span>{item.lang}</span>
+            <span>{item.publishedAt}</span>
+          </div>
+          <h2>
+            <a href={item.href}>{item.title}</a>
+          </h2>
+          <p class="desc">{item.description}</p>
+          <p class="stats">
+            {item.units} words · {item.readMin} min read
+          </p>
+          <p class="tags">{item.tags.map((t) => `#${t}`).join(' ')}</p>
+        </article>
+      ) : (
+        <article class="entry-w is-post">
+          <div class="meta">
+            <span class="pill">POST</span>
+            <span>{item.publishedAt}</span>
+          </div>
+          <div class="prose" set:html={item.bodyHtml} />
+        </article>
+      )
+    )
+  }
+</Shell>

@@ -1,0 +1,110 @@
+---
+export const prerender = true;
+import Shell from '../layouts/Shell.astro';
+import { getFeedItems, type FeedItem } from '../lib/content';
+
+const items = await getFeedItems();
+
+function stripTags(html?: string) {
+  return (html ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function excerpt(item: FeedItem, len = 140) {
+  const text = item.kind === 'ARTICLE' ? item.description : stripTags(item.bodyHtml);
+  return text.length > len ? text.slice(0, len) + '…' : text;
+}
+
+function displayTitle(item: FeedItem) {
+  return item.title ?? (excerpt(item, 70) || '(no subject)');
+}
+
+const groups = new Map<string, FeedItem[]>();
+for (const item of items) {
+  const key = item.publishedAt ? item.publishedAt.slice(0, 7) : 'undated';
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key)!.push(item);
+}
+const sortedKeys = [...groups.keys()].sort().reverse();
+---
+
+<Shell title="Archive | Brian Duan" activeKey="archive" paneTitle={`archive.md (${items.length} entries)`}>
+  <h1>Archive</h1>
+  <p class="archive-sub">Every article and note, in one place — newest first.</p>
+
+  <div class="vim-search">
+    <span class="glyph">/</span>
+    <input id="archive-filter" type="text" placeholder="type to filter by title or tag" autocomplete="off" />
+    <span class="count" id="archive-count">{items.length} entries</span>
+  </div>
+
+  <p id="archive-empty-state" class="fold-note" style="display:none">No entries match that filter.</p>
+
+  {
+    sortedKeys.map((key) => {
+      const [year, month] = key.split('-');
+      const label = month ? `${year} / ${month}` : year;
+      return (
+        <>
+          <div class="arch-group-label" data-archive-group>
+            {label}
+          </div>
+          {groups.get(key)!.map((item) => {
+            const search = [item.kind, displayTitle(item), excerpt(item, 300), ...item.tags]
+              .join(' ')
+              .toLowerCase();
+            const dateShort = item.publishedAt ? item.publishedAt.slice(5) : '';
+            return (
+              <div
+                class={`arch-row ${item.kind === 'ARTICLE' ? 'is-article' : 'is-note'}`}
+                data-archive-row
+                data-search={search}
+              >
+                <span class="kind">{item.kind}</span>
+                {item.href ? (
+                  <a href={item.href} class="title">
+                    {displayTitle(item)}
+                  </a>
+                ) : (
+                  <span class="title">{displayTitle(item)}</span>
+                )}
+                <span class="rtags">{item.tags.join(', ') || '—'}</span>
+                <span class="rdate">{dateShort}</span>
+              </div>
+            );
+          })}
+        </>
+      );
+    })
+  }
+
+  <script>
+    const input = document.getElementById('archive-filter');
+    const rows = Array.from(document.querySelectorAll('[data-archive-row]'));
+    const groupEls = Array.from(document.querySelectorAll('[data-archive-group]'));
+    const countEl = document.getElementById('archive-count');
+    const emptyEl = document.getElementById('archive-empty-state');
+
+    if (input instanceof HTMLInputElement) {
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        let visible = 0;
+        rows.forEach((row) => {
+          const match = !q || (row.getAttribute('data-search') ?? '').includes(q);
+          row.classList.toggle('is-hidden', !match);
+          if (match) visible++;
+        });
+        groupEls.forEach((group) => {
+          let el = group.nextElementSibling;
+          let any = false;
+          while (el && !el.hasAttribute('data-archive-group')) {
+            if (el.hasAttribute('data-archive-row') && !el.classList.contains('is-hidden')) any = true;
+            el = el.nextElementSibling;
+          }
+          group.classList.toggle('is-hidden', !any);
+        });
+        if (countEl) countEl.textContent = `${visible} entr${visible === 1 ? 'y' : 'ies'}`;
+        if (emptyEl instanceof HTMLElement) emptyEl.style.display = visible === 0 ? 'block' : 'none';
+      });
+    }
+  </script>
+</Shell>

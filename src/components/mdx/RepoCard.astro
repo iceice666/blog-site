@@ -1,0 +1,16 @@
+---
+interface Props {
+  url: string;
+  desc: string;
+}
+const { url, desc } = Astro.props;
+const display = url.replace(/^https?:\/\//, '');
+---
+
+<div class="article-repo">
+  <div>
+    <a href={url} class="url" target="_blank" rel="noopener noreferrer">{display}</a>
+    <p>{desc}</p>
+  </div>
+  <span class="ext" aria-hidden="true">↗</span>
+</div>

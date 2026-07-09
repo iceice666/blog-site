@@ -2,15 +2,6 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 export const DEFAULT_ARTICLE_LANG = 'en';
 
-declare const __STANDALONE_ARTICLE_IDS__: string[];
-
-const standaloneArticleIds = new Set(__STANDALONE_ARTICLE_IDS__);
-for (const id of standaloneArticleIds) {
-  if (id.includes('/')) {
-    throw new Error(`Standalone marker must live at content/articles/<article>/.standalone, got ${id}/.standalone.`);
-  }
-}
-
 export interface ArticleInfo {
   id: string;
   series: string | null;
@@ -40,11 +31,10 @@ export function getArticleInfo(id: string): ArticleInfo {
 
   for (const part of parts) assertArticlePathSegment(part, id);
 
+  // Nesting depth decides the shape: <article>/<lang>.mdx is standalone,
+  // <series>/<article>/<lang>.mdx belongs to a series.
   if (parents.length === 1) {
     const [article] = parents;
-    if (!standaloneArticleIds.has(article)) {
-      throw new Error(`Standalone article "${id}" needs content/articles/${article}/.standalone.`);
-    }
     return buildArticleInfo({ id, series: null, article, lang });
   }
 

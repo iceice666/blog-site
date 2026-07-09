@@ -119,4 +119,13 @@ export const friends: Friend[] = [
     desc: "群除我佬，我是肺霧",
     socials: [],
   },
+  {
+    name: "LuYishan",
+    url: "https://luyishan-4.github.io/luyishan.io/",
+    img: "https://luyishan-4.github.io/luyishan.io/asstes/176718460685483c7639149f4ba8ab9c942c355be78d0d2e2abcf.jpg",
+    desc: "",
+    socials: [
+      { kind: "github", url:"https://github.com/LuYishan-4" },
+    ]
+  },
 ];

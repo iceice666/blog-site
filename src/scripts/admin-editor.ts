@@ -134,7 +134,6 @@ if (root && !window.__blogAdminEditorReady) {
   window.addEventListener('beforeunload', (event) => {
     if (!state.dirty) return;
     event.preventDefault();
-    event.returnValue = '';
   });
 
   document.addEventListener('keydown', (event) => {
@@ -445,10 +444,8 @@ function renderEditor(root: HTMLElement, state: EditorState) {
   textarea.addEventListener('keydown', (event) => {
     if (event.key !== 'Tab' || event.shiftKey) return;
     event.preventDefault();
-    if (!document.execCommand('insertText', false, '  ')) {
-      textarea.setRangeText('  ', textarea.selectionStart ?? 0, textarea.selectionEnd ?? 0, 'end');
-      handleEdit(root, state, textarea.value);
-    }
+    textarea.setRangeText('  ', textarea.selectionStart, textarea.selectionEnd, 'end');
+    handleEdit(root, state, textarea.value);
   });
   ui.textarea = textarea;
   appendNodes(rawPane, textarea);

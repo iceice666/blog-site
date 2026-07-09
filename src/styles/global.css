@@ -102,8 +102,6 @@ html::-webkit-scrollbar-button, .scroll-area::-webkit-scrollbar-button, .sidebar
 }
 .vim-hint.is-dim { opacity: 0.28; }
 .vim-hint.is-match { background: var(--accent); color: var(--bg); }
-::highlight(vim-search) { background: color-mix(in srgb, var(--flag) 45%, transparent); }
-::highlight(vim-search-current) { background: var(--accent); color: var(--bg); }
 .vim-command-help {
   position: fixed;
   inset: 0;

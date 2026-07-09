@@ -80,6 +80,16 @@ const extraWindowIndex =
         <meta property="og:image" content={ogImage} />
         <meta name="twitter:card" content="summary" />
         <title>{title}</title>
+        <style is:inline>
+            /* Lightning CSS does not recognize the Custom Highlight API yet. */
+            ::highlight(vim-search) {
+                background: color-mix(in srgb, var(--flag) 45%, transparent);
+            }
+            ::highlight(vim-search-current) {
+                background: var(--accent);
+                color: var(--bg);
+            }
+        </style>
         <script is:inline>
             // Inline so the saved theme applies before first paint.
             try {

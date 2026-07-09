@@ -161,7 +161,9 @@ html[data-vim-available="false"] .vim-help,
 html[data-vim-available="false"] .status-bar.bottom,
 html[data-vim-available="false"] #vim-toggle { display: none; }
 @media (hover: none), (pointer: coarse) {
-  .vim-help { display: none; }
+  .vim-help,
+  .status-bar.bottom,
+  #vim-toggle { display: none; }
 }
 
 .panes { display: flex; align-items: stretch; border: 1px solid var(--border); border-top: none; }
@@ -609,13 +611,171 @@ html[data-sidebar="hidden"] .sidebar { display: none; }
 }
 
 @media (max-width: 900px) {
-  /* The chip row can't shrink; without wrapping it forces horizontal page
-     scroll on narrow phones (and on article pages with long window labels). */
-  .status-bar.top { flex-wrap: wrap; overflow-x: auto; }
-  .status-right { flex-basis: 100%; flex-wrap: wrap; justify-content: flex-end; }
-  .panes { flex-direction: column; }
+  .tmux { min-height: 100vh; min-height: 100dvh; padding: 0; }
+  .status-bar.bottom,
+  #vim-toggle,
+  .chip[aria-disabled="true"] { display: none; }
+  .status-bar.top {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 8px;
+    align-items: center;
+    overflow: visible;
+    border-top: none;
+    border-inline: none;
+    border-radius: 0;
+    padding:
+      calc(8px + env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      6px
+      max(10px, env(safe-area-inset-left));
+  }
+  .session,
+  .win,
+  .chip {
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+  .session {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .status-right {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    flex-basis: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .windows {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    margin-inline: -2px;
+  }
+  .windows::-webkit-scrollbar { display: none; }
+  .win { flex: 0 0 auto; scroll-snap-align: center; padding: 6px 10px; }
+  .chip { padding: 6px 10px; }
+  .panes { flex-direction: column; border-inline: none; border-bottom: none; }
+  .pane-title { padding: 7px max(12px, env(safe-area-inset-right)) 7px max(12px, env(safe-area-inset-left)); }
   .sidebar { flex: none; width: 100%; border-left: none; border-top: 1px solid var(--border); }
-  .reading { padding: 24px 18px 40px; }
+  .reading {
+    width: 100%;
+    max-width: none;
+    padding:
+      24px
+      max(18px, env(safe-area-inset-right))
+      calc(48px + env(safe-area-inset-bottom))
+      max(18px, env(safe-area-inset-left));
+  }
+  .reading.is-wide { max-width: none; }
+  #main-content,
+  .prose :is(h1, h2, h3, h4) { scroll-margin-top: 112px; }
   .reading h1 { font-size: 27px; }
   .prose { font-size: 16px; line-height: 1.75; }
+  .prose pre,
+  .prose .table-scroll,
+  .prose .katex-display,
+  .comment-body pre {
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prose pre code { padding-right: 36px; }
+  .article-spotlight { padding: 14px; margin-bottom: 18px; }
+  .entry-w { padding: 22px 0; }
+  .article-spotlight .meta,
+  .entry-w .meta,
+  .art-meta { gap: 8px; }
+  .comments-head { flex-direction: column; align-items: stretch; }
+  .comments-controls { justify-content: flex-start; }
+  .comments-link,
+  .comments-action,
+  .comment-delete,
+  .profile-links a,
+  .friend-links a {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .profile-links { flex-wrap: wrap; }
+}
+
+@media (max-width: 620px) {
+  .status-bar.top { grid-template-columns: minmax(0, 1fr) auto; }
+  .session {
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .reading { padding: 20px 14px calc(44px + env(safe-area-inset-bottom)); }
+  .reading h1 { font-size: 24px; line-height: 1.28; }
+  .article-spotlight h1 { font-size: 22px; }
+  .entry-w h2 { font-size: 18px; }
+  .art-desc,
+  .article-spotlight .desc,
+  .entry-w p.desc { font-size: 14.5px; }
+  .prose { font-size: 15.5px; line-height: 1.74; }
+  .prose ul li { padding-left: 18px; }
+  .prose ol li { padding-left: 24px; }
+  .prose pre,
+  .prose .table-scroll,
+  .prose .katex-display { margin-inline: -14px; }
+  .prose pre code { padding: 18px 14px 13px; }
+  .prose table { min-width: 520px; }
+  .article-repo { flex-direction: column; gap: 8px; padding: 12px; }
+  .article-repo .ext { align-self: flex-start; }
+  .details-box summary {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+  }
+  .skillgrid { padding: 12px; }
+  .skillgrid-chips { grid-template-columns: 1fr; }
+  .comments { margin-top: 30px; }
+  .comment-delete { margin-left: 0; }
+  .comment-replies { padding-left: 12px; }
+  .comment-form-actions { justify-content: stretch; }
+  .comment-form-actions .comments-action {
+    width: 100%;
+    justify-content: center;
+  }
+  .vim-search {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 10px;
+  }
+  .vim-search .count { grid-column: 2; }
+  .arch-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    align-items: start;
+    padding: 12px 0;
+  }
+  .arch-row .kind { width: auto; }
+  .arch-row .title {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.45;
+  }
+  .friends-grid { gap: 12px; }
+  .friend-card { min-height: 0; padding: 14px; }
+  .widget-body { padding: 13px 14px; }
+  .repo-card { padding: 12px; }
 }

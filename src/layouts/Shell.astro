@@ -52,7 +52,10 @@ const extraWindowIndex =
 <html lang={lang}>
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
         <meta name="description" content={description} />
         <link rel="icon" type="image/png" href={author.avatar} />
         <link rel="apple-touch-icon" href={author.avatar} />
@@ -238,6 +241,23 @@ const extraWindowIndex =
                     const saved = sessionStorage.getItem(key);
                     if (saved) scroller.scrollTop = Number(saved);
                 } catch {}
+            })();
+
+            (function () {
+                const windows = document.querySelector<HTMLElement>(".windows");
+                const activeWindow =
+                    windows?.querySelector<HTMLElement>(".win.active");
+                if (!windows || !activeWindow) return;
+                const isCompact = window.matchMedia?.("(max-width: 900px)")
+                    .matches;
+                if (!isCompact && windows.scrollWidth <= windows.clientWidth)
+                    return;
+                window.requestAnimationFrame(() => {
+                    activeWindow.scrollIntoView({
+                        block: "nearest",
+                        inline: "center",
+                    });
+                });
             })();
 
             (function () {

@@ -1,6 +1,7 @@
 export {};
 
 type ContentKind = 'post' | 'article';
+type CreateMode = 'post' | 'series' | 'article';
 
 interface AuthUser {
   id: number;
@@ -38,6 +39,7 @@ interface StatusLink {
 interface EditorState {
   user: AuthUser | null;
   files: EditableFile[];
+  view: 'home' | 'editor';
   current: LoadedFile | null;
   content: string;
   filter: string;
@@ -49,9 +51,8 @@ interface EditorState {
   loading: boolean;
   busy: boolean;
   dirty: boolean;
-  autoPreview: boolean;
-  createKind: ContentKind;
-  createSlug: string;
+  createMode: CreateMode | null;
+  create: { post: string; series: string; article: string; lang: string };
 }
 
 interface ApiErrorPayload {
@@ -67,30 +68,37 @@ declare global {
 
 const LOGIN_REQUIRED = 'GitHub login is required.';
 const AUTOSAVE_DELAY = 2500;
-const AUTOPREVIEW_DELAY = 1200;
-const AUTOPREVIEW_KEY = 'blog:admin-autopreview';
+const PREVIEW_DELAY = 1200;
+
+const CREATE_CARDS: Array<{ mode: CreateMode; title: string; hint: string }> = [
+  { mode: 'post', title: 'New Post', hint: 'a short note — content/posts/<slug>.md' },
+  { mode: 'series', title: 'New Series', hint: 'a series with its first article — content/articles/<series>/<article>/<lang>.mdx' },
+  { mode: 'article', title: 'New Article', hint: 'a standalone article — content/articles/<article>/<lang>.mdx' },
+];
 
 // Live node references, rebuilt on every full render. Targeted updates
-// (status line, dirty dot, counts, preview HTML, file list) go through these
-// so typing in the source or filter never loses focus to a re-render.
+// (status line, dirty dot, counts, preview HTML, file list, create form)
+// go through these so typing never loses focus to a re-render.
 const ui: {
   status: HTMLElement | null;
   dirty: HTMLElement | null;
   counts: HTMLElement | null;
   preview: HTMLElement | null;
   fileList: HTMLElement | null;
+  createForm: HTMLElement | null;
   textarea: HTMLTextAreaElement | null;
   saveButton: HTMLButtonElement | null;
-  previewButton: HTMLButtonElement | null;
+  userSlot: HTMLElement | null;
 } = {
   status: null,
   dirty: null,
   counts: null,
   preview: null,
   fileList: null,
+  createForm: null,
   textarea: null,
   saveButton: null,
-  previewButton: null,
+  userSlot: null,
 };
 
 let autosaveTimer = 0;
@@ -101,9 +109,11 @@ const root = document.querySelector<HTMLElement>('[data-admin-editor]');
 
 if (root && !window.__blogAdminEditorReady) {
   window.__blogAdminEditorReady = true;
+  ui.userSlot = document.querySelector<HTMLElement>('[data-editor-user]');
   const state: EditorState = {
     user: null,
     files: [],
+    view: 'home',
     current: null,
     content: '',
     filter: '',
@@ -115,9 +125,8 @@ if (root && !window.__blogAdminEditorReady) {
     loading: true,
     busy: false,
     dirty: false,
-    autoPreview: readAutoPreview(),
-    createKind: 'post',
-    createSlug: '',
+    createMode: null,
+    create: { post: '', series: '', article: '', lang: '' },
   };
   render(root, state);
   void boot(root, state);
@@ -130,12 +139,13 @@ if (root && !window.__blogAdminEditorReady) {
 
   document.addEventListener('keydown', (event) => {
     if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) return;
+    if (state.view !== 'editor' || !state.current) return;
     if (event.key.toLowerCase() === 's') {
       event.preventDefault();
-      if (state.current && !state.busy) void saveDraft(root, state);
+      if (!state.busy) void saveDraft(root, state);
     } else if (event.key === 'Enter') {
-      if (!state.current || state.busy) return;
       event.preventDefault();
+      window.clearTimeout(previewTimer);
       void refreshPreview(root, state);
     }
   });
@@ -147,7 +157,7 @@ async function boot(root: HTMLElement, state: EditorState) {
     state.files = payload.files;
     state.user = payload.user;
     state.loading = false;
-    setStatusValues(state, payload.files.length ? 'Select a file or create a new one.' : 'No editable files found.');
+    setStatusValues(state, payload.files.length ? 'Create something new or open an existing file.' : 'No editable files found — create one.');
   } catch (error) {
     state.loading = false;
     state.error = messageFromError(error);
@@ -159,6 +169,7 @@ async function boot(root: HTMLElement, state: EditorState) {
 function render(root: HTMLElement, state: EditorState) {
   resetUi();
   root.replaceChildren();
+  paintUser(state);
 
   if (state.error === LOGIN_REQUIRED) {
     renderLoggedOut(root);
@@ -169,59 +180,90 @@ function render(root: HTMLElement, state: EditorState) {
     return;
   }
 
-  const head = el('div', 'admin-editor-head');
-  const titleBox = el('div');
-  appendNodes(titleBox, el('h1', undefined, 'Editor'));
-  appendNodes(titleBox, el('p', 'admin-editor-sub', state.user ? `signed in as ${state.user.login}` : 'private GitHub-backed content editor'));
-  const actions = el('div', 'admin-editor-actions');
-  if (state.user) {
-    const profile = el('a', 'comments-user');
-    profile.href = state.user.profileUrl;
-    profile.target = '_blank';
-    profile.rel = 'noopener noreferrer';
-    const avatar = document.createElement('img');
-    avatar.src = state.user.avatarUrl;
-    avatar.alt = '';
-    appendNodes(profile, avatar, document.createTextNode(state.user.login));
-    appendNodes(actions, profile);
-  }
-  appendNodes(head, titleBox, actions);
-  appendNodes(root, head);
+  if (state.view === 'editor' && state.current) renderEditor(root, state);
+  else renderHome(root, state);
+}
 
-  const status = el('p', 'admin-status');
-  status.setAttribute('aria-live', 'polite');
-  ui.status = status;
-  paintStatus(state);
-  appendNodes(root, status);
-
-  const shell = el('div', 'admin-editor-grid');
-  appendNodes(shell, renderFilePane(root, state), renderEditPane(root, state), renderPreviewPane(root, state));
-  appendNodes(root, shell);
+function homeShell(root: HTMLElement) {
+  const home = el('div', 'ed-home');
+  const inner = el('div', 'ed-home-inner');
+  appendNodes(home, inner);
+  appendNodes(root, home);
+  return inner;
 }
 
 function renderLoggedOut(root: HTMLElement) {
-  const head = el('div', 'admin-editor-head');
-  const box = el('div');
+  const inner = homeShell(root);
+  const box = el('div', 'ed-login');
   appendNodes(box, el('h1', undefined, 'Editor'));
-  appendNodes(box, el('p', 'admin-editor-sub', 'GitHub login is required.'));
-  const login = el('a', 'comments-action', 'login with GitHub');
+  appendNodes(box, el('p', 'ed-sub', 'Sign in with the site owner GitHub account to edit content.'));
+  const login = el('a', 'comments-action is-primary', 'login with GitHub');
   login.href = `/api/auth/github/start?returnTo=${encodeURIComponent('/admin/edit')}`;
-  appendNodes(head, box, login);
-  appendNodes(root, head, statusNode('Sign in with the site owner GitHub account.', false));
+  appendNodes(box, login);
+  appendNodes(inner, box);
 }
 
 function renderFatal(root: HTMLElement, error: string) {
-  const head = el('div', 'admin-editor-head');
-  appendNodes(head, el('h1', undefined, 'Editor'));
-  appendNodes(root, head, statusNode(error, true));
+  const inner = homeShell(root);
+  appendNodes(inner, el('h1', undefined, 'Editor'), statusNode(error, true));
 }
 
-function renderFilePane(root: HTMLElement, state: EditorState) {
-  const pane = el('section', 'admin-panel admin-files');
-  appendNodes(pane, panelTitle(`files (${state.files.length})`));
+function paintUser(state: EditorState) {
+  const slot = ui.userSlot;
+  if (!slot) return;
+  slot.replaceChildren();
+  if (!state.user) return;
+  const profile = el('a', 'comments-user');
+  profile.href = state.user.profileUrl;
+  profile.target = '_blank';
+  profile.rel = 'noopener noreferrer';
+  const avatar = document.createElement('img');
+  avatar.src = state.user.avatarUrl;
+  avatar.alt = '';
+  appendNodes(profile, avatar, document.createTextNode(state.user.login));
+  appendNodes(slot, profile);
+}
 
+/* ---- home view ---- */
+
+function renderHome(root: HTMLElement, state: EditorState) {
+  const home = homeShell(root);
+
+  appendNodes(home, el('h1', undefined, 'Editor'));
+  appendNodes(home, el('p', 'ed-sub', 'Posts and articles live on GitHub. Drafts autosave while you type.'));
+
+  const status = el('p', 'ed-status');
+  status.setAttribute('aria-live', 'polite');
+  ui.status = status;
+  paintStatus(state);
+  appendNodes(home, status);
+
+  const grid = el('div', 'ed-new-grid');
+  for (const card of CREATE_CARDS) {
+    const btn = button('', `ed-new-card${state.createMode === card.mode ? ' is-active' : ''}`);
+    btn.dataset.mode = card.mode;
+    appendNodes(btn, el('strong', undefined, card.title), el('span', undefined, card.hint));
+    btn.addEventListener('click', () => {
+      state.createMode = state.createMode === card.mode ? null : card.mode;
+      for (const other of grid.querySelectorAll<HTMLElement>('.ed-new-card')) {
+        other.classList.toggle('is-active', other.dataset.mode === state.createMode);
+      }
+      paintCreateForm(root, state);
+    });
+    appendNodes(grid, btn);
+  }
+  appendNodes(home, grid);
+
+  const form = el('div', 'ed-new-form');
+  ui.createForm = form;
+  paintCreateForm(root, state);
+  appendNodes(home, form);
+
+  const files = el('section', 'ed-files');
+  const head = el('div', 'ed-files-head');
+  appendNodes(head, el('h2', undefined, `Open existing (${state.files.length})`));
   const filter = document.createElement('input');
-  filter.className = 'admin-input';
+  filter.className = 'ed-input ed-filter';
   filter.type = 'search';
   filter.placeholder = 'filter files';
   filter.value = state.filter;
@@ -236,49 +278,73 @@ function renderFilePane(root: HTMLElement, state: EditorState) {
     state.filter = '';
     paintFileList(root, state);
   });
-  appendNodes(pane, filter);
+  appendNodes(head, filter);
+  appendNodes(files, head);
 
-  const create = el('div', 'admin-create');
-  const kind = document.createElement('select');
-  kind.className = 'admin-input';
-  for (const value of ['post', 'article'] as const) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = value;
-    option.selected = state.createKind === value;
-    kind.appendChild(option);
-  }
-  const slug = document.createElement('input');
-  slug.className = 'admin-input';
-  const syncSlugPlaceholder = () => {
-    slug.placeholder = state.createKind === 'article' ? 'article/lang or series/article/lang' : 'new slug';
-  };
-  syncSlugPlaceholder();
-  kind.addEventListener('change', () => {
-    state.createKind = kind.value === 'article' ? 'article' : 'post';
-    syncSlugPlaceholder();
-  });
-  slug.value = state.createSlug;
-  slug.addEventListener('input', () => {
-    state.createSlug = slug.value;
-  });
-  slug.addEventListener('keydown', (event) => {
-    if (event.key !== 'Enter') return;
-    event.preventDefault();
-    state.createSlug = slug.value;
-    void createNewFile(root, state);
-  });
-
-  const createButton = button('new', 'comments-action');
-  createButton.addEventListener('click', () => void createNewFile(root, state));
-  appendNodes(create, kind, slug, createButton);
-  appendNodes(pane, create);
-
-  const list = el('div', 'admin-file-list');
+  const list = el('div', 'ed-file-list');
   ui.fileList = list;
   paintFileList(root, state);
-  appendNodes(pane, list);
-  return pane;
+  appendNodes(files, list);
+  appendNodes(home, files);
+}
+
+function paintCreateForm(root: HTMLElement, state: EditorState) {
+  const form = ui.createForm;
+  if (!form) return;
+  form.replaceChildren();
+  const mode = state.createMode;
+  form.hidden = !mode;
+  if (!mode) return;
+
+  const submit = () => void createNewFile(root, state);
+  const fields = el('div', 'ed-new-fields');
+
+  const addField = (label: string, key: 'post' | 'series' | 'article' | 'lang', placeholder: string) => {
+    const wrap = document.createElement('label');
+    wrap.className = 'ed-field';
+    appendNodes(wrap, el('span', undefined, label));
+    const input = document.createElement('input');
+    input.className = 'ed-input';
+    input.placeholder = placeholder;
+    input.value = state.create[key];
+    input.addEventListener('input', () => {
+      state.create[key] = input.value;
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      submit();
+    });
+    appendNodes(wrap, input);
+    appendNodes(fields, wrap);
+    return input;
+  };
+
+  let first: HTMLInputElement;
+  if (mode === 'post') {
+    first = addField('slug', 'post', 'my-new-post');
+  } else if (mode === 'series') {
+    first = addField('series', 'series', 'writeups');
+    addField('article', 'article', 'ctf-2026');
+    addField('lang', 'lang', 'en');
+  } else {
+    first = addField('article', 'article', 'my-article');
+    addField('lang', 'lang', 'en');
+  }
+  appendNodes(form, fields);
+
+  const actions = el('div', 'ed-new-actions');
+  const create = button(`create ${mode}`, 'comments-action is-primary');
+  create.addEventListener('click', submit);
+  const cancel = button('cancel', 'comments-action');
+  cancel.addEventListener('click', () => {
+    state.createMode = null;
+    for (const card of root.querySelectorAll<HTMLElement>('.ed-new-card')) card.classList.remove('is-active');
+    paintCreateForm(root, state);
+  });
+  appendNodes(actions, create, cancel);
+  appendNodes(form, actions);
+  first.focus();
 }
 
 function paintFileList(root: HTMLElement, state: EditorState) {
@@ -289,42 +355,90 @@ function paintFileList(root: HTMLElement, state: EditorState) {
   const query = state.filter.trim().toLowerCase();
   const files = state.files.filter((item) => !query || item.path.toLowerCase().includes(query));
   if (!files.length) {
-    appendNodes(list, el('p', 'admin-file-empty', state.loading ? 'Loading...' : query ? 'No matches.' : 'No editable files.'));
+    appendNodes(list, el('p', 'ed-file-empty', state.loading ? 'Loading...' : query ? 'No matches.' : 'No editable files.'));
     return;
   }
 
   for (const file of files) {
-    const row = button('', `admin-file${file.kind === 'article' ? ' is-article' : ''}${state.current?.path === file.path ? ' is-active' : ''}`);
+    const row = button('', `ed-file${file.kind === 'article' ? ' is-article' : ''}`);
     row.title = file.path;
     appendNodes(row, el('span', 'kind', file.kind), el('span', 'slug', file.slug));
-    row.addEventListener('click', () => {
-      if (state.current?.path === file.path) return;
-      if (!confirmDiscard(state)) return;
-      void loadFile(root, state, file.path);
-    });
+    row.addEventListener('click', () => void loadFile(root, state, file.path));
     appendNodes(list, row);
   }
 }
 
-function renderEditPane(root: HTMLElement, state: EditorState) {
-  const pane = el('section', 'admin-panel admin-work');
-  const title = panelTitle('source');
-  const dirty = el('span', 'admin-dirty', '● unsaved');
+/* ---- editor view ---- */
+
+function renderEditor(root: HTMLElement, state: EditorState) {
+  const screen = el('div', 'ed-editor');
+
+  const toolbar = el('div', 'ed-toolbar');
+
+  const back = button('← files', 'comments-action');
+  back.addEventListener('click', () => {
+    if (!confirmDiscard(state)) return;
+    closeEditor(root, state);
+  });
+  appendNodes(toolbar, back);
+
+  const info = el('div', 'ed-toolbar-file');
+  appendNodes(info, el('span', 'ed-path', state.current?.path ?? ''));
+  const dirty = el('span', 'ed-dirty', '● unsaved');
   dirty.hidden = !state.dirty;
   ui.dirty = dirty;
-  appendNodes(title, dirty);
-  appendNodes(pane, title);
+  appendNodes(info, dirty);
+  appendNodes(toolbar, info);
 
-  if (!state.current) {
-    appendNodes(pane, el('p', 'fold-note', state.loading ? 'Loading...' : 'Select a file on the left or create a new one.'));
-    return pane;
+  const counts = el('span', 'ed-counts');
+  ui.counts = counts;
+  updateCounts(state);
+  appendNodes(toolbar, counts);
+
+  const actions = el('div', 'ed-toolbar-actions');
+  if (state.current?.url) {
+    const open = el('a', 'comments-link', 'github');
+    open.href = state.current.url;
+    open.target = '_blank';
+    open.rel = 'noopener noreferrer';
+    appendNodes(actions, open);
   }
+  if (state.current?.sha) {
+    const reload = button('reload', 'comments-action');
+    reload.disabled = state.busy;
+    reload.title = 'reload from GitHub, ignoring the saved draft';
+    reload.addEventListener('click', () => {
+      if (!state.current) return;
+      if (state.dirty && !window.confirm('Discard unsaved changes and reload from GitHub?')) return;
+      void loadFile(root, state, state.current.path, { ignoreDraft: true });
+    });
+    appendNodes(actions, reload);
+  }
+  const save = button('save draft', 'comments-action');
+  save.disabled = state.busy;
+  save.title = 'ctrl/cmd+s';
+  save.addEventListener('click', () => void saveDraft(root, state));
+  ui.saveButton = save;
+  const publish = button('publish', 'comments-action is-primary');
+  publish.disabled = state.busy;
+  publish.title = 'commit to GitHub';
+  publish.addEventListener('click', () => void publishFile(root, state));
+  appendNodes(actions, save, publish);
+  appendNodes(toolbar, actions);
+  appendNodes(screen, toolbar);
 
-  appendNodes(pane, el('p', 'admin-path', state.current.path));
-  appendNodes(pane, renderMetadata(root, state));
+  const status = el('p', 'ed-status');
+  status.setAttribute('aria-live', 'polite');
+  ui.status = status;
+  paintStatus(state);
+  appendNodes(screen, status);
 
+  const split = el('div', 'ed-split');
+
+  const rawPane = el('section', 'ed-pane');
+  appendNodes(rawPane, el('div', 'ed-pane-head', 'raw'));
   const textarea = document.createElement('textarea');
-  textarea.className = 'admin-source';
+  textarea.className = 'ed-source';
   textarea.spellcheck = false;
   textarea.value = state.content;
   textarea.addEventListener('input', () => handleEdit(root, state, textarea.value));
@@ -337,132 +451,62 @@ function renderEditPane(root: HTMLElement, state: EditorState) {
     }
   });
   ui.textarea = textarea;
-  appendNodes(pane, textarea);
+  appendNodes(rawPane, textarea);
 
-  const foot = el('div', 'admin-editor-foot');
-  const counts = el('span', 'admin-counts');
-  ui.counts = counts;
-  updateCounts(state);
-
-  const actions = el('div', 'admin-editor-actions');
-  const save = button('save draft', 'comments-action');
-  save.disabled = state.busy;
-  save.title = 'ctrl/cmd+s';
-  save.addEventListener('click', () => void saveDraft(root, state));
-  ui.saveButton = save;
-
-  const preview = button('preview', 'comments-action');
-  preview.disabled = state.busy;
-  preview.title = 'ctrl/cmd+enter';
-  preview.addEventListener('click', () => void refreshPreview(root, state));
-  ui.previewButton = preview;
-
-  const publish = button('publish', 'comments-action is-primary');
-  publish.disabled = state.busy;
-  publish.title = 'commit to GitHub';
-  publish.addEventListener('click', () => void publishFile(root, state));
-
-  appendNodes(actions, save, preview, publish);
-  appendNodes(foot, counts, actions);
-  appendNodes(pane, foot);
-  return pane;
-}
-
-function renderMetadata(root: HTMLElement, state: EditorState) {
-  const fields = el('div', 'admin-meta-grid');
-  const article = state.current?.kind === 'article';
-  const names = article
-    ? ['title', 'description', 'category', 'tags', 'publishedAt', 'lang']
-    : ['title', 'tags', 'publishedAt', 'lang'];
-
-  for (const name of names) {
-    const label = document.createElement('label');
-    label.className = 'admin-field';
-    appendNodes(label, el('span', undefined, name));
-    const input = document.createElement('input');
-    input.className = 'admin-input';
-    input.value = frontmatterValue(state.content, name);
-    input.addEventListener('change', () => {
-      state.content = setFrontmatterValue(state.content, name, input.value, name === 'tags');
-      if (state.current) state.current.content = state.content;
-      state.dirty = true;
-      render(root, state);
-      scheduleAutosave(root, state);
-      schedulePreview(root, state);
-    });
-    appendNodes(label, input);
-    appendNodes(fields, label);
-  }
-  return fields;
-}
-
-function renderPreviewPane(root: HTMLElement, state: EditorState) {
-  const pane = el('section', 'admin-panel admin-preview-panel');
-  appendNodes(pane, panelTitle('preview'));
-
-  if (!state.current) {
-    appendNodes(pane, el('p', 'fold-note', 'Select or create a file.'));
-    return pane;
-  }
-
-  const top = el('div', 'admin-preview-tools');
-
-  const auto = button(`auto: ${state.autoPreview ? 'on' : 'off'}`, `comments-action admin-toggle${state.autoPreview ? ' is-on' : ''}`);
-  auto.setAttribute('aria-pressed', String(state.autoPreview));
-  auto.title = 'render the preview automatically while typing';
-  auto.addEventListener('click', () => {
-    state.autoPreview = !state.autoPreview;
-    persistAutoPreview(state.autoPreview);
-    auto.textContent = `auto: ${state.autoPreview ? 'on' : 'off'}`;
-    auto.classList.toggle('is-on', state.autoPreview);
-    auto.setAttribute('aria-pressed', String(state.autoPreview));
-    if (state.autoPreview) void refreshPreview(root, state, { auto: true });
-    else paintPreview(state);
-  });
-  appendNodes(top, auto);
-
-  if (state.current.url) {
-    const open = el('a', 'comments-link', 'github');
-    open.href = state.current.url;
-    open.target = '_blank';
-    open.rel = 'noopener noreferrer';
-    appendNodes(top, open);
-  }
-
-  const reload = button('reload', 'comments-action');
-  reload.disabled = state.busy || !state.current.sha;
-  reload.title = 'reload from GitHub, ignoring the saved draft';
-  reload.addEventListener('click', () => {
-    if (!state.current) return;
-    if (state.dirty && !window.confirm('Discard unsaved changes and reload from GitHub?')) return;
-    void loadFile(root, state, state.current.path, { ignoreDraft: true });
-  });
-  appendNodes(top, reload);
-  appendNodes(pane, top);
-
-  const preview = el('div', 'admin-preview prose');
+  const previewPane = el('section', 'ed-pane');
+  appendNodes(previewPane, el('div', 'ed-pane-head', 'preview'));
+  const preview = el('div', 'ed-preview prose');
   ui.preview = preview;
   paintPreview(state);
-  appendNodes(pane, preview);
-  return pane;
+  appendNodes(previewPane, preview);
+
+  appendNodes(split, rawPane, previewPane);
+  appendNodes(screen, split);
+  appendNodes(root, screen);
+}
+
+function closeEditor(root: HTMLElement, state: EditorState) {
+  clearTimers();
+  state.view = 'home';
+  state.current = null;
+  state.content = '';
+  state.previewHtml = '';
+  state.dirty = false;
+  setStatusValues(state, 'Create something new or open an existing file.');
+  render(root, state);
+  void refreshFileList(root, state);
+}
+
+async function refreshFileList(root: HTMLElement, state: EditorState) {
+  try {
+    const payload = await api<{ files: EditableFile[]; user: AuthUser }>('/api/admin/content');
+    state.files = payload.files;
+    state.user = payload.user;
+    if (state.view === 'home') render(root, state);
+  } catch {
+    // Keep the stale list; opening a file will surface real errors.
+  }
 }
 
 async function createNewFile(root: HTMLElement, state: EditorState) {
-  const path = pathForNew(state.createKind, state.createSlug);
+  const target = createTarget(state);
+  if (!target) {
+    setStatusValues(state, 'Fill in every field (no slashes or file extensions).', { danger: true });
+    return;
+  }
+  const path = pathForNew(target.kind, target.slug);
   if (!path) {
-    setStatusValues(state, 'Enter a valid path without a file extension.', { danger: true });
+    setStatusValues(state, 'Invalid slug — avoid leading dots, slashes and file extensions.', { danger: true });
     return;
   }
   if (state.files.some((file) => file.path === path)) {
-    setStatusValues(state, `${path} already exists — select it in the list.`, { danger: true });
+    setStatusValues(state, `${path} already exists — open it from the list below.`, { danger: true });
     return;
   }
-  if (!confirmDiscard(state)) return;
 
   clearTimers();
-  const slugValue = state.createSlug.trim();
-  let content = templateFor(state.createKind, slugValue);
-  let status = `New ${state.createKind}: ${path}`;
+  let content = templateFor(target.kind, target.slug);
+  let status = `New ${state.createMode}: ${path}`;
   try {
     const draftPayload = await api<{ draft: DraftPayload | null }>(`/api/admin/drafts?path=${encodeURIComponent(path)}`);
     if (draftPayload.draft) {
@@ -474,10 +518,10 @@ async function createNewFile(root: HTMLElement, state: EditorState) {
   }
 
   state.current = {
-    kind: state.createKind,
+    kind: target.kind,
     path,
     name: path.split('/').at(-1) ?? path,
-    slug: slugValue,
+    slug: target.slug,
     sha: '',
     size: 0,
     url: '',
@@ -486,10 +530,35 @@ async function createNewFile(root: HTMLElement, state: EditorState) {
   state.content = content;
   state.previewHtml = '';
   state.dirty = false;
+  state.view = 'editor';
+  state.createMode = null;
+  state.create = { post: '', series: '', article: '', lang: '' };
   setStatusValues(state, status);
   render(root, state);
   ui.textarea?.focus();
-  if (state.autoPreview) void refreshPreview(root, state, { auto: true });
+  void refreshPreview(root, state, { auto: true });
+}
+
+function createTarget(state: EditorState): { kind: ContentKind; slug: string } | null {
+  const clean = (value: string) => value.trim().replace(/^\/+|\/+$/g, '');
+  const post = clean(state.create.post);
+  const series = clean(state.create.series);
+  const article = clean(state.create.article);
+  const lang = clean(state.create.lang) || 'en';
+  const simple = (value: string) => Boolean(value) && !value.includes('/');
+
+  switch (state.createMode) {
+    case 'post':
+      return simple(post) ? { kind: 'post', slug: post } : null;
+    case 'series':
+      return simple(series) && simple(article) && simple(lang)
+        ? { kind: 'article', slug: `${series}/${article}/${lang}` }
+        : null;
+    case 'article':
+      return simple(article) && simple(lang) ? { kind: 'article', slug: `${article}/${lang}` } : null;
+    default:
+      return null;
+  }
 }
 
 async function loadFile(root: HTMLElement, state: EditorState, path: string, options: { ignoreDraft?: boolean } = {}) {
@@ -512,9 +581,10 @@ async function loadFile(root: HTMLElement, state: EditorState, path: string, opt
     state.previewHtml = '';
     state.user = payload.user;
     state.dirty = false;
+    state.view = 'editor';
     setStatusValues(state, status);
   });
-  if (state.autoPreview && state.current?.path === path) void refreshPreview(root, state, { auto: true });
+  if (state.current?.path === path) void refreshPreview(root, state, { auto: true });
 }
 
 async function saveDraft(root: HTMLElement, state: EditorState, options: { auto?: boolean } = {}) {
@@ -547,10 +617,7 @@ async function saveDraft(root: HTMLElement, state: EditorState, options: { auto?
 async function refreshPreview(root: HTMLElement, state: EditorState, options: { auto?: boolean } = {}) {
   if (!state.current) return;
   const seq = ++previewSeq;
-  if (!options.auto) {
-    setStatusValues(state, 'Rendering preview...');
-    if (ui.previewButton) ui.previewButton.disabled = true;
-  }
+  if (!options.auto) setStatusValues(state, 'Rendering preview...');
   try {
     const payload = await api<{ html: string }>('/api/admin/preview', {
       method: 'POST',
@@ -563,8 +630,6 @@ async function refreshPreview(root: HTMLElement, state: EditorState, options: { 
     if (!options.auto) setStatusValues(state, 'Preview refreshed.');
   } catch (error) {
     if (seq === previewSeq) applyError(root, state, error);
-  } finally {
-    if (ui.previewButton) ui.previewButton.disabled = false;
   }
 }
 
@@ -632,9 +697,8 @@ function scheduleAutosave(root: HTMLElement, state: EditorState) {
 }
 
 function schedulePreview(root: HTMLElement, state: EditorState) {
-  if (!state.autoPreview) return;
   window.clearTimeout(previewTimer);
-  previewTimer = window.setTimeout(() => void refreshPreview(root, state, { auto: true }), AUTOPREVIEW_DELAY);
+  previewTimer = window.setTimeout(() => void refreshPreview(root, state, { auto: true }), PREVIEW_DELAY);
 }
 
 function clearTimers() {
@@ -688,9 +752,7 @@ function paintPreview(state: EditorState) {
     node.innerHTML = state.previewHtml;
     return;
   }
-  node.textContent = state.autoPreview
-    ? 'Preview renders automatically after you edit.'
-    : 'Press preview (or ctrl/cmd+enter) to render.';
+  node.textContent = 'Preview renders as you type.';
 }
 
 function updateCounts(state: EditorState) {
@@ -707,9 +769,9 @@ function resetUi() {
   ui.counts = null;
   ui.preview = null;
   ui.fileList = null;
+  ui.createForm = null;
   ui.textarea = null;
   ui.saveButton = null;
-  ui.previewButton = null;
 }
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
@@ -739,58 +801,6 @@ function templateFor(kind: ContentKind, slug: string) {
 
 function isSafePathSegment(segment: string) {
   return Boolean(segment) && !segment.startsWith('.') && !segment.includes('\\') && !/[\u0000-\u001f]/u.test(segment);
-}
-
-function frontmatterValue(content: string, key: string) {
-  const fm = readFrontmatter(content);
-  const value = fm.values.get(key) ?? '';
-  if (key === 'tags') return value.replace(/^\[/, '').replace(/\]$/, '');
-  return value.replace(/^["']|["']$/g, '');
-}
-
-function setFrontmatterValue(content: string, key: string, value: string, isList = false) {
-  const fm = readFrontmatter(content);
-  const serialized = isList
-    ? `[${value.split(',').map((item) => item.trim()).filter(Boolean).join(', ')}]`
-    : value && /[:#\n]/u.test(value)
-      ? JSON.stringify(value)
-      : value;
-  fm.values.set(key, serialized);
-  const lines = [...fm.values.entries()].map(([name, val]) => `${name}: ${val}`);
-  return `---\n${lines.join('\n')}\n---\n${fm.body}`;
-}
-
-function readFrontmatter(content: string) {
-  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/u);
-  const values = new Map<string, string>();
-  if (!match) return { values, body: `\n${content}` };
-
-  for (const line of match[1].split('\n')) {
-    const [key, ...rest] = line.split(':');
-    if (key?.trim()) values.set(key.trim(), rest.join(':').trim());
-  }
-  return { values, body: match[2] };
-}
-
-function readAutoPreview() {
-  try {
-    return window.localStorage.getItem(AUTOPREVIEW_KEY) !== 'off';
-  } catch {
-    return true;
-  }
-}
-
-function persistAutoPreview(value: boolean) {
-  try {
-    window.localStorage.setItem(AUTOPREVIEW_KEY, value ? 'on' : 'off');
-  } catch {
-    // Local storage can be unavailable in private or embedded contexts.
-  }
-}
-
-function panelTitle(text: string) {
-  const title = el('div', 'admin-panel-title', text);
-  return title;
 }
 
 function statusNode(text: string, danger = false) {

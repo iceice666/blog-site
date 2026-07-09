@@ -1,34 +1,60 @@
 ---
 export const prerender = false;
-import Shell from '../../layouts/Shell.astro';
+import '../../styles/global.css';
+import { author, site } from '../../../config';
 ---
 
-<Shell
-  title="Editor | Brian Duan"
-  activeKey="feed"
-  extraWindow={{ label: 'admin/edit' }}
-  paneTitle="admin-editor.ts"
-  description="Private editor for blog posts and articles."
-  wide
->
-  <Fragment slot="footer-hints">
-    <span>C-s save draft</span>
-    <span>C-enter preview</span>
-    <span>tab indents</span>
-    <span>autosave on idle</span>
-  </Fragment>
-
-  <section class="admin-editor" data-admin-editor>
-    <div class="admin-editor-head">
-      <div>
-        <h1>Editor</h1>
-        <p class="admin-editor-sub">Loading GitHub session...</p>
-      </div>
-      <a class="comments-action" href="/api/auth/github/start?returnTo=/admin/edit">login</a>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/png" href={author.avatar} />
+    <title>Editor | {site.title}</title>
+    <script is:inline>
+      // Inline so the saved theme applies before first paint.
+      try {
+        var savedTheme = window.localStorage.getItem('blog:theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+      } catch {}
+    </script>
+  </head>
+  <body class="ed-body">
+    <div class="ed-app">
+      <header class="ed-topbar">
+        <a class="ed-brand" href="/">&larr; blog</a>
+        <span class="ed-topbar-label">editor</span>
+        <div class="ed-topbar-right">
+          <span data-editor-user></span>
+          <button id="theme-toggle" class="chip" type="button" aria-label="toggle color theme">theme</button>
+        </div>
+      </header>
+      <main class="ed-main" data-admin-editor>
+        <div class="ed-home"><p class="fold-note">Loading editor...</p></div>
+      </main>
     </div>
-  </section>
 
-  <script>
-    import '../../scripts/admin-editor';
-  </script>
-</Shell>
+    <script>
+      import '../../scripts/admin-editor';
+
+      (function () {
+        const root = document.documentElement;
+        const btn = document.getElementById('theme-toggle');
+        btn?.addEventListener('click', function () {
+          const current = root.getAttribute('data-theme');
+          const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+          const effectiveIsDark = current ? current === 'dark' : prefersDark;
+          const next = effectiveIsDark ? 'light' : 'dark';
+          root.setAttribute('data-theme', next);
+          try {
+            window.localStorage.setItem('blog:theme', next);
+          } catch {
+            // Local storage can be unavailable in private or embedded contexts.
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

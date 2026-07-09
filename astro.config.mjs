@@ -5,7 +5,7 @@ import { markdownProcessor } from './src/lib/markdown.ts';
 
 export default defineConfig({
   output: 'server',
-  adapter: cloudflare(),
+  adapter: cloudflare({ prerenderEnvironment: 'node' }),
   integrations: [mdx()],
   markdown: {
     syntaxHighlight: false,

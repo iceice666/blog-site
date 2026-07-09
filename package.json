@@ -10,11 +10,11 @@
     "check": "wrangler types && astro check"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.1.1",
+    "@astrojs/cloudflare": "^14.1.2",
     "@astrojs/markdown-remark": "^7.2.1",
     "@astrojs/mdx": "^7.0.2",
     "@shikijs/rehype": "^4.3.1",
-    "astro": "^7.0.6",
+    "astro": "^7.0.7",
     "shiki": "^4.3.1"
   },
   "devDependencies": {

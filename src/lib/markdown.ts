@@ -1,5 +1,7 @@
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import { unified, type MarkdownRenderer, type RehypePlugin, type RemarkPlugin } from '@astrojs/markdown-remark';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 import { createHighlighter, createJavaScriptRegexEngine, type BundledLanguage, type ShikiTransformer } from 'shiki';
 
 type MarkdownNode = {
@@ -186,9 +188,10 @@ export const highlightCode = () => {
 };
 
 export const markdownProcessor = unified({
-  remarkPlugins: [remarkCollapsibleAside],
+  remarkPlugins: [remarkMath, remarkCollapsibleAside],
   rehypePlugins: [
     rewriteInternalLinks,
+    rehypeKatex,
     labelCodeLang,
     highlightCode,
     wrapTables,

@@ -275,6 +275,7 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 .prose pre[data-lang="shell"] { border-left-color: var(--danger); }
 .prose pre[data-lang="shell"]::before { background: var(--danger); color: var(--bg); }
 .prose :not(pre) > code { white-space: normal; }
+.prose .katex-display { overflow-x: auto; overflow-y: hidden; padding-bottom: 2px; }
 
 .prose .table-scroll { overflow-x: auto; margin: 4px 0 22px; }
 .prose .table-scroll table { margin: 0; }

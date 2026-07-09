@@ -298,8 +298,8 @@ export async function getBlogStats(): Promise<BlogStats> {
 }
 
 export const NAV_ITEMS = [
-  { key: 'feed', label: 'feed', href: '/', windowIndex: 1 },
-  { key: 'about', label: 'about', href: '/about', windowIndex: 2 },
+  { key: 'about', label: 'about', href: '/', windowIndex: 1 },
+  { key: 'feed', label: 'feed', href: '/feed', windowIndex: 2 },
   { key: 'friends', label: 'friends', href: '/friends', windowIndex: 3 },
   { key: 'archive', label: 'archive', href: '/archive', windowIndex: 4 },
   { key: 'typography', label: 'type', href: '/typography', windowIndex: 5 },

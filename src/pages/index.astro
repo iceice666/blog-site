@@ -1,82 +1,19 @@
 ---
 export const prerender = true;
-import Shell from '../layouts/Shell.astro';
-import ViewCount from '../components/ViewCount.astro';
-import { getFeedItems, type FeedItem } from '../lib/content';
+import { getCollection } from 'astro:content';
+import ArticlePage from '../components/ArticlePage.astro';
+import { DEFAULT_ARTICLE_LANG, getArticleAlternates } from '../lib/content';
 
-const items = await getFeedItems();
+const articles = await getCollection('articles');
+const entry = articles.find((item) => item.id === `about/${DEFAULT_ARTICLE_LANG}`);
 
-type ArticleFeedItem = FeedItem & { kind: 'ARTICLE'; href: string };
-
-function isLongFormArticle(item: FeedItem): item is ArticleFeedItem {
-  return item.kind === 'ARTICLE' && item.href?.startsWith('/articles/') === true;
+if (!entry) {
+  throw new Error(`Missing about/${DEFAULT_ARTICLE_LANG} article for the home page.`);
 }
 
-const promotedArticle = items.find(isLongFormArticle);
-const feedItems = promotedArticle ? items.filter((item) => item.id !== promotedArticle.id) : items;
-const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
+const langAlternates = (await getArticleAlternates(entry.id)).map((item) =>
+  item.isCurrent ? { ...item, href: '/' } : item
+);
 ---
 
-<Shell title="Feed | Brian Duan" activeKey="feed" paneTitle={`feed.md (${displayedItemCount} entries)`}>
-  {
-    promotedArticle && (
-      <section
-        class="article-spotlight"
-        aria-labelledby="spotlight-title"
-        lang={promotedArticle.lang}
-        data-vim-target
-        data-vim-open={promotedArticle.href}
-      >
-        <div class="spot-kicker">LATEST ARTICLE</div>
-        <div class="meta">
-          <span class="pill">ARTICLE</span>
-          <span class="category">{promotedArticle.category}</span>
-          <span>{promotedArticle.lang}</span>
-          <span>{promotedArticle.publishedAt}</span>
-        </div>
-        <h1 id="spotlight-title">
-          <a href={promotedArticle.href}>{promotedArticle.title}</a>
-        </h1>
-        <p class="desc">{promotedArticle.description}</p>
-        <p class="stats">
-          {promotedArticle.units} words · {promotedArticle.readMin} min read
-          <ViewCount path={promotedArticle.href} />
-        </p>
-        <p class="tags">{promotedArticle.tags.map((t) => `#${t}`).join(' ')}</p>
-      </section>
-    )
-  }
-
-  {
-    feedItems.map((item) =>
-      item.kind === 'ARTICLE' ? (
-        <article class="entry-w" lang={item.lang} data-vim-target data-vim-open={item.href}>
-          <div class="meta">
-            <span class="pill">ARTICLE</span>
-            <span class="category">{item.category}</span>
-            <span>{item.lang}</span>
-            <span>{item.publishedAt}</span>
-          </div>
-          <h2>
-            <a href={item.href}>{item.title}</a>
-          </h2>
-          <p class="desc">{item.description}</p>
-          <p class="stats">
-            {item.units} words · {item.readMin} min read
-            {item.href && <ViewCount path={item.href} />}
-          </p>
-          <p class="tags">{item.tags.map((t) => `#${t}`).join(' ')}</p>
-        </article>
-      ) : (
-        <article class="entry-w is-post" lang={item.lang} data-vim-target data-vim-open={item.href ?? undefined}>
-          <div class="meta">
-            <span class="pill">POST</span>
-            <span>{item.publishedAt}</span>
-            {item.href && <ViewCount path={item.href} prefix="" />}
-          </div>
-          <div class="prose" lang={item.lang} set:html={item.bodyHtml} />
-        </article>
-      )
-    )
-  }
-</Shell>
+<ArticlePage entry={entry} activeKey="about" paneTitle={entry.id + '.mdx'} viewPath="/" langAlternates={langAlternates} />

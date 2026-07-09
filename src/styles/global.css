@@ -182,7 +182,7 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
   }
 }
 
-/* ---- homepage spotlight ---- */
+/* ---- feed spotlight ---- */
 .article-spotlight { border: 1px solid var(--border); border-left: 3px solid var(--accent); background: var(--surface); padding: 16px 18px; margin: 0 0 22px; }
 .article-spotlight .spot-kicker { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
 .article-spotlight .meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }

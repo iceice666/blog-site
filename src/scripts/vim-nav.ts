@@ -21,15 +21,18 @@ const EDIT_COMMANDS = new Set(['e', 'ed', 'edi', 'edit']);
 const HELP_COMMANDS = new Set(['?', 'help']);
 const NAV_BY_KEY: Record<string, string> = {
   '1': '/',
-  '2': '/about',
+  '2': '/feed',
   '3': '/friends',
   '4': '/archive',
+  '5': '/typography',
 };
 const COMMAND_ROUTES: Record<string, string> = {
-  feed: '/',
-  about: '/about',
+  about: '/',
+  feed: '/feed',
   friends: '/friends',
   archive: '/archive',
+  typography: '/typography',
+  type: '/typography',
 };
 const HELP_SECTIONS = [
   {
@@ -41,7 +44,7 @@ const HELP_SECTIONS = [
       ['h / l', 'browser back / forward'],
       ['f / F', 'hint target / new tab'],
       ['o / Enter', 'open target'],
-      ['1-4', 'switch window'],
+      ['1-5', 'switch window'],
     ],
   },
   {
@@ -60,7 +63,7 @@ const HELP_SECTIONS = [
       [':login', 'start GitHub OAuth'],
       [':logout', 'clear GitHub OAuth session'],
       [':sidebar / :outline', 'toggle side panes'],
-      [':q', 'back or feed'],
+      [':q', 'back or home'],
     ],
   },
 ] as const;

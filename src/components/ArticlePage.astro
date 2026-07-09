@@ -1,0 +1,79 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Shell from '../layouts/Shell.astro';
+import Comments from './Comments.astro';
+import ViewCount from './ViewCount.astro';
+import DocOutline from './DocOutline.astro';
+import {
+  countUnits,
+  getArticleAlternates,
+  getArticleCommentId,
+  getArticleInfo,
+  isAboutArticleId,
+  readingTime,
+  stripMarkdown,
+  type ArticleAlternate,
+} from '../lib/content';
+
+type ActiveKey = 'feed' | 'about' | 'friends' | 'archive' | 'typography';
+
+interface Props {
+  entry: CollectionEntry<'articles'>;
+  activeKey?: ActiveKey;
+  extraWindow?: { label: string };
+  paneTitle?: string;
+  viewPath?: string;
+  langAlternates?: ArticleAlternate[];
+}
+
+const {
+  entry,
+  activeKey: activeKeyProp,
+  extraWindow,
+  paneTitle = `${entry.id}.mdx`,
+  viewPath,
+  langAlternates: langAlternatesProp,
+} = Astro.props;
+
+const { Content, headings } = await render(entry);
+const outlineHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+
+const article = getArticleInfo(entry.id);
+const lang = article.lang;
+const langAlternates = langAlternatesProp ?? (await getArticleAlternates(entry.id));
+const units = countUnits(stripMarkdown(entry.body ?? ''));
+const readMin = readingTime(units);
+const isAbout = isAboutArticleId(entry.id);
+const activeKey = activeKeyProp ?? (isAbout ? 'about' : 'feed');
+const pagePath = viewPath ?? article.href;
+---
+
+<Shell
+  title={`${entry.data.title} | Brian Duan`}
+  activeKey={activeKey}
+  extraWindow={extraWindow}
+  paneTitle={paneTitle}
+  langAlternates={langAlternates}
+  description={entry.data.description}
+  lang={lang}
+  ogType="article"
+>
+  {outlineHeadings.length > 0 && <DocOutline slot="outline" headings={outlineHeadings} />}
+  <div class="art-meta">
+    <span class="pill">ARTICLE</span>
+    <span class="category">{entry.data.category}</span>
+    <span>{lang}</span>
+    <span>{entry.data.publishedAt}</span>
+  </div>
+  <h1>{entry.data.title}</h1>
+  <p class="art-desc">{entry.data.description}</p>
+  <p class="art-stats">{units} words · {readMin} min read<ViewCount path={pagePath} /></p>
+  <p class="art-tags">{entry.data.tags.map((t) => `#${t}`).join(' ')}</p>
+  <hr class="art-rule" />
+
+  <div class="prose" lang={lang}>
+    <Content />
+  </div>
+
+  <Comments entryType="article" entryId={getArticleCommentId(entry.id)} title={entry.data.title} path={pagePath} />
+</Shell>

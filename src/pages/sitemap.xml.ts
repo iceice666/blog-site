@@ -14,7 +14,7 @@ export const GET: APIRoute = async () => {
     if (!existing || item.publishedAt > existing) lastmodByPath.set(item.href, item.publishedAt);
   }
 
-  const paths = [...new Set(['/', '/archive', '/friends', ...items.flatMap((item) => (item.href ? [item.href] : []))])];
+  const paths = [...new Set(['/', '/feed', '/archive', '/friends', ...items.flatMap((item) => (item.href ? [item.href] : []))])];
 
   const entries = paths
     .map((path) => {

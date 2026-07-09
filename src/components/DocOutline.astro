@@ -1,0 +1,26 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+}
+const { headings } = Astro.props;
+---
+
+<aside class="doc-outline" aria-label="On this page">
+  <div class="pane-title">outline</div>
+  <nav class="doc-outline-body">
+    {
+      headings.map((h) => (
+        <a
+          class={`doc-outline-link depth-${h.depth}`}
+          href={`#${h.slug}`}
+          data-doc-outline-link={h.slug}
+        >
+          {h.text}
+        </a>
+      ))
+    }
+  </nav>
+</aside>
+<script>
+  import "../scripts/doc-outline";
+</script>

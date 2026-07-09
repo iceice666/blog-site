@@ -4,6 +4,7 @@ import { getCollection, render } from 'astro:content';
 import Shell from '../../layouts/Shell.astro';
 import Comments from '../../components/Comments.astro';
 import ViewCount from '../../components/ViewCount.astro';
+import DocOutline from '../../components/DocOutline.astro';
 import {
   countUnits,
   getArticleAlternates,
@@ -22,7 +23,8 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
+const outlineHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 
 const article = getArticleInfo(entry.id);
 const lang = article.lang;
@@ -41,6 +43,7 @@ const readMin = readingTime(units);
   lang={lang}
   ogType="article"
 >
+  {outlineHeadings.length > 0 && <DocOutline slot="outline" headings={outlineHeadings} />}
   <div class="art-meta">
     <span class="pill">ARTICLE</span>
     <span class="category">{entry.data.category}</span>

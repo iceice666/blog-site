@@ -40,6 +40,7 @@ const posts = defineCollection({
     tags: z.array(z.string()).default([]),
     publishedAt: dateString,
     lang: z.string().optional(),
+    article: z.string().optional(),
   }),
 });
 

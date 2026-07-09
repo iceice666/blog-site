@@ -248,13 +248,16 @@ function renderFilePane(root: HTMLElement, state: EditorState) {
     option.selected = state.createKind === value;
     kind.appendChild(option);
   }
-  kind.addEventListener('change', () => {
-    state.createKind = kind.value === 'article' ? 'article' : 'post';
-  });
-
   const slug = document.createElement('input');
   slug.className = 'admin-input';
-  slug.placeholder = 'new slug';
+  const syncSlugPlaceholder = () => {
+    slug.placeholder = state.createKind === 'article' ? 'article/lang or series/article/lang' : 'new slug';
+  };
+  syncSlugPlaceholder();
+  kind.addEventListener('change', () => {
+    state.createKind = kind.value === 'article' ? 'article' : 'post';
+    syncSlugPlaceholder();
+  });
   slug.value = state.createSlug;
   slug.addEventListener('input', () => {
     state.createSlug = slug.value;
@@ -447,7 +450,7 @@ function renderPreviewPane(root: HTMLElement, state: EditorState) {
 async function createNewFile(root: HTMLElement, state: EditorState) {
   const path = pathForNew(state.createKind, state.createSlug);
   if (!path) {
-    setStatusValues(state, 'Enter a slug without a file extension.', { danger: true });
+    setStatusValues(state, 'Enter a valid path without a file extension.', { danger: true });
     return;
   }
   if (state.files.some((file) => file.path === path)) {
@@ -718,16 +721,24 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
 
 function pathForNew(kind: ContentKind, slug: string) {
   const clean = slug.trim();
-  if (!clean || clean.includes('/') || clean.includes('\\') || clean.startsWith('.') || /\.[A-Za-z0-9]+$/u.test(clean)) return null;
+  const segments = clean.split('/');
+  if (!clean || segments.some((part) => !isSafePathSegment(part)) || /\.[A-Za-z0-9]+$/u.test(clean)) return null;
+  if (kind === 'post' && segments.length !== 1) return null;
+  if (kind === 'article' && segments.length !== 2 && segments.length !== 3) return null;
   return kind === 'post' ? `content/posts/${clean}.md` : `content/articles/${clean}.mdx`;
 }
 
 function templateFor(kind: ContentKind, slug: string) {
   const today = new Date().toISOString().slice(0, 10);
+  const title = kind === 'article' ? (slug.split('/').at(-2) ?? slug) : slug;
   if (kind === 'post') {
-    return `---\ntitle: ${JSON.stringify(slug)}\npublishedAt: ${today}\ntags: []\n---\n\n`;
+    return `---\ntitle: ${JSON.stringify(title)}\npublishedAt: ${today}\ntags: []\n---\n\n`;
   }
-  return `---\ntitle: ${JSON.stringify(slug)}\ndescription: ""\ncategory: ""\ntags: []\npublishedAt: ${today}\n---\n\n`;
+  return `---\ntitle: ${JSON.stringify(title)}\ndescription: ""\ncategory: ""\ntags: []\npublishedAt: ${today}\n---\n\n`;
+}
+
+function isSafePathSegment(segment: string) {
+  return Boolean(segment) && !segment.startsWith('.') && !segment.includes('\\') && !/[\u0000-\u001f]/u.test(segment);
 }
 
 function frontmatterValue(content: string, key: string) {

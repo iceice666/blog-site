@@ -1,23 +1,130 @@
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 
-/** MDX filename (sans extension) -> public route slug. */
-export const ARTICLE_SLUGS: Record<string, string> = {
-  'nhnc-2026-writeups': 'nhnc-2026-writeups',
-  'about-me': 'about',
-  'about-me.zh-tw': 'about-zh-tw',
-};
+export const DEFAULT_ARTICLE_LANG = 'en';
+
+declare const __STANDALONE_ARTICLE_IDS__: string[];
+
+const standaloneArticleIds = new Set(__STANDALONE_ARTICLE_IDS__);
+for (const id of standaloneArticleIds) {
+  if (id.includes('/')) {
+    throw new Error(`Standalone marker must live at content/articles/<article>/.standalone, got ${id}/.standalone.`);
+  }
+}
+
+export interface ArticleInfo {
+  id: string;
+  series: string | null;
+  article: string;
+  lang: string;
+  translationKey: string;
+  routeSlug: string;
+  href: string;
+  isStandalone: boolean;
+}
+
+export interface ArticleAlternate {
+  lang: string;
+  href: string;
+  title: string;
+  isCurrent: boolean;
+}
+
+export function getArticleInfo(id: string): ArticleInfo {
+  const parts = id.split('/').filter(Boolean);
+  const lang = parts.at(-1);
+  const parents = parts.slice(0, -1);
+
+  if (!lang || parents.length < 1 || parents.length > 2) {
+    throw new Error(`Invalid article path "${id}". Use <article>/<lang>.mdx or <series>/<article>/<lang>.mdx.`);
+  }
+
+  for (const part of parts) assertArticlePathSegment(part, id);
+
+  if (parents.length === 1) {
+    const [article] = parents;
+    if (!standaloneArticleIds.has(article)) {
+      throw new Error(`Standalone article "${id}" needs content/articles/${article}/.standalone.`);
+    }
+    return buildArticleInfo({ id, series: null, article, lang });
+  }
+
+  const [series, article] = parents;
+  return buildArticleInfo({ id, series, article, lang });
+}
+
+export function isStandaloneArticleId(id: string) {
+  return getArticleInfo(id).isStandalone;
+}
 
 export function isAboutArticleId(id: string) {
-  return id === 'about-me' || id === 'about-me.zh-tw';
+  const article = getArticleInfo(id);
+  return article.isStandalone && article.article === 'about';
 }
 
 export function getArticleSlug(id: string) {
-  return ARTICLE_SLUGS[id] ?? id;
+  return getArticleInfo(id).routeSlug;
 }
 
 export function getArticleHref(id: string) {
-  const slug = getArticleSlug(id);
-  return isAboutArticleId(id) ? `/${slug}` : `/articles/${slug}/`;
+  return getArticleInfo(id).href;
+}
+
+export function getArticleCommentId(id: string) {
+  const article = getArticleInfo(id);
+  return `${article.translationKey.replaceAll('/', '__')}__${article.lang}`;
+}
+
+export async function getArticleAlternates(id: string): Promise<ArticleAlternate[]> {
+  const current = getArticleInfo(id);
+  const articles = await getCollection('articles');
+
+  return articles
+    .map((entry) => {
+      const article = getArticleInfo(entry.id);
+      if (article.translationKey !== current.translationKey) return null;
+      return {
+        lang: article.lang,
+        href: article.href,
+        title: entry.data.title,
+        isCurrent: entry.id === id,
+      };
+    })
+    .filter((item): item is ArticleAlternate => Boolean(item))
+    .sort((a, b) => langSortKey(a.lang).localeCompare(langSortKey(b.lang)));
+}
+
+function buildArticleInfo(input: { id: string; series: string | null; article: string; lang: string }): ArticleInfo {
+  const isStandalone = input.series === null;
+  const translationKey = input.series ? `${input.series}/${input.article}` : input.article;
+  const routeParts = isStandalone
+    ? [input.lang === DEFAULT_ARTICLE_LANG ? input.article : `${input.article}-${input.lang}`]
+    : input.lang === DEFAULT_ARTICLE_LANG
+      ? [input.series!, input.article]
+      : [input.series!, input.article, input.lang];
+  const routeSlug = routeParts.join('/');
+  const encodedRoute = routeParts.map(encodeURIComponent).join('/');
+  const href = isStandalone ? `/${encodedRoute}` : `/articles/${encodedRoute}/`;
+
+  return {
+    id: input.id,
+    series: input.series,
+    article: input.article,
+    lang: input.lang,
+    translationKey,
+    routeSlug,
+    href,
+    isStandalone,
+  };
+}
+
+function assertArticlePathSegment(part: string, id: string) {
+  if (!part || part.startsWith('.') || part.includes('\\') || /[\u0000-\u001f]/u.test(part)) {
+    throw new Error(`Invalid article path segment in "${id}".`);
+  }
+}
+
+function langSortKey(lang: string) {
+  return lang === DEFAULT_ARTICLE_LANG ? `0:${lang}` : `1:${lang}`;
 }
 
 export function getPostSlug(id: string) {
@@ -40,6 +147,8 @@ const LATIN_WORD_RE = /[A-Za-z0-9']+/g;
 
 export function inferLang(id: string, explicit?: string, body = '') {
   if (explicit) return explicit;
+  const pathLang = id.includes('/') ? id.split('/').at(-1) : null;
+  if (pathLang) return pathLang;
   if (id.includes('.zh-tw')) return 'zh-tw';
   return CJK_PRESENT_RE.test(body) ? 'zh-tw' : 'en';
 }
@@ -89,18 +198,23 @@ export interface FeedItem {
   isStub?: boolean;
 }
 
+export function getPostArticleStubHref(post: CollectionEntry<'posts'>, articles: CollectionEntry<'articles'>[]) {
+  const article = getPostArticleStubEntry(post, articles);
+  return article ? getArticleHref(article.id) : null;
+}
+
 export async function getFeedItems(): Promise<FeedItem[]> {
   const articles = await getCollection('articles');
   const posts = await getCollection('posts');
-  const articleIds = new Set(articles.map((a) => a.id));
 
   const articleItems: FeedItem[] = articles.map((entry) => {
-    const lang = inferLang(entry.id, entry.data.lang, entry.body ?? '');
+    const article = getArticleInfo(entry.id);
+    const lang = article.lang;
     const units = countUnits(stripMarkdown(entry.body ?? ''));
     return {
       kind: 'ARTICLE',
       id: entry.id,
-      href: getArticleHref(entry.id),
+      href: article.href,
       title: entry.data.title,
       description: entry.data.description,
       category: entry.data.category,
@@ -113,10 +227,9 @@ export async function getFeedItems(): Promise<FeedItem[]> {
   });
 
   const postItems: FeedItem[] = posts.map((entry) => {
-    // A post stub sharing an id with a real article (e.g. the nhnc-2026-writeups
-    // index stub) links through to that article instead of standing on its own.
-    const isStub = articleIds.has(entry.id);
-    const href = isStub ? getArticleHref(entry.id) : getPostHref(entry.id);
+    const stubArticle = getPostArticleStubEntry(entry, articles);
+    const isStub = Boolean(stubArticle);
+    const href = stubArticle ? getArticleHref(stubArticle.id) : getPostHref(entry.id);
     const units = countUnits(stripMarkdown(entry.body ?? ''));
     const { title: leadingTitle, rest: bodyHtml } = extractLeadingH1(entry.rendered?.html ?? '');
     return {
@@ -137,6 +250,35 @@ export async function getFeedItems(): Promise<FeedItem[]> {
   });
 
   return [...articleItems, ...postItems].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+function getPostArticleStubEntry(post: CollectionEntry<'posts'>, articles: CollectionEntry<'articles'>[]) {
+  const explicitArticle = post.data.article?.trim();
+  if (explicitArticle) {
+    const article = findArticleByReference(explicitArticle, articles);
+    if (!article) throw new Error(`Post "${post.id}" references unknown article "${explicitArticle}".`);
+    return article;
+  }
+
+  return articles.find((article) => article.id === post.id) ?? null;
+}
+
+function findArticleByReference(ref: string, articles: CollectionEntry<'articles'>[]) {
+  const normalized = normalizeArticleReference(ref);
+  const direct = articles.find((entry) => entry.id === normalized);
+  if (direct) return direct;
+
+  const byTranslationKey = articles.filter((entry) => getArticleInfo(entry.id).translationKey === normalized);
+  return byTranslationKey.find((entry) => getArticleInfo(entry.id).lang === DEFAULT_ARTICLE_LANG) ?? byTranslationKey[0] ?? null;
+}
+
+function normalizeArticleReference(ref: string) {
+  return ref
+    .trim()
+    .replace(/^content\/articles\//, '')
+    .replace(/^\/?articles\//, '')
+    .replace(/\.mdx$/u, '')
+    .replace(/\/$/u, '');
 }
 
 export interface BlogStats {

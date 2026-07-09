@@ -10,7 +10,7 @@ type MarkdownNode = {
 };
 
 const LEGACY_POST_ROUTES: Record<string, string> = {
-  'nhnc-2026-writeups': '/articles/nhnc-2026-writeups/',
+  'nhnc-2026-writeups': '/articles/writeups/nhnc-2026/',
 };
 
 /** Rewrite legacy content-authored /posts/<slug>/ links only when a post moved. */

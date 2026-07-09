@@ -3,13 +3,12 @@ export const prerender = true;
 import { getCollection, render } from 'astro:content';
 import Shell from '../../layouts/Shell.astro';
 import Comments from '../../components/Comments.astro';
-import { countUnits, getPostHref, getPostSlug, inferLang, readingTime, stripMarkdown } from '../../lib/content';
+import { countUnits, getPostArticleStubHref, getPostHref, getPostSlug, inferLang, readingTime, stripMarkdown } from '../../lib/content';
 
 export async function getStaticPaths() {
   const [posts, articles] = await Promise.all([getCollection('posts'), getCollection('articles')]);
-  const articleIds = new Set(articles.map((entry) => entry.id));
 
-  return posts.filter((entry) => !articleIds.has(entry.id)).map((entry) => {
+  return posts.filter((entry) => !getPostArticleStubHref(entry, articles)).map((entry) => {
     return { params: { slug: getPostSlug(entry.id) }, props: { entry } };
   });
 }

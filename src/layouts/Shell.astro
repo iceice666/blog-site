@@ -11,6 +11,12 @@ interface Props {
     extraWindow?: { label: string };
     paneTitle: string;
     langHref?: string | null;
+    langAlternates?: Array<{
+        lang: string;
+        href: string;
+        title?: string;
+        isCurrent?: boolean;
+    }>;
     description?: string;
     lang?: string;
     wide?: boolean;
@@ -22,6 +28,7 @@ const {
     extraWindow,
     paneTitle,
     langHref = null,
+    langAlternates = [],
     description = site.description,
     lang = "en",
     wide = false,
@@ -33,6 +40,9 @@ const ogImage = new URL(author.avatar, site.url).href;
 
 const stats = await getBlogStats();
 const github = await getGithubData();
+const langSwitch =
+    langAlternates.find((item) => !item.isCurrent) ??
+    (langHref ? { lang: "en/zh", href: langHref } : null);
 
 const extraWindowIndex =
     Math.max(...NAV_ITEMS.map((item) => item.windowIndex)) + 1;
@@ -46,6 +56,15 @@ const extraWindowIndex =
         <link rel="icon" type="image/png" href={author.avatar} />
         <link rel="apple-touch-icon" href={author.avatar} />
         <link rel="canonical" href={canonicalUrl} />
+        {
+            langAlternates.map((item) => (
+                <link
+                    rel="alternate"
+                    hreflang={item.lang}
+                    href={new URL(item.href, site.url).href}
+                />
+            ))
+        }
         <link
             rel="alternate"
             type="application/rss+xml"
@@ -126,13 +145,13 @@ const extraWindowIndex =
                         aria-label="toggle color theme">THEME</button
                     >
                     {
-                        langHref ? (
-                            <a href={langHref} class="chip">
-                                en/中
+                        langSwitch ? (
+                            <a href={langSwitch.href} class="chip">
+                                {langSwitch.lang}
                             </a>
                         ) : (
                             <span class="chip" aria-disabled="true">
-                                en/中
+                                {lang}
                             </span>
                         )
                     }

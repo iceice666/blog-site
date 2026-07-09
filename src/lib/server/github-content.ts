@@ -65,24 +65,23 @@ export function parseContentPath(path: string | null | undefined) {
   if (!match) throw new HttpError(400, 'Invalid content path.', 'bad_content_path');
 
   const folder = match[1];
-  const file = match[2];
+  const filePath = match[2];
   const kind: ContentKind = folder === 'posts' ? 'post' : 'article';
   const expectedExt = kind === 'post' ? '.md' : '.mdx';
 
-  if (
-    !file.endsWith(expectedExt) ||
-    file.includes('/') ||
-    file.includes('\\') ||
-    file.startsWith('.') ||
-    /[\u0000-\u001f]/u.test(file)
-  ) {
+  if (!filePath.endsWith(expectedExt) || filePath.includes('\\') || /[\u0000-\u001f]/u.test(filePath)) {
     throw new HttpError(400, 'Invalid content filename.', 'bad_content_filename');
   }
 
-  const slug = file.slice(0, -expectedExt.length);
-  if (!slug) throw new HttpError(400, 'Content slug is required.', 'bad_content_slug');
+  const slug = filePath.slice(0, -expectedExt.length);
+  const segments = slug.split('/');
+  const validArticleDepth = kind === 'article' && (segments.length === 2 || segments.length === 3);
+  const validPostDepth = kind === 'post' && segments.length === 1;
+  if (!slug || !segments.every(isSafePathSegment) || (!validPostDepth && !validArticleDepth)) {
+    throw new HttpError(400, 'Invalid content slug.', 'bad_content_slug');
+  }
 
-  return { path: value, kind, slug, name: file };
+  return { path: value, kind, slug, name: `${segments.at(-1)}${expectedExt}` };
 }
 
 export function contentPathForNew(kind: string | null | undefined, slug: string | null | undefined) {
@@ -90,14 +89,10 @@ export function contentPathForNew(kind: string | null | undefined, slug: string 
   if (!normalizedKind) throw new HttpError(400, 'Invalid content kind.', 'bad_content_kind');
 
   const cleanSlug = (slug ?? '').trim();
-  if (
-    !cleanSlug ||
-    cleanSlug.includes('/') ||
-    cleanSlug.includes('\\') ||
-    cleanSlug.startsWith('.') ||
-    /\.[A-Za-z0-9]+$/u.test(cleanSlug) ||
-    /[\u0000-\u001f]/u.test(cleanSlug)
-  ) {
+  const segments = cleanSlug.split('/');
+  const validArticleDepth = normalizedKind === 'article' && (segments.length === 2 || segments.length === 3);
+  const validPostDepth = normalizedKind === 'post' && segments.length === 1;
+  if (!cleanSlug || !segments.every(isSafePathSegment) || (!validPostDepth && !validArticleDepth) || /\.[A-Za-z0-9]+$/u.test(cleanSlug)) {
     throw new HttpError(400, 'Invalid slug.', 'bad_content_slug');
   }
 
@@ -191,11 +186,16 @@ export function draftKey(path: string) {
   return `admin:draft:${parseContentPath(path).path}`;
 }
 
-async function listDirectory(path: string, kind: ContentKind, ext: string) {
-  const files = await githubJson<GitHubContentFile[]>(`/repos/${repoPath()}/contents/${encodePath(path)}?ref=${encodeURIComponent(branch())}`);
-  return files
-    .filter((file) => file.type === 'file' && file.name.endsWith(ext))
-    .map((file) => toEditableFile(file, kind));
+async function listDirectory(path: string, kind: ContentKind, ext: string): Promise<EditableFile[]> {
+  const entries = await githubJson<GitHubContentFile[]>(`/repos/${repoPath()}/contents/${encodePath(path)}?ref=${encodeURIComponent(branch())}`);
+  const nested = await Promise.all(
+    entries.map(async (file): Promise<EditableFile[]> => {
+      if (file.type === 'dir') return listDirectory(file.path, kind, ext);
+      if (file.type === 'file' && file.name.endsWith(ext)) return [toEditableFile(file, kind)];
+      return [];
+    }),
+  );
+  return nested.flat();
 }
 
 async function getExistingSha(path: string) {
@@ -247,6 +247,10 @@ function toEditableFile(file: GitHubContentFile, kind: ContentKind): EditableFil
     size: file.size,
     url: file.html_url ?? '',
   };
+}
+
+function isSafePathSegment(segment: string) {
+  return Boolean(segment) && !segment.startsWith('.') && !segment.includes('\\') && !/[\u0000-\u001f]/u.test(segment);
 }
 
 function repoPath() {

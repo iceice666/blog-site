@@ -3,20 +3,29 @@ export const prerender = true;
 import { getCollection, render } from 'astro:content';
 import Shell from '../../layouts/Shell.astro';
 import Comments from '../../components/Comments.astro';
-import { countUnits, getArticleSlug, inferLang, isAboutArticleId, readingTime, stripMarkdown } from '../../lib/content';
+import {
+  countUnits,
+  getArticleAlternates,
+  getArticleCommentId,
+  getArticleInfo,
+  isStandaloneArticleId,
+  readingTime,
+  stripMarkdown,
+} from '../../lib/content';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
-  return articles.filter((entry) => !isAboutArticleId(entry.id)).map((entry) => {
-    return { params: { slug: getArticleSlug(entry.id) }, props: { entry } };
+  return articles.filter((entry) => !isStandaloneArticleId(entry.id)).map((entry) => {
+    return { params: { slug: getArticleInfo(entry.id).routeSlug }, props: { entry } };
   });
 }
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
-const slug = getArticleSlug(entry.id);
-const lang = inferLang(entry.id, entry.data.lang, entry.body ?? '');
+const article = getArticleInfo(entry.id);
+const lang = article.lang;
+const langAlternates = await getArticleAlternates(entry.id);
 const units = countUnits(stripMarkdown(entry.body ?? ''));
 const readMin = readingTime(units);
 ---
@@ -24,9 +33,10 @@ const readMin = readingTime(units);
 <Shell
   title={`${entry.data.title} | Brian Duan`}
   activeKey="feed"
-  extraWindow={{ label: `articles/${slug}` }}
+  extraWindow={{ label: `articles/${article.routeSlug}` }}
   paneTitle={`${entry.id}.mdx`}
   description={entry.data.description}
+  langAlternates={langAlternates}
   lang={lang}
   ogType="article"
 >
@@ -46,5 +56,5 @@ const readMin = readingTime(units);
     <Content />
   </div>
 
-  <Comments entryType="article" entryId={entry.id} title={entry.data.title} path={`/articles/${slug}/`} />
+  <Comments entryType="article" entryId={getArticleCommentId(entry.id)} title={entry.data.title} path={article.href} />
 </Shell>

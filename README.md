@@ -12,6 +12,7 @@ This repository contains:
 ## Development
 
 ```sh
+nix develop
 pnpm install
 pnpm dev      # astro dev at localhost:4321
 ```
@@ -19,6 +20,7 @@ pnpm dev      # astro dev at localhost:4321
 ## Build & deploy
 
 ```sh
+nix develop
 pnpm build    # wrangler types + astro build -> dist/
 pnpm preview  # build, then serve it locally through the real Workers runtime (wrangler dev)
 pnpm deploy   # build, then wrangler deploy

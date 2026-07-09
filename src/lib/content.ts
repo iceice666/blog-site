@@ -302,5 +302,4 @@ export const NAV_ITEMS = [
   { key: 'feed', label: 'feed', href: '/feed', windowIndex: 2 },
   { key: 'friends', label: 'friends', href: '/friends', windowIndex: 3 },
   { key: 'archive', label: 'archive', href: '/archive', windowIndex: 4 },
-  { key: 'typography', label: 'type', href: '/typography', windowIndex: 5 },
 ] as const;

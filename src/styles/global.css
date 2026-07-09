@@ -320,35 +320,6 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 .fold-note strong { color: var(--text); }
 .fold-note.is-danger { color: var(--danger); border-color: var(--danger); }
 
-
-/* ---- typography reference ---- */
-.type-sub { color: var(--text-muted); font-family: var(--font-prose-active); font-size: 14.5px; line-height: 1.7; margin: 0 0 26px; max-width: 66ch; }
-.type-section { margin: 0 0 30px; }
-.type-card-list { display: grid; gap: 10px; }
-.type-card { border: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 64%, transparent); padding: 13px 15px; }
-.type-card-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: var(--text-muted); font-size: 13px; line-height: 1.45; }
-.type-card-meta code { color: var(--accent); font-family: var(--font-code); font-size: 13px; background: var(--surface-2); padding: 2px 6px; border-radius: 2px; }
-.type-card-meta span { text-align: right; }
-.type-font-sample { margin: 12px 0 0; color: var(--text); font-size: 18px; line-height: 1.55; overflow-wrap: anywhere; }
-.type-scale { border-top: 1px solid var(--border); }
-.type-scale-row { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 14px 0; border-bottom: 1px dashed var(--border); }
-.type-scale-label { color: var(--text-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
-.type-scale-row p { margin: 0; }
-.type-sample-ui { font: 13px/1.55 var(--font-ui); }
-.type-sample-prose { font: 17px/1.78 var(--font-prose-active); }
-.type-sample-heading { font-family: var(--font-prose-active); font-size: 31px; line-height: 1.25; font-weight: 700; letter-spacing: 0; }
-.type-sample-code { display: inline-block; background: var(--code-panel); color: var(--text); border-left: 3px solid var(--accent); padding: 8px 11px; font: 13px/1.6 var(--font-code); }
-.palette-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 10px; }
-.palette-token { display: grid; grid-template-columns: 38px minmax(0, 1fr); grid-template-areas: "swatch name" "swatch role"; gap: 2px 10px; align-items: center; border: 1px solid var(--border); background: var(--surface); padding: 10px; }
-.palette-swatch { grid-area: swatch; width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 2px; background: var(--swatch-color); box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 12%, transparent); }
-.palette-name { grid-area: name; color: var(--text); font-family: var(--font-code); font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
-.palette-role { grid-area: role; color: var(--text-muted); font-size: 13px; line-height: 1.45; }
-.type-prose-check { border: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 48%, transparent); padding: 16px 18px; }
-@media (max-width: 620px) {
-  .type-scale-row { grid-template-columns: 1fr; gap: 6px; }
-  .type-card-meta { display: block; }
-  .type-card-meta span { display: block; margin-top: 6px; text-align: left; }
-}
 /* ---- comments ---- */
 .comments { margin-top: 36px; padding-top: 22px; border-top: 1px solid var(--border); }
 .comments-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 14px; }

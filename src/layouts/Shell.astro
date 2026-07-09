@@ -98,6 +98,15 @@ const extraWindowIndex =
                         "hidden",
                     );
                 }
+                var savedOutline = window.localStorage.getItem(
+                    "blog:outline-visible",
+                );
+                if (savedOutline === "false") {
+                    document.documentElement.setAttribute(
+                        "data-outline",
+                        "hidden",
+                    );
+                }
             } catch {}
         </script>
     </head>

@@ -14,6 +14,7 @@ const STATUS_DISABLED = '-- VIM OFF --';
 const STATUS_UNAVAILABLE = '-- VIM N/A --';
 const VIM_STORAGE_KEY = 'blog:vim-enabled';
 const SIDEBAR_STORAGE_KEY = 'blog:sidebar-visible';
+const OUTLINE_STORAGE_KEY = 'blog:outline-visible';
 const EDITABLE_CONTROL_SELECTOR =
   'input:not([type="hidden"]):not(:disabled), textarea:not(:disabled), select:not(:disabled), [contenteditable]:not([contenteditable="false"])';
 const EDIT_COMMANDS = new Set(['e', 'ed', 'edi', 'edit']);
@@ -58,7 +59,7 @@ const HELP_SECTIONS = [
       [':? / :help', 'show this help'],
       [':login', 'start GitHub OAuth'],
       [':logout', 'clear GitHub OAuth session'],
-      [':sidebar', 'toggle sidebar pane'],
+      [':sidebar / :outline', 'toggle side panes'],
       [':q', 'back or feed'],
     ],
   },
@@ -128,6 +129,14 @@ function initVimNav() {
   function saveSidebarPreference(hidden: boolean) {
     try {
       window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(!hidden));
+    } catch {
+      // Local storage can be unavailable in private or embedded contexts.
+    }
+  }
+
+  function saveOutlinePreference(hidden: boolean) {
+    try {
+      window.localStorage.setItem(OUTLINE_STORAGE_KEY, String(!hidden));
     } catch {
       // Local storage can be unavailable in private or embedded contexts.
     }
@@ -255,6 +264,32 @@ function initVimNav() {
 
   function getSidebar() {
     return document.querySelector<HTMLElement>('.sidebar');
+  }
+
+  function applyOutlineHidden(hidden: boolean) {
+    const outline = document.querySelector<HTMLElement>('.doc-outline');
+    if (hidden) document.documentElement.dataset.outline = 'hidden';
+    else delete document.documentElement.dataset.outline;
+    if (outline) {
+      if (hidden) outline.setAttribute('aria-hidden', 'true');
+      else outline.removeAttribute('aria-hidden');
+    }
+    if (hidden && selectedTarget && outline?.contains(selectedTarget)) clearSelection();
+  }
+
+  function isOutlineHidden() {
+    return document.documentElement.dataset.outline === 'hidden';
+  }
+
+  function setOutlineHidden(hidden: boolean, temporaryStatus = false) {
+    const outline = document.querySelector<HTMLElement>('.doc-outline');
+    if (!outline) {
+      setStatus('outline unavailable', temporaryStatus);
+      return;
+    }
+    applyOutlineHidden(hidden);
+    saveOutlinePreference(hidden);
+    setStatus(`outline ${hidden ? 'hidden' : 'shown'}`, temporaryStatus);
   }
 
   function isSidebarHidden() {
@@ -879,6 +914,10 @@ function initVimNav() {
       return;
     }
 
+    if (normalized === 'outline') {
+      setOutlineHidden(!isOutlineHidden(), true);
+      return;
+    }
     const route = COMMAND_ROUTES[normalized];
     if (route) {
       window.location.assign(route);
@@ -1046,6 +1085,7 @@ function initVimNav() {
   );
   ['(pointer: coarse)', '(hover: none)', '(any-pointer: coarse)', '(any-hover: hover)'].forEach(watchDeviceCapability);
   applySidebarHidden(isSidebarHidden());
+  applyOutlineHidden(isOutlineHidden());
   vimToggle?.addEventListener('click', () => setVimEnabled(!vimEnabled));
   document.addEventListener('keydown', handleKeydown);
   document.addEventListener('focusin', (event) => syncEditorStatus(event.target));

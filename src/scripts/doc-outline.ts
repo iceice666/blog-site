@@ -13,6 +13,8 @@ function initDocOutline() {
     .filter((el): el is HTMLElement => Boolean(el));
   if (!headingEls.length) return;
 
+  const marker = nav.querySelector<HTMLElement>(".doc-outline-marker");
+
   let activeSlug = "";
   let ticking = false;
   function setActive(slug: string) {
@@ -23,6 +25,10 @@ function initDocOutline() {
     if (!link) return;
     link.classList.add("is-active");
     link.scrollIntoView({ block: "nearest" });
+    if (marker) {
+      marker.style.transform = `translateY(${link.offsetTop}px)`;
+      marker.style.height = `${link.offsetHeight}px`;
+    }
   }
 
   function updateActive() {

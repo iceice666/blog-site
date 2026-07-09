@@ -532,21 +532,39 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
     overflow-y: auto;
   }
 }
-.doc-outline-body { display: flex; flex-direction: column; padding: 10px 0; }
+html[data-outline="hidden"] .doc-outline { display: none; }
+.doc-outline-body { position: relative; display: flex; flex-direction: column; padding: 10px 0; }
+.doc-outline-marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 0;
+  background: var(--accent);
+  transform: translateY(10px);
+  transition: transform 180ms ease, height 180ms ease;
+}
 .doc-outline-link {
+  position: relative;
   padding: 4px 14px;
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.45;
   border-left: 2px solid transparent;
   overflow-wrap: anywhere;
+  transition: color 140ms ease, background-color 180ms ease, padding-left 180ms ease;
 }
 .doc-outline-link.depth-3 { padding-left: 28px; font-size: 12.5px; }
-.doc-outline-link:hover { color: var(--accent); }
+.doc-outline-link:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 4%, transparent); }
 .doc-outline-link.is-active {
   color: var(--accent);
-  border-left-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.doc-outline-link.depth-2.is-active { padding-left: 17px; }
+.doc-outline-link.depth-3.is-active { padding-left: 31px; }
+@media (prefers-reduced-motion: reduce) {
+  .doc-outline-marker,
+  .doc-outline-link { transition: none; }
 }
 
 /* ---- sidebar ---- */

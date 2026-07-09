@@ -8,6 +8,7 @@ const { headings } = Astro.props;
 <aside class="doc-outline" aria-label="On this page">
   <div class="pane-title">outline</div>
   <nav class="doc-outline-body">
+    <span class="doc-outline-marker" aria-hidden="true"></span>
     {
       headings.map((h) => (
         <a

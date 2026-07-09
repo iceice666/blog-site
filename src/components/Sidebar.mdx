@@ -51,7 +51,11 @@ import { author, socialDisplayName, socialHref, socialIsExternal } from '../../c
       <div className="stat-row"><dt>words</dt><dd>{props.stats.words.toLocaleString()}</dd></div>
       <div className="stat-row"><dt>langs</dt><dd>{props.stats.langs.join(' / ')}</dd></div>
       <div className="toptags">
-        {props.stats.topTags.map((tag) => <span>{tag}</span>)}
+        {props.stats.topTags.map((tag) => (
+          <a href={`/archive?tag=${encodeURIComponent(tag)}`} data-vim-target>
+            {tag}
+          </a>
+        ))}
       </div>
     </div>
   </div>

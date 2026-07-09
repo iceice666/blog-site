@@ -93,9 +93,10 @@ const sortedKeys = [...groups.keys()].sort().reverse();
     const groupEls = Array.from(document.querySelectorAll('[data-archive-group]'));
     const countEl = document.getElementById('archive-count');
     const emptyEl = document.getElementById('archive-empty-state');
+    const params = new URLSearchParams(window.location.search);
 
     if (input instanceof HTMLInputElement) {
-      input.addEventListener('input', () => {
+      const applyFilter = () => {
         const q = input.value.trim().toLowerCase();
         let visible = 0;
         rows.forEach((row) => {
@@ -114,7 +115,11 @@ const sortedKeys = [...groups.keys()].sort().reverse();
         });
         if (countEl) countEl.textContent = `${visible} entr${visible === 1 ? 'y' : 'ies'}`;
         if (emptyEl instanceof HTMLElement) emptyEl.style.display = visible === 0 ? 'block' : 'none';
-      });
+      };
+
+      input.value = params.get('tag') ?? params.get('q') ?? '';
+      input.addEventListener('input', applyFilter);
+      applyFilter();
     }
   </script>
 </Shell>

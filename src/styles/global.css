@@ -600,7 +600,8 @@ html[data-sidebar="hidden"] .sidebar { display: none; }
 .stat-row dt { color: var(--text-muted); margin: 0; }
 .stat-row dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
 .toptags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
-.toptags span { font-size: 13px; color: var(--accent); background: var(--surface-2); padding: 2px 6px; border-radius: 2px; }
+.toptags a { font-size: 13px; color: var(--accent); background: var(--surface-2); padding: 2px 6px; border-radius: 2px; text-decoration: none; }
+.toptags a:hover { color: var(--accent-strong); }
 .sidebar-final-widget { border-bottom: none; }
 
 @media (min-width: 1500px) {

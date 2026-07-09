@@ -1,0 +1,104 @@
+---
+export const prerender = true;
+import Shell from '../layouts/Shell.astro';
+
+const colorTokens = [
+  { name: '--bg', role: 'page background' },
+  { name: '--surface', role: 'panes and cards' },
+  { name: '--surface-2', role: 'status bars and raised controls' },
+  { name: '--text', role: 'primary copy' },
+  { name: '--text-muted', role: 'secondary copy' },
+  { name: '--accent', role: 'links, active state, focus' },
+  { name: '--accent-strong', role: 'link hover' },
+  { name: '--bold', role: 'strong prose emphasis' },
+  { name: '--border', role: 'rules and outlines' },
+  { name: '--pill-post', role: 'post badges' },
+  { name: '--lang-ts', role: 'category/language accents' },
+  { name: '--lang-md', role: 'markdown language label' },
+  { name: '--code-bg', role: 'code block background' },
+  { name: '--code-text', role: 'code block text' },
+  { name: '--code-lang', role: 'code block language label' },
+  { name: '--flag', role: 'search and hint marker' },
+  { name: '--danger', role: 'destructive/error state' },
+];
+
+const fontStacks = [
+  { token: '--font-ui', role: 'terminal shell, controls, metadata', sample: 'justaslime 1:feed* 5:typography' },
+  { token: '--font-code', role: 'inline code, fenced blocks, editor panes', sample: 'const route = "/typography";' },
+  { token: '--font-prose-latin', role: 'Latin article prose fallback', sample: 'Sphinx of black quartz, judge my vow.' },
+  { token: '--font-prose-zh-tw', role: 'Traditional Chinese prose', sample: '視覺節奏、標點與中英文混排測試。' },
+  { token: '--font-prose-zh-cn', role: 'Simplified Chinese prose', sample: '视觉节奏、标点与中英文混排测试。' },
+  { token: '--font-prose-ja', role: 'Japanese prose', sample: '素早い茶色の狐が怠惰な犬を飛び越える。' },
+];
+
+const typeSamples = [
+  { label: 'ui floor / 13px', className: 'type-sample-ui', text: 'status bar · pane title · keyboard hints · compact metadata' },
+  { label: 'prose / 17px', className: 'type-sample-prose', text: 'Long-form reading uses a calmer prose stack, loose leading, and language-specific fallbacks.' },
+  { label: 'heading / 31px', className: 'type-sample-heading', text: 'Readable first, decorative never' },
+  { label: 'code / 13px', className: 'type-sample-code', text: 'pnpm check && pnpm build' },
+];
+---
+
+<Shell title="Typography | Brian Duan" activeKey="typography" paneTitle="typography.md" wide>
+  <h1>Typography</h1>
+  <p class="type-sub">A compact reference for the site font stacks, color tokens, and prose rhythm.</p>
+
+  <section class="type-section" aria-labelledby="font-stacks">
+    <h2 id="font-stacks" class="subhead">font configuration</h2>
+    <div class="type-card-list">
+      {
+        fontStacks.map((font) => (
+          <article class="type-card">
+            <div class="type-card-meta">
+              <code>{font.token}</code>
+              <span>{font.role}</span>
+            </div>
+            <p class="type-font-sample" style={`font-family: var(${font.token})`}>{font.sample}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="type-section" aria-labelledby="scale">
+    <h2 id="scale" class="subhead">type scale</h2>
+    <div class="type-scale">
+      {
+        typeSamples.map((sample) => (
+          <article class="type-scale-row">
+            <div class="type-scale-label">{sample.label}</div>
+            <p class={sample.className}>{sample.text}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="type-section" aria-labelledby="palette">
+    <h2 id="palette" class="subhead">color palette</h2>
+    <div class="palette-grid">
+      {
+        colorTokens.map((token) => (
+          <article class="palette-token">
+            <span class="palette-swatch" style={`--swatch-color: var(${token.name})`} aria-hidden="true"></span>
+            <span class="palette-name">{token.name}</span>
+            <span class="palette-role">{token.role}</span>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="type-section" aria-labelledby="prose-check">
+    <h2 id="prose-check" class="subhead">prose check</h2>
+    <div class="prose type-prose-check">
+      <p><strong>English:</strong> The shell stays monospace, but article copy switches to a prose stack for longer reading sessions.</p>
+      <p lang="zh-tw"><strong>繁體中文：</strong>保留終端風格，同時讓長文閱讀的字距與行高維持穩定。</p>
+      <p lang="zh-cn"><strong>简体中文：</strong>同一组设计 token 应该在浅色与深色主题下保持清楚的层级。</p>
+      <p lang="ja"><strong>日本語：</strong>多言語の本文でも、見出し、本文、コードの役割を崩さない。</p>
+      <pre data-lang="shell"><code>pnpm dev
+pnpm check
+pnpm build</code></pre>
+    </div>
+  </section>
+</Shell>

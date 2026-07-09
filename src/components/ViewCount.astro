@@ -1,0 +1,20 @@
+---
+interface Props {
+  path: string;
+  prefix?: string;
+}
+
+const { path, prefix = ' · ' } = Astro.props;
+---
+
+<span
+  class="view-count"
+  data-view-count
+  data-view-path={path}
+  data-view-prefix={prefix}
+  aria-label="pageviews"
+>{prefix}-- views</span>
+
+<script>
+  import '../scripts/view-count';
+</script>

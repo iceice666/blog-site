@@ -8,5 +8,11 @@ declare namespace Cloudflare {
     GITHUB_REPO?: string;
     GITHUB_TOKEN?: string;
     SESSION_SECRET?: string;
+    UMAMI_API_URL?: string;
+    UMAMI_API_TOKEN?: string;
+    UMAMI_DOMAINS?: string;
+    UMAMI_PASSWORD?: string;
+    UMAMI_USERNAME?: string;
+    UMAMI_WEBSITE_ID?: string;
   }
 }

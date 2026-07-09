@@ -3,6 +3,7 @@ export const prerender = true;
 import { getCollection, render } from 'astro:content';
 import Shell from '../layouts/Shell.astro';
 import Comments from '../components/Comments.astro';
+import ViewCount from '../components/ViewCount.astro';
 import {
   countUnits,
   getArticleAlternates,
@@ -50,7 +51,7 @@ const isAbout = isAboutArticleId(entry.id);
   </div>
   <h1>{entry.data.title}</h1>
   <p class="art-desc">{entry.data.description}</p>
-  <p class="art-stats">{units} words · {readMin} min read</p>
+  <p class="art-stats">{units} words · {readMin} min read<ViewCount path={article.href} /></p>
   <p class="art-tags">{entry.data.tags.map((t) => `#${t}`).join(' ')}</p>
   <hr class="art-rule" />
 

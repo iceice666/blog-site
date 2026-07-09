@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 import Shell from '../layouts/Shell.astro';
+import ViewCount from '../components/ViewCount.astro';
 import { getFeedItems, type FeedItem } from '../lib/content';
 
 const items = await getFeedItems();
@@ -39,6 +40,7 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
         <p class="desc">{promotedArticle.description}</p>
         <p class="stats">
           {promotedArticle.units} words · {promotedArticle.readMin} min read
+          <ViewCount path={promotedArticle.href} />
         </p>
         <p class="tags">{promotedArticle.tags.map((t) => `#${t}`).join(' ')}</p>
       </section>
@@ -61,6 +63,7 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
           <p class="desc">{item.description}</p>
           <p class="stats">
             {item.units} words · {item.readMin} min read
+            {item.href && <ViewCount path={item.href} />}
           </p>
           <p class="tags">{item.tags.map((t) => `#${t}`).join(' ')}</p>
         </article>
@@ -69,6 +72,7 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
           <div class="meta">
             <span class="pill">POST</span>
             <span>{item.publishedAt}</span>
+            {item.href && <ViewCount path={item.href} prefix="" />}
           </div>
           <div class="prose" lang={item.lang} set:html={item.bodyHtml} />
         </article>

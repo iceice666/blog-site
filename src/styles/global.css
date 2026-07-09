@@ -197,6 +197,7 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 .entry-w p.desc { margin: 0 0 10px; color: var(--text-muted); font-family: var(--font-prose-active); font-size: 15px; line-height: 1.72; max-width: 62ch; text-autospace: normal; text-spacing-trim: normal; }
 .entry-w .stats { margin: 0 0 6px; color: var(--text-muted); font-size: 10.5px; }
 .entry-w .tags { margin: 0; color: var(--accent); font-size: 10.5px; }
+.view-count { color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .entry-w .note { margin: 0; color: var(--text); font-family: var(--font-prose-active); font-size: 16px; line-height: 1.75; white-space: pre-wrap; max-width: 62ch; text-autospace: normal; text-spacing-trim: normal; }
 .entry-w .note::before { content: "» "; color: var(--accent); }
 .entry-w .note a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }

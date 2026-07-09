@@ -1,4 +1,6 @@
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import { unified, type MarkdownRenderer, type RehypePlugin, type RemarkPlugin } from '@astrojs/markdown-remark';
+import { createHighlighter, createJavaScriptRegexEngine, type BundledLanguage, type ShikiTransformer } from 'shiki';
 
 type MarkdownNode = {
   type?: string;
@@ -8,6 +10,9 @@ type MarkdownNode = {
   value?: string;
   [key: string]: unknown;
 };
+type MarkdownRoot = { type?: string; children?: unknown[] };
+type AsyncShikiTransformer = (tree: MarkdownRoot) => Promise<unknown> | unknown;
+
 
 const LEGACY_POST_ROUTES: Record<string, string> = {
   'nhnc-2026-writeups': '/articles/writeups/nhnc-2026/',
@@ -145,9 +150,50 @@ export const remarkCollapsibleAside: RemarkPlugin = () => {
   };
 };
 
+const shikiThemes = { light: 'catppuccin-latte', dark: 'catppuccin-mocha' } as const;
+const shikiLangAlias = { flag: 'text' } as unknown as Record<string, BundledLanguage>;
+const dataLangTransformer: ShikiTransformer = {
+  name: 'data-lang-label',
+  pre(node) {
+    const lang = this.options.lang;
+    if (typeof lang === 'string') {
+      node.properties ||= {};
+      node.properties['data-lang'] = lang;
+    }
+  },
+};
+
+const shikiLangs = ['javascript', 'json', 'python', 'http', 'typescript', 'bash', 'shellscript', 'markdown'] as BundledLanguage[];
+const shikiHighlighter = createHighlighter({
+  themes: Object.values(shikiThemes),
+  langs: shikiLangs,
+  langAlias: shikiLangAlias,
+  engine: createJavaScriptRegexEngine(),
+});
+
+/** Highlight code without Shiki's default Wasm engine; Cloudflare prerender disallows Wasm codegen. */
+export const highlightCode = () => {
+  return async (tree: MarkdownRoot) => {
+    const highlighter = await shikiHighlighter;
+    const transform = rehypeShikiFromHighlighter(highlighter, {
+      themes: shikiThemes,
+      defaultColor: false,
+      fallbackLanguage: 'text',
+      transformers: [dataLangTransformer],
+    }) as unknown as AsyncShikiTransformer;
+    await transform(tree);
+  };
+};
+
 export const markdownProcessor = unified({
   remarkPlugins: [remarkCollapsibleAside],
-  rehypePlugins: [rewriteInternalLinks, labelCodeLang, wrapTables, stripDuplicateLeadingH1],
+  rehypePlugins: [
+    rewriteInternalLinks,
+    labelCodeLang,
+    highlightCode,
+    wrapTables,
+    stripDuplicateLeadingH1,
+  ],
   gfm: true,
 });
 

@@ -1,8 +1,8 @@
 :root {
-  --bg: #eef2f1; --surface: #e5ebe9; --surface-2: #dae2df; --text: #16211f;
-  --text-muted: #566360; --accent: #1b6f65; --accent-strong: #145c53;
-  --border: #c7d2cf; --pill-post: #5b6461; --lang-ts: #2f7dbf; --lang-md: #7c8b90;
-  --code-bg: #12181a; --code-text: #dfe7e3; --code-lang: #7c9490; --flag: #d8b23f; --danger: #a8402c;
+  --bg: #eff1f5; --surface: #e6e9ef; --surface-2: #dce0e8; --text: #4c4f69;
+  --text-muted: #5c5f77; --accent: #0d7278; --accent-strong: #0a5a5f; --bold: #8839ef;
+  --border: #bcc0cc; --pill-post: #6b57d6; --lang-ts: #1a5ce0; --lang-md: #6c6f85;
+  --code-bg: #181825; --code-text: #cdd6f4; --code-lang: #7f849c; --flag: #df8e1d; --danger: #d20f39;
   --font-ui: "Sarasa Term TC", "Sarasa Term SC", "Sarasa Term J", "Sarasa Term K", ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
   --font-code: "Sarasa Fixed TC", "Sarasa Fixed SC", "Sarasa Fixed J", "Sarasa Fixed K", var(--font-ui);
   --font-prose-latin: "Sarasa UI TC", "Sarasa UI SC", "Sarasa UI J", "Sarasa UI K", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Helvetica Neue", Arial;
@@ -13,21 +13,21 @@
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1417; --surface: #161c20; --surface-2: #1c2328; --text: #dbe4e6;
-    --text-muted: #7c8b90; --accent: #4fb8ad; --accent-strong: #86e0d4;
-    --border: #2a3338; --pill-post: #87939b; --lang-ts: #5b9bd9; --lang-md: #8a97a0;
-    --flag: #e0c261; --danger: #e2775a;
+    --bg: #1e1e2e; --surface: #313244; --surface-2: #45475a; --text: #cdd6f4;
+    --text-muted: #a6adc8; --accent: #94e2d5; --accent-strong: #b4f5ea; --bold: #cba6f7;
+    --border: #45475a; --pill-post: #b4befe; --lang-ts: #89b4fa; --lang-md: #a6adc8;
+    --flag: #f9e2af; --danger: #f38ba8;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1417; --surface: #161c20; --surface-2: #1c2328; --text: #dbe4e6;
-  --text-muted: #7c8b90; --accent: #4fb8ad; --accent-strong: #86e0d4; --border: #2a3338; --pill-post: #87939b;
-  --lang-ts: #5b9bd9; --lang-md: #8a97a0; --flag: #e0c261; --danger: #e2775a;
+  --bg: #1e1e2e; --surface: #313244; --surface-2: #45475a; --text: #cdd6f4;
+  --text-muted: #a6adc8; --accent: #94e2d5; --accent-strong: #b4f5ea; --bold: #cba6f7; --border: #45475a; --pill-post: #b4befe;
+  --lang-ts: #89b4fa; --lang-md: #a6adc8; --flag: #f9e2af; --danger: #f38ba8;
 }
 :root[data-theme="light"] {
-  --bg: #eef2f1; --surface: #e5ebe9; --surface-2: #dae2df; --text: #16211f;
-  --text-muted: #566360; --accent: #1b6f65; --accent-strong: #145c53; --border: #c7d2cf; --pill-post: #5b6461;
-  --lang-ts: #2f7dbf; --lang-md: #7c8b90; --flag: #d8b23f; --danger: #a8402c;
+  --bg: #eff1f5; --surface: #e6e9ef; --surface-2: #dce0e8; --text: #4c4f69;
+  --text-muted: #5c5f77; --accent: #0d7278; --accent-strong: #0a5a5f; --bold: #8839ef; --border: #bcc0cc; --pill-post: #6b57d6;
+  --lang-ts: #1a5ce0; --lang-md: #6c6f85; --flag: #df8e1d; --danger: #d20f39;
 }
 
 * { box-sizing: border-box; }
@@ -177,39 +177,43 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 
 /* ---- homepage spotlight ---- */
 .article-spotlight { border: 1px solid var(--border); border-left: 3px solid var(--accent); background: var(--surface); padding: 16px 18px; margin: 0 0 22px; }
-.article-spotlight .spot-kicker { margin: 0 0 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
-.article-spotlight .meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10.5px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
-.article-spotlight .meta .pill { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.article-spotlight .spot-kicker { margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
+.article-spotlight .meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.article-spotlight .meta .pill { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.article-spotlight .meta .category { color: var(--lang-ts); }
 .article-spotlight h1 { margin: 0 0 9px; font-family: var(--font-prose-active); font-size: 25px; line-height: 1.25; letter-spacing: 0; overflow-wrap: anywhere; text-autospace: normal; text-spacing-trim: normal; }
 .article-spotlight h1 a:hover { color: var(--accent); }
 .article-spotlight .desc { margin: 0 0 10px; color: var(--text-muted); font-family: var(--font-prose-active); font-size: 15px; line-height: 1.72; max-width: 62ch; text-autospace: normal; text-spacing-trim: normal; }
-.article-spotlight .stats { margin: 0 0 6px; color: var(--text-muted); font-size: 10.5px; }
-.article-spotlight .tags { margin: 0; color: var(--accent); font-size: 10.5px; line-height: 1.6; }
+.article-spotlight .stats { margin: 0 0 6px; color: var(--text-muted); font-size: 12px; }
+.article-spotlight .tags { margin: 0; color: var(--accent); font-size: 12px; line-height: 1.6; }
 
 /* ---- feed rows ---- */
 .entry-w { padding: 26px 0; border-bottom: 1px solid var(--border); }
 .entry-w:first-child { padding-top: 6px; }
-.entry-w .meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10.5px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
-.entry-w .meta .pill { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.entry-w .meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.entry-w .meta .pill { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
 .entry-w.is-post .meta .pill { color: var(--pill-post); }
+.entry-w .meta .category { color: var(--lang-ts); }
 .entry-w h2 { margin: 0 0 8px; font-family: var(--font-prose-active); font-size: 20px; line-height: 1.35; text-autospace: normal; text-spacing-trim: normal; }
 .entry-w h2 a:hover { color: var(--accent); }
 .entry-w p.desc { margin: 0 0 10px; color: var(--text-muted); font-family: var(--font-prose-active); font-size: 15px; line-height: 1.72; max-width: 62ch; text-autospace: normal; text-spacing-trim: normal; }
-.entry-w .stats { margin: 0 0 6px; color: var(--text-muted); font-size: 10.5px; }
-.entry-w .tags { margin: 0; color: var(--accent); font-size: 10.5px; }
+.entry-w .stats { margin: 0 0 6px; color: var(--text-muted); font-size: 12px; }
+.entry-w .tags { margin: 0; color: var(--accent); font-size: 12px; }
 .view-count { color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .entry-w .note { margin: 0; color: var(--text); font-family: var(--font-prose-active); font-size: 16px; line-height: 1.75; white-space: pre-wrap; max-width: 62ch; text-autospace: normal; text-spacing-trim: normal; }
 .entry-w .note::before { content: "» "; color: var(--accent); }
 .entry-w .note a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 
 /* ---- article / about prose ---- */
-.art-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10.5px; color: var(--text-muted); margin-bottom: 10px; font-variant-numeric: tabular-nums; }
-.art-meta .pill { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.art-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-muted); margin-bottom: 10px; font-variant-numeric: tabular-nums; }
+.art-meta .pill { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
 .art-meta .pill-danger { color: var(--danger); }
+.art-meta .pill-post { color: var(--pill-post); }
+.art-meta .category { color: var(--lang-ts); }
 .reading h1 { font-family: var(--font-prose-active); font-size: 31px; line-height: 1.25; margin: 0 0 10px; letter-spacing: 0; text-autospace: normal; text-spacing-trim: normal; }
 .art-desc { color: var(--text-muted); font-family: var(--font-prose-active); font-size: 15.5px; line-height: 1.75; margin: 0 0 12px; text-autospace: normal; text-spacing-trim: normal; }
-.art-stats { color: var(--text-muted); font-size: 10.5px; margin: 0 0 6px; }
-.art-tags { color: var(--accent); font-size: 10.5px; margin: 0 0 22px; }
+.art-stats { color: var(--text-muted); font-size: 12px; margin: 0 0 6px; }
+.art-tags { color: var(--accent); font-size: 12px; margin: 0 0 22px; }
 .art-rule { border: none; border-top: 1px solid var(--border); margin: 0 0 26px; }
 
 .prose { font-family: var(--font-prose-active); font-size: 17px; line-height: 1.78; letter-spacing: 0; text-autospace: normal; text-spacing-trim: normal; line-break: strict; word-break: normal; overflow-wrap: break-word; }
@@ -217,7 +221,7 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 .prose h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
 .prose h3 { font-size: 1.08em; line-height: 1.45; margin: 22px 0 10px; color: var(--text); }
 .prose p { margin: 0 0 1.05em; line-height: inherit; font-size: inherit; }
-.prose strong { color: var(--accent-strong); font-weight: 700; }
+.prose strong { color: var(--bold); font-weight: 700; }
 .prose code { font-family: var(--font-code); background: var(--surface-2); padding: 1px 5px; border-radius: 2px; font-size: 0.88em; }
 .prose del { color: var(--text-muted); }
 .prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
@@ -230,8 +234,18 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 .prose ol li { counter-increment: ol; padding-left: 26px; position: relative; margin: 7px 0; line-height: inherit; font-size: inherit; }
 .prose ol li::before { content: counter(ol) "."; position: absolute; left: 0; color: var(--accent); font-variant-numeric: tabular-nums; font-size: 11px; }
 
-.prose pre { position: relative; margin: 0 0 18px; border-left: 3px solid var(--accent); background: var(--code-bg); padding: 14px 16px; overflow-x: auto; font-family: var(--font-code); font-size: 13px; line-height: 1.6; color: var(--code-text); }
+.prose pre { position: relative; margin: 0 0 18px; border-left: 3px solid var(--accent); background-color: var(--code-bg); padding: 14px 16px; overflow-x: auto; font-family: var(--font-code); font-size: 13px; line-height: 1.6; color: var(--code-text); }
 .prose pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+.prose pre.shiki, .comment-body pre.shiki, .shiki span { color: var(--shiki-light); background-color: var(--shiki-light-bg); }
+@media (prefers-color-scheme: dark) {
+  .prose pre.shiki, .comment-body pre.shiki, .shiki span { color: var(--shiki-dark); background-color: var(--shiki-dark-bg); }
+}
+:root[data-theme="dark"] .prose pre.shiki, :root[data-theme="dark"] .comment-body pre.shiki, :root[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark); background-color: var(--shiki-dark-bg);
+}
+:root[data-theme="light"] .prose pre.shiki, :root[data-theme="light"] .comment-body pre.shiki, :root[data-theme="light"] .shiki span {
+  color: var(--shiki-light); background-color: var(--shiki-light-bg);
+}
 .prose pre[data-lang]::before {
   content: attr(data-lang);
   position: absolute;
@@ -243,7 +257,7 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
   letter-spacing: 0.06em;
 }
 .prose pre[data-lang="flag"] { border-left-color: var(--flag); color: var(--flag); }
-.prose pre[data-lang="flag"] code { color: var(--flag); }
+.prose pre[data-lang="flag"] code, .prose pre[data-lang="flag"] span { color: var(--flag); }
 .prose pre[data-lang="shell"] { border-left-color: var(--danger); }
 .prose :not(pre) > code { white-space: normal; }
 
@@ -329,7 +343,7 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 .comment-body p { margin: 0 0 0.9em; }
 .comment-body p:last-child { margin-bottom: 0; }
 .comment-body a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-.comment-body pre { margin: 0 0 12px; border-left: 3px solid var(--accent); background: var(--code-bg); color: var(--code-text); padding: 12px 14px; overflow-x: auto; font-family: var(--font-code); font-size: 12.5px; line-height: 1.55; }
+.comment-body pre { margin: 0 0 12px; border-left: 3px solid var(--accent); background-color: var(--code-bg); color: var(--code-text); padding: 12px 14px; overflow-x: auto; font-family: var(--font-code); font-size: 12.5px; line-height: 1.55; }
 .comment-body code { font-family: var(--font-code); background: var(--surface-2); padding: 1px 5px; border-radius: 2px; font-size: 0.88em; }
 .comment-body pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
 .comment-body blockquote { margin: 0 0 12px; padding-left: 12px; border-left: 2px solid var(--border); color: var(--text-muted); }
@@ -495,6 +509,13 @@ html[data-sidebar="hidden"] .sidebar { display: none; }
 .toptags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
 .toptags span { font-size: 10.5px; color: var(--accent); background: var(--surface-2); padding: 2px 6px; border-radius: 2px; }
 .sidebar-final-widget { border-bottom: none; }
+
+@media (min-width: 1500px) {
+  .tmux { max-width: 1440px; }
+  .reading { max-width: 760px; padding: 40px 48px 60px; }
+  .prose { font-size: 18px; }
+  .sidebar { flex-basis: 340px; }
+}
 
 @media (max-width: 900px) {
   /* The chip row can't shrink; without wrapping it forces horizontal page

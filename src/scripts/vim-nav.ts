@@ -84,9 +84,9 @@ function initVimNav() {
   let hintBuffer = '';
   let hintNewTab = false;
   let pendingKey = '';
-  let pendingTimer: ReturnType<typeof window.setTimeout> | undefined;
-  let statusTimer: ReturnType<typeof window.setTimeout> | undefined;
-  let announceTimer: ReturnType<typeof window.setTimeout> | undefined;
+  let pendingTimer: number | undefined;
+  let statusTimer: number | undefined;
+  let announceTimer: number | undefined;
   let editorStatus: string | null = null;
   let helpEl: HTMLElement | null = null;
 

@@ -30,7 +30,7 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
         <div class="spot-kicker">LATEST ARTICLE</div>
         <div class="meta">
           <span class="pill">ARTICLE</span>
-          <span>{promotedArticle.category}</span>
+          <span class="category">{promotedArticle.category}</span>
           <span>{promotedArticle.lang}</span>
           <span>{promotedArticle.publishedAt}</span>
         </div>
@@ -53,7 +53,7 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
         <article class="entry-w" lang={item.lang} data-vim-target data-vim-open={item.href}>
           <div class="meta">
             <span class="pill">ARTICLE</span>
-            <span>{item.category}</span>
+            <span class="category">{item.category}</span>
             <span>{item.lang}</span>
             <span>{item.publishedAt}</span>
           </div>

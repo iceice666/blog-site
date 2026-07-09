@@ -175,12 +175,6 @@ html[data-vim-available="false"] #vim-toggle { display: none; }
 @media (min-width: 901px) { .scroll-area { flex: 1; min-height: 0; overflow-y: auto; } }
 .reading { max-width: 720px; margin-inline: auto; padding: 30px 34px 50px; }
 .reading.is-wide { max-width: 900px; }
-@media (min-width: 1600px) {
-  .reading .prose > pre,
-  .reading .prose > .table-scroll {
-    margin-inline: -110px;
-  }
-}
 
 /* ---- feed spotlight ---- */
 .article-spotlight { border: 1px solid var(--border); border-left: 3px solid var(--accent); background: var(--surface); padding: 16px 18px; margin: 0 0 22px; }
@@ -605,8 +599,8 @@ html[data-sidebar="hidden"] .sidebar { display: none; }
 .sidebar-final-widget { border-bottom: none; }
 
 @media (min-width: 1500px) {
-  .tmux { max-width: 1600px; }
-  .reading { max-width: 760px; padding: 40px 48px 60px; }
+  .tmux { max-width: 1800px; }
+  .reading { max-width: 860px; padding: 40px 48px 60px; }
   .prose { font-size: 18px; }
   .sidebar { flex-basis: 340px; }
 }

@@ -1,0 +1,33 @@
+---
+interface Contact {
+  href: string;
+  label: string;
+  external?: boolean;
+}
+
+interface Props {
+  name: string;
+  role: string;
+  contacts: Contact[];
+}
+
+import styles from '../../styles/Resume.module.css';
+
+const { name, role, contacts } = Astro.props;
+---
+
+<header class={styles.header}>
+  <div>
+    <h1>{name}</h1>
+    <p class={styles.role}>{role}</p>
+  </div>
+  <nav class={styles.contacts} aria-label="Contact and profile links">
+    {
+      contacts.map(({ href, label, external }) => (
+        <a href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>
+          {label}{external ? ' ↗' : ''}
+        </a>
+      ))
+    }
+  </nav>
+</header>

@@ -1,0 +1,16 @@
+---
+export const prerender = true;
+
+import ResumeContent from "../components/ResumeContent.mdx";
+import Shell from "../layouts/Shell.astro";
+---
+
+<Shell
+    title="Resume | Brian Duan"
+    description="Brian Duan — NCKU CSIE undergraduate building embedded systems, developer tools, local-first AI agents, and reproducible infrastructure."
+    activeKey="resume"
+    paneTitle="resume.md"
+    wide
+>
+    <ResumeContent />
+</Shell>

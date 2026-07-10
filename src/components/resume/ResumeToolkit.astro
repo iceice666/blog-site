@@ -1,0 +1,31 @@
+---
+interface Item {
+  area: string;
+  tools: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Area</th>
+      <th>Tools and topics</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      items.map(({ area, tools }) => (
+        <tr>
+          <th scope="row">{area}</th>
+          <td>{tools}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

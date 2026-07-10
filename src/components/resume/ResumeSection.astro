@@ -1,0 +1,14 @@
+---
+interface Props {
+  title: string;
+}
+
+import styles from '../../styles/Resume.module.css';
+
+const { title } = Astro.props;
+---
+
+<section class={styles.section}>
+  <h2>// {title}</h2>
+  <slot />
+</section>

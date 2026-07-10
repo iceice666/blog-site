@@ -25,12 +25,15 @@ const NAV_BY_KEY: Record<string, string> = {
   '2': '/feed',
   '3': '/friends',
   '4': '/archive',
+  '5': '/resume',
 };
 const COMMAND_ROUTES: Record<string, string> = {
   about: '/',
   feed: '/feed',
   friends: '/friends',
   archive: '/archive',
+  resume: '/resume',
+  cv: '/resume',
 };
 const HELP_SECTIONS = [
   {
@@ -42,7 +45,7 @@ const HELP_SECTIONS = [
       ['h / l', 'browser back / forward'],
       ['f / F', 'hint target / new tab'],
       ['o / Enter', 'open target'],
-      ['1-4', 'switch window'],
+      ['1-5', 'switch window'],
     ],
   },
   {

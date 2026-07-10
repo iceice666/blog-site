@@ -1,0 +1,19 @@
+---
+interface Props {
+  title: string;
+  href?: string;
+  vimOpen?: string;
+  external?: boolean;
+}
+
+import styles from '../../styles/Resume.module.css';
+
+const { title, href, vimOpen = href, external = false } = Astro.props;
+---
+
+<article class={styles.project} data-vim-target={vimOpen ? true : undefined} data-vim-open={vimOpen}>
+  <h3>
+    {href ? <a href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>{title} ↗</a> : title}
+  </h3>
+  <slot />
+</article>

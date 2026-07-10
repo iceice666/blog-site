@@ -76,7 +76,6 @@ export const author: Author = {
   socials: [
     { kind: "email", address: primaryContactEmail },
     { kind: "github", url: "https://github.com/iceice666" },
-    { kind: "website", url: "https://code.justaslime.dev/explore/repos" },
     {
       kind: "website",
       url: "https://www.pixiv.net/artworks/72701405",

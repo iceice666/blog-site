@@ -1,0 +1,127 @@
+import ResumeHeader from './resume/ResumeHeader.astro';
+import ResumeProject from './resume/ResumeProject.astro';
+import ResumeProjectGrid from './resume/ResumeProjectGrid.astro';
+import ResumeSection from './resume/ResumeSection.astro';
+import ResumeToolkit from './resume/ResumeToolkit.astro';
+
+export const contacts = [
+  { href: 'mailto:brian1061225@gmail.com', label: 'email' },
+  { href: 'https://github.com/iceice666', label: 'github', external: true },
+  { href: '/feed', label: 'writing' },
+];
+
+export const toolkit = [
+  { area: 'Languages used in projects', tools: 'Rust, Zig, TypeScript, Python, C++20, Lua, Nix' },
+  { area: 'Languages explored', tools: 'Haskell, ReScript' },
+  { area: 'Embedded and systems', tools: 'Linux, NixOS, MediaPipe graph integration, Novatek NT9869x, AI3 / NPU integration, SIMD / NEON, Docker, networking' },
+  { area: 'Web and services', tools: 'Astro, React, Axum, Cloudflare Workers, Nginx, self-hosted services' },
+  { area: 'Development workflow', tools: 'Git, Neovim, Zed, shell scripting, GitHub Actions, reproducible development environments' },
+];
+
+<ResumeHeader
+  name="Brian Duan"
+  role="CSIE undergraduate · embedded systems, developer tools, and local-first AI"
+  contacts={contacts}
+/>
+
+<ResumeSection title="summary">
+
+Undergraduate student in the Department of Computer Science and Information Engineering at National Cheng Kung University. I learn by building systems end-to-end: an embedded hand-tracking pipeline running on a vendor NPU, local-first AI agents, programming language experiments, and the infrastructure behind my own development environment.
+
+I care about inspectable systems, measured performance, and understanding the boundaries between models, runtimes, hardware, infrastructure, and user-facing tools.
+
+</ResumeSection>
+
+<ResumeSection title="education">
+
+**National Cheng Kung University** (2025 ~ ) · Taiwan
+
+Undergraduate, Department of Computer Science and Information Engineering
+
+</ResumeSection>
+
+<ResumeSection title="experience">
+
+    - **MOPCON 2025** — Program Team Lead
+    - **Hack Club Juice (2025)** — Attendee
+    - **Hack Club Highsea (2025)** — Attendee
+
+</ResumeSection>
+
+<ResumeSection title="project experience">
+
+<ResumeProject title="基於手型辨識的聯詠開發板系統移植" vimOpen="/files/nt9869x-hand-tracking-poster.pdf">
+
+_First-year team project · Primary technical implementer · [NCKU CSIE Project Exhibition](https://news-secr.ncku.edu.tw/p/405-1037-298426,c5934.php?Lang=zh-tw)_
+
+I was responsible for the end-to-end technical implementation of porting a MediaPipe Hands-style two-stage hand-tracking pipeline to the Novatek NT9869x embedded platform. The port preserved the graph, geometry, and post-processing flow while replacing the original inference path with the board's AI3 / NPU backend.
+
+- Ported the palm-detection and hand-landmark pipeline to the NT9869x, replacing the original inference calculator path with `vendor_ai3`.
+- Integrated the live camera → ISP / VPE → MediaPipe graph → AI3 / NPU → HDMI overlay data path.
+- Implemented the Cortex-A73 host-side flow for graph execution, SSD decode, NMS, rotated ROI handling, landmark projection, gesture rules, result caching, and overlay rendering.
+- Ran palm detection and 21-point hand-landmark inference on the on-chip AI3 / NPU.
+- Reworked image preparation to avoid full-frame RGB conversion by fusing NV12 conversion with inference-region crop and resize operations.
+- Used SIMD / NEON-accelerated sampling for the rotated hand crop and image conversion path.
+- Built the model-conversion and validation workflow for INT16 palm and landmark models, including host-side golden checks and a 12-frame review set.
+- Implemented live skeleton, ROI, handedness, gesture-state, and timing-HUD overlays, together with five rule-based gesture classes.
+- Prepared the project demonstration, performance measurements, technical explanation, and exhibition poster.
+
+**Measured results:** stable **30 fps** live HDMI output; per-tick compute reduced from approximately **55 ms to 10 ms**; NV12-to-RGB processing reduced from **43.5 ms to 1.4 ms**. All 12 review frames passed the 0.90 validation threshold, with an average palm-detector score of **0.949** and average hand-landmark presence score of **0.977**.
+
+**Stack:** MediaPipe 0.10.35, Novatek NT9869x / NS02201, AI3 / `vendor_ai3`, HDAL, Zig, C++20, Python, Novaic Gen-tool, SIMD / NEON
+
+_Public poster available. The implementation repository and internal project materials are private._
+
+</ResumeProject>
+
+</ResumeSection>
+
+<ResumeSection title="selected public projects">
+
+<ResumeProjectGrid>
+  <ResumeProject title="TempestMiku" href="https://github.com/mozufu/TempestMiku">
+
+  A self-hosted, single-user AI companion and project-aware coding agent written in Rust, exploring sandboxed execution, approval flows, explicit project context, and local-first interaction.
+
+  _Rust · Deno · agent runtimes · sandboxing · local-first AI_
+
+  </ResumeProject>
+  <ResumeProject title="Zutai" href="https://github.com/iceice666/zutai">
+
+  An experimental two-mode language system separating deterministic data literals from pure, lazy, typed computation, with a parser, semantic IR, CLI, editor support, and versioned language specifications.
+
+  _Rust · language design · parsers · semantic IR · CLI tooling_
+
+  </ResumeProject>
+  <ResumeProject title="Materwelon" href="https://github.com/iceice666/materwelon">
+
+  A tiny functional shell for the Raspberry Pi Pico 2, exploring language and runtime design under embedded memory, hardware, and tooling constraints.
+
+  _Embedded systems · language runtime · Raspberry Pi Pico 2_
+
+  </ResumeProject>
+  <ResumeProject title="justaslime.dev" href="https://github.com/iceice666/blog-site">
+
+  The Astro application behind this site: an MDX-based writing system deployed on Cloudflare Workers, with terminal-inspired and keyboard-first navigation.
+
+  _Astro · TypeScript · MDX · Cloudflare Workers · browser UX_
+
+  </ResumeProject>
+</ResumeProjectGrid>
+
+</ResumeSection>
+
+<ResumeSection title="technical toolkit">
+
+<ResumeToolkit items={toolkit} />
+
+</ResumeSection>
+
+<ResumeSection title="writing and security">
+
+I use this site as a public engineering notebook for project logs, CTF writeups, infrastructure notes, language experiments, and reflections on AI-assisted development.
+
+- [NHNC 2026 CTF writeup](/articles/writeups/nhnc-2026/) — notes across web, cryptography, reverse engineering, pwn, jail, and protocol challenges.
+- [Project notes and technical writing](/feed) — embedded systems, local-first AI, programming languages, Linux / Nix, and personal tooling.
+
+</ResumeSection>

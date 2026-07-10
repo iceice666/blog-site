@@ -51,6 +51,11 @@ export function isAboutArticleId(id: string) {
   return article.isStandalone && article.article === 'about';
 }
 
+export function isResumeArticleId(id: string) {
+  const article = getArticleInfo(id);
+  return article.isStandalone && article.article === 'resume';
+}
+
 export function getArticleSlug(id: string) {
   return getArticleInfo(id).routeSlug;
 }

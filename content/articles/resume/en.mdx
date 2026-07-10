@@ -1,0 +1,90 @@
+---
+title: Resume
+description: Brian Duan — NCKU CSIE undergraduate building embedded systems, developer tools, local-first AI agents, and reproducible infrastructure.
+category: meta
+tags: [resume]
+publishedAt: 2026-07-10
+---
+
+import RepoCard from '$/components/mdx/RepoCard.astro';
+
+**Brian Duan** — CSIE undergraduate at National Cheng Kung University, working on embedded systems, developer tools, and local-first AI.
+
+## Summary
+
+Undergraduate student in the Department of Computer Science and Information Engineering at National Cheng Kung University. I learn by building systems end-to-end: an embedded hand-tracking pipeline running on a vendor NPU, local-first AI agents, programming language experiments, and the infrastructure behind my own development environment.
+
+I care about inspectable systems, measured performance, and understanding the boundaries between models, runtimes, hardware, infrastructure, and user-facing tools.
+
+## Education
+
+**National Cheng Kung University** (2025 ~ ) · Taiwan
+
+Undergraduate, Department of Computer Science and Information Engineering
+
+## Experience
+
+- **MOPCON 2025** — Program Team Lead
+- **Hack Club Juice (2025)** — Attendee
+- **Hack Club Highsea (2025)** — Attendee
+
+## Project Experience
+
+### Hand-Gesture-Recognition System Port for a Novatek Development Board
+
+_First-year team project · Primary technical implementer · [NCKU CSIE Project Exhibition](https://news-secr.ncku.edu.tw/p/405-1037-298426,c5934.php?Lang=zh-tw)_
+
+I was responsible for the end-to-end technical implementation of porting a MediaPipe Hands-style two-stage hand-tracking pipeline to the Novatek NT9869x embedded platform. The port preserved the graph, geometry, and post-processing flow while replacing the original inference path with the board's on-chip NPU backend.
+
+- Ported the palm-detection and hand-landmark pipeline to the NT9869x, replacing the original inference calculator path with a custom NPU-backed inference calculator.
+- Integrated the live camera → ISP / VPE → MediaPipe graph → NPU → HDMI overlay data path.
+- Implemented the Cortex-A73 host-side flow for graph execution, SSD decode, NMS, rotated ROI handling, landmark projection, gesture rules, result caching, and overlay rendering.
+- Ran palm detection and 21-point hand-landmark inference on the on-chip NPU.
+- Reworked image preparation to avoid full-frame RGB conversion by fusing NV12 conversion with inference-region crop and resize operations.
+- Used SIMD / NEON-accelerated sampling for the rotated hand crop and image conversion path.
+- Built the model-conversion and validation workflow for INT16 palm and landmark models, including host-side golden checks and a 12-frame review set.
+- Implemented live skeleton, ROI, handedness, gesture-state, and timing-HUD overlays, together with five rule-based gesture classes.
+- Prepared the project demonstration, performance measurements, technical explanation, and exhibition poster.
+
+**Measured results:** stable **30 fps** live HDMI output; per-tick compute reduced from approximately **55 ms to 10 ms**; NV12-to-RGB processing reduced from **43.5 ms to 1.4 ms**. All 12 review frames passed the 0.90 validation threshold, with an average palm-detector score of **0.949** and average hand-landmark presence score of **0.977**.
+
+**Stack:** MediaPipe 0.10.35, Novatek NT9869x, HDAL, Zig, C++20, Python, SIMD / NEON
+
+_Public poster available as a [PDF](/files/nt9869x-hand-tracking-poster.pdf). The implementation repository and internal project materials are private._
+
+## Selected Public Projects
+
+<RepoCard url="https://github.com/mozufu/TempestMiku"
+       desc="A self-hosted, single-user AI companion and project-aware coding agent written in Rust, exploring sandboxed execution, approval flows, explicit project context, and local-first interaction. Rust · Deno · agent runtimes · sandboxing · local-first AI" />
+
+<RepoCard url="https://github.com/iceice666/zutai"
+       desc="An experimental two-mode language system separating deterministic data literals from pure, lazy, typed computation, with a parser, semantic IR, CLI, editor support, and versioned language specifications. Rust · language design · parsers · semantic IR · CLI tooling" />
+
+<RepoCard url="https://github.com/iceice666/materwelon"
+       desc="A tiny functional shell for the Raspberry Pi Pico 2, exploring language and runtime design under embedded memory, hardware, and tooling constraints. Embedded systems · language runtime · Raspberry Pi Pico 2" />
+
+<RepoCard url="https://github.com/iceice666/blog-site"
+       desc="The Astro application behind this site: an MDX-based writing system deployed on Cloudflare Workers, with terminal-inspired and keyboard-first navigation. Astro · TypeScript · MDX · Cloudflare Workers · browser UX" />
+
+## Technical Toolkit
+
+| Area | Tools and topics |
+| --- | --- |
+| Languages used in projects | Rust, Zig, TypeScript, Python, C++20, Lua, Nix |
+| Languages explored | Haskell, ReScript |
+| Embedded and systems | Linux, NixOS, MediaPipe graph integration, Novatek NT9869x, NPU integration, SIMD / NEON, Docker, networking |
+| Web and services | Astro, React, Axum, Cloudflare Workers, Nginx, self-hosted services |
+| Development workflow | Git, Neovim, Zed, shell scripting, GitHub Actions, reproducible development environments |
+
+## Writing and Security
+
+I use this site as a public engineering notebook for project logs, CTF writeups, infrastructure notes, language experiments, and reflections on AI-assisted development.
+
+- [NHNC 2026 CTF writeup](/articles/writeups/nhnc-2026/) — notes across web, cryptography, reverse engineering, pwn, jail, and protocol challenges.
+- [Project notes and technical writing](/feed) — embedded systems, local-first AI, programming languages, Linux / Nix, and personal tooling.
+
+## Contact
+
+* Email: [brian1061225@gmail.com](mailto:brian1061225@gmail.com)
+* GitHub: [github.com/iceice666](https://github.com/iceice666)
+* Writing: [feed](/feed)

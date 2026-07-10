@@ -1,0 +1,90 @@
+---
+title: 履歷
+description: Brian Duan — 國立成功大學資工系學生，打造嵌入式系統、開發者工具、本地優先 AI agent，以及可重現的基礎設施。
+category: meta
+tags: [resume]
+publishedAt: 2026-07-10
+---
+
+import RepoCard from '$/components/mdx/RepoCard.astro';
+
+**Brian Duan** — 國立成功大學資訊工程系大學部學生，專注於嵌入式系統、開發者工具與本地優先 AI。
+
+## 摘要
+
+國立成功大學資訊工程學系大學部學生。我習慣透過從頭到尾親手建構系統來學習：在廠商 NPU 上運行的嵌入式手部追蹤 pipeline、本地優先的 AI agent、程式語言實驗，以及支撐我自己開發環境的基礎設施。
+
+我重視系統是否可被檢視、效能是否經過實際量測，以及對模型、runtime、硬體、基礎設施與使用者介面工具之間邊界的理解。
+
+## 學歷
+
+**國立成功大學**（2025 ~ 至今）· 台灣
+
+資訊工程學系大學部
+
+## 經歷
+
+- **MOPCON 2025** — 議程組組長
+- **Hack Club Juice (2025)** — 參加者
+- **Hack Club Highsea (2025)** — 參加者
+
+## 專案經驗
+
+### 基於手型辨識的聯詠開發板系統移植
+
+_大一團隊專題 · 主要技術實作者 · [成大資工系專題成果展](https://news-secr.ncku.edu.tw/p/405-1037-298426,c5934.php?Lang=zh-tw)_
+
+我負責將 MediaPipe Hands 風格的雙階段手部追蹤 pipeline 完整移植至 Novatek NT9869x 嵌入式平台。這次移植保留了原本的 graph、幾何運算與後處理流程，同時把原本的推論路徑換成開發板內建的 NPU backend。
+
+- 把手掌偵測與手部關鍵點 pipeline 移植到 NT9869x，以客製化的 NPU 推論 calculator 取代原本的推論路徑。
+- 串接即時攝影機 → ISP / VPE → MediaPipe graph → NPU → HDMI overlay 的完整資料路徑。
+- 在 Cortex-A73 host 端實作 graph 執行、SSD decode、NMS、旋轉 ROI 處理、關鍵點投影、手勢規則、結果快取與 overlay 渲染的完整流程。
+- 在晶片內建的 NPU 上跑手掌偵測與 21 點手部關鍵點推論。
+- 重寫影像前處理流程，把 NV12 轉換和推論區域的裁切、縮放操作融合在一起，避免整張畫面做 full-frame RGB 轉換。
+- 在旋轉手部裁切與影像轉換路徑上使用 SIMD / NEON 加速取樣。
+- 建立 INT16 手掌與關鍵點模型的轉換與驗證流程，包含 host 端的 golden check 和 12 張影像的審核集。
+- 實作即時骨架、ROI、慣用手、手勢狀態與計時 HUD 的畫面疊加，並搭配五種基於規則的手勢分類。
+- 準備專案展示、效能量測、技術說明與展覽海報。
+
+**實測結果：** 穩定 **30 fps** 即時 HDMI 輸出；單次 tick 運算時間從約 **55 ms 降到 10 ms**；NV12 轉 RGB 的處理時間從 **43.5 ms 降到 1.4 ms**。全部 12 張審核影像都通過 0.90 的驗證門檻，手掌偵測器平均分數為 **0.949**，手部關鍵點存在分數平均為 **0.977**。
+
+**技術棧：** MediaPipe 0.10.35, Novatek NT9869x, HDAL, Zig, C++20, Python, SIMD / NEON
+
+_海報公開可查看（[PDF](/files/nt9869x-hand-tracking-poster.pdf)），實作 repository 與內部專案資料則不公開。_
+
+## 精選公開專案
+
+<RepoCard url="https://github.com/mozufu/TempestMiku"
+       desc="一個自託管、單人使用的 AI 夥伴兼專案感知 coding agent，用 Rust 寫成，探索 sandboxed 執行、審核流程、明確的專案上下文與本地優先互動。Rust · Deno · agent runtime · sandboxing · 本地優先 AI" />
+
+<RepoCard url="https://github.com/iceice666/zutai"
+       desc="一個實驗性的雙模式語言系統，把確定性的資料字面值和純粹、惰性、有型別的運算分開處理，包含 parser、semantic IR、CLI 與編輯器支援，以及版本化的語言規格。Rust · 語言設計 · parser · semantic IR · CLI 工具" />
+
+<RepoCard url="https://github.com/iceice666/materwelon"
+       desc="給 Raspberry Pi Pico 2 用的迷你函數式 shell，在嵌入式的記憶體、硬體與工具鏈限制下探索語言與 runtime 設計。嵌入式系統 · language runtime · Raspberry Pi Pico 2" />
+
+<RepoCard url="https://github.com/iceice666/blog-site"
+       desc="這個網站背後的 Astro 應用程式：一套部署在 Cloudflare Workers 上、以 MDX 為基礎的寫作系統，具備終端機風格與鍵盤優先的導覽方式。Astro · TypeScript · MDX · Cloudflare Workers · 瀏覽器 UX" />
+
+## 技術工具箱
+
+| 領域 | 工具與主題 |
+| --- | --- |
+| 專案中使用的語言 | Rust, Zig, TypeScript, Python, C++20, Lua, Nix |
+| 探索過的語言 | Haskell, ReScript |
+| 嵌入式與系統 | Linux, NixOS, MediaPipe graph integration, Novatek NT9869x, NPU integration, SIMD / NEON, Docker, networking |
+| 網頁與服務 | Astro, React, Axum, Cloudflare Workers, Nginx, self-hosted services |
+| 開發流程 | Git, Neovim, Zed, shell scripting, GitHub Actions, reproducible development environments |
+
+## 寫作與資安
+
+我把這個網站當成公開的工程筆記本，記錄專案日誌、CTF writeup、基礎設施筆記、語言實驗，以及對 AI 輔助開發的反思。
+
+- [NHNC 2026 CTF writeup](/articles/writeups/nhnc-2026/) — 涵蓋 web、密碼學、逆向工程、pwn、jail 與協定挑戰的筆記。
+- [專案筆記與技術寫作](/feed) — 嵌入式系統、本地優先 AI、程式語言、Linux / Nix，以及個人工具。
+
+## 聯絡方式
+
+* 電子郵件: [brian1061225@gmail.com](mailto:brian1061225@gmail.com)
+* GitHub: [github.com/iceice666](https://github.com/iceice666)
+* 文章: [feed](/feed)

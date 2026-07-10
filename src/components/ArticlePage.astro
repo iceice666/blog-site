@@ -10,6 +10,7 @@ import {
   getArticleCommentId,
   getArticleInfo,
   isAboutArticleId,
+  isResumeArticleId,
   readingTime,
   stripMarkdown,
   type ArticleAlternate,
@@ -46,7 +47,8 @@ const langAlternates = langAlternatesProp ?? (await getArticleAlternates(entry.i
 const units = countUnits(stripMarkdown(entry.body ?? ''));
 const readMin = readingTime(units);
 const isAbout = isAboutArticleId(entry.id);
-const activeKey = activeKeyProp ?? (isAbout ? 'about' : 'feed');
+const isResume = isResumeArticleId(entry.id);
+const activeKey = activeKeyProp ?? (isAbout ? 'about' : isResume ? 'resume' : 'feed');
 const pagePath = viewPath ?? article.href;
 ---
 

@@ -4,6 +4,7 @@ interface Props {
   label: string;
   skills: Skill[];
 }
+import styles from '../../styles/Mdx.module.css';
 const { label, skills } = Astro.props;
 
 const iconOverrides: Record<string, string> = {
@@ -43,9 +44,9 @@ function labelOf(name: string, note: string | null) {
 }
 ---
 
-<div class="skillgrid">
-  <div class="skillgrid-label">{label}</div>
-  <div class="skillgrid-chips">
+<div class={styles.grid}>
+  <div class={styles.label}>{label}</div>
+  <div class={styles.chips}>
     {
       skills.map((s) => {
         const name = nameOf(s);
@@ -55,19 +56,18 @@ function labelOf(name: string, note: string | null) {
           <span
             aria-label={labelOf(name, note)}
             title={labelOf(name, note)}
-            class:list={[!hasBrandIcon(name) && 'is-monogram']}
             style={hasBrandIcon(name) ? `--skill-icon: url("https://cdn.simpleicons.org/${iconSlugOf(name)}");` : undefined}
           >
-            <span class="skillgrid-mark" aria-hidden="true">
+            <span class={styles.mark} aria-hidden="true">
               {hasBrandIcon(name) ? (
-                <span class="skillgrid-icon" />
+                <span class={styles.icon} />
               ) : (
-                <span class="skillgrid-monogram">{monogramOf(name)}</span>
+                <span class={styles.monogram}>{monogramOf(name)}</span>
               )}
             </span>
-            <span class="skillgrid-copy">
-              <span class="skillgrid-name">{name}</span>
-              {note && <span class="skillgrid-note">{note}</span>}
+            <span class={styles.copy}>
+              <span class={styles.name}>{name}</span>
+              {note && <span class={styles.note}>{note}</span>}
             </span>
           </span>
         );

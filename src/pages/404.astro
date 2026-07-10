@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 import Shell from '../layouts/Shell.astro';
+import styles from '../styles/Content.module.css';
 ---
 
 <Shell
@@ -9,15 +10,15 @@ import Shell from '../layouts/Shell.astro';
   extraWindow={{ label: '[No Name]' }}
   paneTitle="404.md"
 >
-  <div class="art-meta">
-    <span class="pill pill-danger">404</span>
+  <div class={styles.meta}>
+    <span class:list={[styles.pill, styles.pillDanger]}>404</span>
     <span>not found</span>
   </div>
-  <h1>No such buffer</h1>
-  <p class="art-desc">Whatever you were looking for isn't here — moved, renamed, or never existed.</p>
-  <hr class="art-rule" />
+  <h1 class={styles.title}>No such buffer</h1>
+  <p class={styles.description}>Whatever you were looking for isn't here — moved, renamed, or never existed.</p>
+  <hr class={styles.rule} />
 
-  <div class="prose">
+  <div class={styles.prose}>
     <pre data-lang="shell"><code>$ cd <span id="attempted-path">…</span>
 bash: cd: <span id="attempted-path-2">…</span>: No such file or directory</code></pre>
 

@@ -2,6 +2,7 @@
 export const prerender = true;
 import Shell from '../layouts/Shell.astro';
 import { getFeedItems, type FeedItem } from '../lib/content';
+import styles from '../styles/Archive.module.css';
 
 // Stub posts only link through to an article that already has its own row here.
 const items = (await getFeedItems()).filter((item) => !item.isStub);
@@ -30,10 +31,10 @@ const sortedKeys = [...groups.keys()].sort().reverse();
 
 <Shell title="Archive | Brian Duan" activeKey="archive" paneTitle={`archive.md (${items.length} entries)`} wide>
   <h1>Archive</h1>
-  <p class="archive-sub">Every article and note, in one place — newest first.</p>
+  <p class={styles.sub}>Every article and note, in one place — newest first.</p>
 
-  <div class="vim-search">
-    <span class="glyph">/</span>
+  <div class={styles.search}>
+    <span class={styles.glyph}>/</span>
     <input
       id="archive-filter"
       type="text"
@@ -41,10 +42,10 @@ const sortedKeys = [...groups.keys()].sort().reverse();
       aria-label="filter entries by title or tag"
       autocomplete="off"
     />
-    <span class="count" id="archive-count" aria-live="polite">{items.length} entries</span>
+    <span class={styles.count} id="archive-count" aria-live="polite">{items.length} entries</span>
   </div>
 
-  <p id="archive-empty-state" class="fold-note" style="display:none">No entries match that filter.</p>
+  <p id="archive-empty-state" class={styles.empty} style="display:none">No entries match that filter.</p>
 
   {
     sortedKeys.map((key) => {
@@ -52,7 +53,7 @@ const sortedKeys = [...groups.keys()].sort().reverse();
       const label = month ? `${year} / ${month}` : year;
       return (
         <>
-          <div class="arch-group-label" data-archive-group>
+          <div class={styles.group} data-archive-group>
             {label}
           </div>
           {groups.get(key)!.map((item) => {
@@ -62,23 +63,25 @@ const sortedKeys = [...groups.keys()].sort().reverse();
             const dateShort = item.publishedAt ? item.publishedAt.slice(5) : '';
             return (
               <div
-                class={`arch-row ${item.kind === 'ARTICLE' ? 'is-article' : 'is-note'}`}
+                class={styles.row}
+                data-article={item.kind === 'ARTICLE' ? '' : undefined}
+                data-note={item.kind === 'POST' ? '' : undefined}
                 data-archive-row
                 data-vim-target
                 data-vim-open={item.href ?? undefined}
                 data-search={search}
                 lang={item.lang}
               >
-                <span class="kind">{item.kind}</span>
+                <span class={styles.kind}>{item.kind}</span>
                 {item.href ? (
-                  <a href={item.href} class="title">
+                  <a href={item.href} class={styles.title}>
                     {displayTitle(item)}
                   </a>
                 ) : (
-                  <span class="title">{displayTitle(item)}</span>
+                  <span class={styles.title}>{displayTitle(item)}</span>
                 )}
-                <span class="rtags">{item.tags.join(', ') || '—'}</span>
-                <span class="rdate">{dateShort}</span>
+                <span class={styles.tags}>{item.tags.join(', ') || '—'}</span>
+                <span class={styles.date}>{dateShort}</span>
               </div>
             );
           })}
@@ -101,17 +104,17 @@ const sortedKeys = [...groups.keys()].sort().reverse();
         let visible = 0;
         rows.forEach((row) => {
           const match = !q || (row.getAttribute('data-search') ?? '').includes(q);
-          row.classList.toggle('is-hidden', !match);
+          row.toggleAttribute('data-filter-hidden', !match);
           if (match) visible++;
         });
         groupEls.forEach((group) => {
           let el = group.nextElementSibling;
           let any = false;
           while (el && !el.hasAttribute('data-archive-group')) {
-            if (el.hasAttribute('data-archive-row') && !el.classList.contains('is-hidden')) any = true;
+            if (el.hasAttribute('data-archive-row') && !el.hasAttribute('data-filter-hidden')) any = true;
             el = el.nextElementSibling;
           }
-          group.classList.toggle('is-hidden', !any);
+          group.toggleAttribute('data-filter-hidden', !any);
         });
         if (countEl) countEl.textContent = `${visible} entr${visible === 1 ? 'y' : 'ies'}`;
         if (emptyEl instanceof HTMLElement) emptyEl.style.display = visible === 0 ? 'block' : 'none';

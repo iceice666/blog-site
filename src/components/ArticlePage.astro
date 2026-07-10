@@ -14,6 +14,8 @@ import {
   stripMarkdown,
   type ArticleAlternate,
 } from '../lib/content';
+import styles from '../styles/Content.module.css';
+import '../styles/Markdown.module.css';
 
 type ActiveKey = 'feed' | 'about' | 'friends' | 'archive';
 
@@ -59,19 +61,19 @@ const pagePath = viewPath ?? article.href;
   ogType="article"
 >
   {outlineHeadings.length > 0 && <DocOutline slot="outline" headings={outlineHeadings} />}
-  <div class="art-meta">
-    <span class="pill">ARTICLE</span>
-    <span class="category">{entry.data.category}</span>
+  <div class={styles.meta}>
+    <span class={styles.pill}>ARTICLE</span>
+    <span class={styles.category}>{entry.data.category}</span>
     <span>{lang}</span>
     <span>{entry.data.publishedAt}</span>
   </div>
-  <h1>{entry.data.title}</h1>
-  <p class="art-desc">{entry.data.description}</p>
-  <p class="art-stats">{units} words · {readMin} min read<ViewCount path={pagePath} /></p>
-  <p class="art-tags">{entry.data.tags.map((t) => `#${t}`).join(' ')}</p>
-  <hr class="art-rule" />
+  <h1 class={styles.title}>{entry.data.title}</h1>
+  <p class={styles.description}>{entry.data.description}</p>
+  <p class={styles.stats}>{units} words · {readMin} min read<ViewCount path={pagePath} /></p>
+  <p class={styles.tags}>{entry.data.tags.map((t) => `#${t}`).join(' ')}</p>
+  <hr class={styles.rule} />
 
-  <div class="prose" lang={lang}>
+  <div class={styles.prose} lang={lang}>
     <Content />
   </div>
 

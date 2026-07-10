@@ -1,6 +1,21 @@
 export {};
 
 type EntryType = 'article' | 'post';
+import styles from '../styles/Comments.module.css';
+
+const CLASS_MAP: Record<string, string> = {
+  'comments-head': styles.commentsHead, 'comments-title': styles.title, 'comments-meta': styles.meta,
+  'comments-controls': styles.commentsControls, 'comments-link': styles.link, 'comments-action': styles.action,
+  'comments-user': styles.user, 'comment-list': styles.list, comment: styles.comment,
+  'comment-meta': styles.commentMeta, 'comment-author': styles.author, 'comment-time': styles.time,
+  'comment-delete': styles.delete, 'comment-body': styles.commentBody, 'comment-replies': styles.replies,
+  'comment-form': styles.form, 'comment-reply-form': styles.replyForm, 'comment-form-actions': styles.formActions,
+  'fold-note': styles.note, 'is-primary': styles.primary,
+};
+
+function moduleClasses(className?: string) {
+  return className?.split(' ').map((name) => CLASS_MAP[name] ?? name).join(' ');
+}
 
 interface AuthUser {
   id: number;
@@ -130,7 +145,7 @@ async function load(widget: HTMLElement, state: WidgetState) {
 }
 
 function render(widget: HTMLElement, state: WidgetState) {
-  const heading = widget.querySelector<HTMLHeadingElement>('.comments-title');
+  const heading = widget.querySelector<HTMLHeadingElement>('[data-comments-title]');
   const headingId = heading?.id ?? '';
   widget.replaceChildren();
   widget.setAttribute('aria-labelledby', headingId);
@@ -314,7 +329,7 @@ function renderComment(comment: PublicComment | PublicReply, widget: HTMLElement
 
 function renderReplyForm(parentId: string, widget: HTMLElement, state: WidgetState) {
   const form = document.createElement('form');
-  form.className = 'comment-form comment-reply-form';
+  form.className = moduleClasses('comment-form comment-reply-form') ?? '';
 
   const textarea = document.createElement('textarea');
   textarea.name = 'body';
@@ -365,7 +380,7 @@ function renderForm(widget: HTMLElement, state: WidgetState) {
   if (!state.user) return;
 
   const form = document.createElement('form');
-  form.className = 'comment-form';
+  form.className = moduleClasses('comment-form') ?? '';
 
   const textarea = document.createElement('textarea');
   textarea.name = 'body';
@@ -424,7 +439,7 @@ function el<K extends keyof HTMLElementTagNameMap>(
   text?: string,
 ): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
-  if (className) node.className = className;
+  if (className) node.className = moduleClasses(className) ?? '';
   if (text !== undefined) node.textContent = text;
   return node;
 }
@@ -432,7 +447,7 @@ function el<K extends keyof HTMLElementTagNameMap>(
 function button(text: string, className: string) {
   const node = document.createElement('button');
   node.type = 'button';
-  node.className = className;
+  node.className = moduleClasses(className) ?? '';
   node.textContent = text;
   return node;
 }

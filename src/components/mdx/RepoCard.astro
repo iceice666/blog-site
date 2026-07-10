@@ -4,16 +4,17 @@ interface Props {
   desc: string;
 }
 import { renderInlineMarkdown } from '../../lib/markdown';
+import styles from '../../styles/Mdx.module.css';
 
 const { url, desc } = Astro.props;
 const display = url.replace(/^https?:\/\//, '');
 const descHtml = await renderInlineMarkdown(desc);
 ---
 
-<div class="article-repo">
+<div class={styles.repo}>
   <div>
-    <a href={url} class="url" target="_blank" rel="noopener noreferrer">{display}</a>
-    <div class="repo-desc" set:html={descHtml} />
+    <a href={url} class={styles.url} target="_blank" rel="noopener noreferrer">{display}</a>
+    <div class={styles.repoDesc} set:html={descHtml} />
   </div>
-  <span class="ext" aria-hidden="true">↗</span>
+  <span class={styles.ext} aria-hidden="true">↗</span>
 </div>

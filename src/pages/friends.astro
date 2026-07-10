@@ -3,6 +3,7 @@ export const prerender = true;
 import Shell from '../layouts/Shell.astro';
 import { renderInlineMarkdown } from '../lib/markdown';
 import { friends, socialDisplayName, socialHref, socialIsExternal } from '../../config';
+import styles from '../styles/Friends.module.css';
 
 const renderedFriends = await Promise.all(
   friends.map(async (friend) => ({
@@ -14,22 +15,22 @@ const renderedFriends = await Promise.all(
 
 <Shell title="Friends | Brian Duan" activeKey="friends" paneTitle="friends.md" wide>
   <h1>Friends</h1>
-  <p class="friends-sub">Blogs and sites I like to read.</p>
+  <p class={styles.sub}>Blogs and sites I like to read.</p>
 
-  <div class="friends-grid">
+  <div class={styles.grid}>
     {
       renderedFriends.map((f) => (
-        <div class="friend-card" lang="zh-tw" data-vim-target data-vim-open={f.url}>
-          <a href={f.url} class="avatar friend-avatar" target="_blank" rel="noopener noreferrer">
+        <div class={styles.card} lang="zh-tw" data-vim-target data-vim-open={f.url}>
+          <a href={f.url} class={styles.avatar} target="_blank" rel="noopener noreferrer">
             <img src={f.img} alt={f.name} loading="lazy" />
           </a>
-          <div class="friend-body">
-            <a href={f.url} class="friend-name" target="_blank" rel="noopener noreferrer">
+          <div class={styles.body}>
+            <a href={f.url} class={styles.name} target="_blank" rel="noopener noreferrer">
               {f.name}
             </a>
-            <div class="friend-desc" set:html={f.descHtml} />
+            <div class={styles.desc} set:html={f.descHtml} />
             {f.socials.length > 0 && (
-              <div class="friend-links">
+              <div class={styles.links}>
                 {f.socials.map((s) => (
                   <a
                     href={socialHref(s)}

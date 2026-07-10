@@ -5,10 +5,11 @@ interface Props {
 }
 
 const { path, prefix = ' · ' } = Astro.props;
+import styles from '../styles/ViewCount.module.css';
 ---
 
 <span
-  class="view-count"
+  class={styles.count}
   data-view-count
   data-view-path={path}
   data-view-prefix={prefix}

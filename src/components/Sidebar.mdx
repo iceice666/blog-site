@@ -1,19 +1,20 @@
 import { author, socialDisplayName, socialHref, socialIsExternal } from '../../config';
+import styles from '../styles/Sidebar.module.css';
 
-<aside className="sidebar">
-  <div className="widget">
-    <div className="pane-title sidebar-whoami-title">whoami</div>
-    <div className="widget-body profile">
-      <div className="avatar">
+<aside className={styles.sidebar} data-sidebar>
+  <div className={styles.widget}>
+    <div className={`${styles.paneTitle} ${styles.profileTitle}`}>whoami</div>
+    <div className={`${styles.body} ${styles.profile}`}>
+      <div className={styles.avatar}>
         <img src={author.avatar} alt={author.name} loading="lazy" />
       </div>
       <div>
-        <div className="profile-name">{author.name}</div>
-        <div className="profile-tag">{author.tagline}</div>
+        <div className={styles.name}>{author.name}</div>
+        <div className={styles.tag}>{author.tagline}</div>
       </div>
     </div>
-    <div className="widget-body sidebar-profile-links">
-      <div className="profile-links">
+    <div className={`${styles.body} ${styles.profileLinks}`}>
+      <div className={styles.links}>
         {author.socials.map((social) => (
           <a href={socialHref(social)} target={socialIsExternal(social) ? '_blank' : undefined} rel={socialIsExternal(social) ? 'noopener noreferrer' : undefined}>
             {socialDisplayName(social)}
@@ -23,34 +24,34 @@ import { author, socialDisplayName, socialHref, socialIsExternal } from '../../c
     </div>
   </div>
 
-  <div className="widget">
-    <div className="pane-title">active repos</div>
-    <div className="widget-body">
+  <div className={styles.widget}>
+    <div className={styles.paneTitle}>active repos</div>
+    <div className={styles.body}>
       {props.github.repos.map((repo) => (
-        <a className="repo-card" href={repo.url} target="_blank" rel="noopener noreferrer">
-          <div className="repo-name">{repo.name}</div>
-          {repo.description ? <div className="repo-desc">{repo.description}</div> : null}
-          <div className="repo-lang">
+        <a className={styles.repo} href={repo.url} target="_blank" rel="noopener noreferrer">
+          <div className={styles.repoName}>{repo.name}</div>
+          {repo.description ? <div className={styles.repoDesc}>{repo.description}</div> : null}
+          <div className={styles.repoLang}>
             <i />
             <span>{repo.language ?? 'unknown'}</span>
-            <span className="repo-activity">{repo.pushed}</span>
+            <span className={styles.activity}>{repo.pushed}</span>
           </div>
         </a>
       ))}
-      <p className="gh-caption">
+      <p className={styles.caption}>
         {props.github.live ? 'top public repos by latest push' : 'fallback repos — live GitHub fetch unavailable at build time'}
       </p>
     </div>
   </div>
 
-  <div className="widget sidebar-final-widget">
-    <div className="pane-title">stats</div>
-    <div className="widget-body">
-      <div className="stat-row"><dt>entries</dt><dd>{props.stats.entries}</dd></div>
-      <div className="stat-row"><dt>articles</dt><dd>{props.stats.articles}</dd></div>
-      <div className="stat-row"><dt>words</dt><dd>{props.stats.words.toLocaleString()}</dd></div>
-      <div className="stat-row"><dt>langs</dt><dd>{props.stats.langs.join(' / ')}</dd></div>
-      <div className="toptags">
+  <div className={`${styles.widget} ${styles.finalWidget}`}>
+    <div className={styles.paneTitle}>stats</div>
+    <div className={styles.body}>
+      <div className={styles.stat}><dt>entries</dt><dd>{props.stats.entries}</dd></div>
+      <div className={styles.stat}><dt>articles</dt><dd>{props.stats.articles}</dd></div>
+      <div className={styles.stat}><dt>words</dt><dd>{props.stats.words.toLocaleString()}</dd></div>
+      <div className={styles.stat}><dt>langs</dt><dd>{props.stats.langs.join(' / ')}</dd></div>
+      <div className={styles.tags}>
         {props.stats.topTags.map((tag) => (
           <a href={`/archive?tag=${encodeURIComponent(tag)}`} data-vim-target>
             {tag}

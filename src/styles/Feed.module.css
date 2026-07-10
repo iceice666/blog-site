@@ -1,0 +1,19 @@
+.spotlight { border: 1px solid var(--border); border-left: 3px solid var(--accent); background: var(--surface); padding: 16px 18px; margin: 0 0 22px; }
+.spotKicker { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
+.meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.pill { font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
+.category { color: var(--lang-ts); }
+.spotlight h1 { margin: 0 0 9px; font-family: var(--font-prose-active); font-size: 25px; line-height: 1.25; letter-spacing: 0; overflow-wrap: anywhere; text-autospace: normal; text-spacing-trim: normal; }
+.spotlight h1 a:hover, .entry h2 a:hover { color: var(--accent); }
+.desc { margin: 0 0 10px; color: var(--text-muted); font-family: var(--font-prose-active); font-size: 15px; line-height: 1.72; max-width: 62ch; text-autospace: normal; text-spacing-trim: normal; }
+.stats { margin: 0 0 6px; color: var(--text-muted); font-size: 13px; }
+.tags { margin: 0; color: var(--accent); font-size: 13px; line-height: 1.6; }
+.entry { padding: 26px 0; border-bottom: 1px solid var(--border); }
+.entry:first-child { padding-top: 6px; }
+.entry[data-post] .pill { color: var(--pill-post); }
+.entry h2 { margin: 0 0 8px; font-family: var(--font-prose-active); font-size: 20px; line-height: 1.35; text-autospace: normal; text-spacing-trim: normal; }
+.note { margin: 0; color: var(--text); font-family: var(--font-prose-active); font-size: 16px; line-height: 1.75; white-space: pre-wrap; max-width: 62ch; text-autospace: normal; text-spacing-trim: normal; }
+.note::before { content: "» "; color: var(--accent); }
+.note a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 900px) { .spotlight { padding: 14px; margin-bottom: 18px; } .entry { padding: 22px 0; } .meta { gap: 8px; } }
+@media (max-width: 620px) { .spotlight h1 { font-size: 22px; } .entry h2 { font-size: 18px; } .desc { font-size: 14.5px; } }

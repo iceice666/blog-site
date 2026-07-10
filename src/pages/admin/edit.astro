@@ -2,6 +2,8 @@
 export const prerender = true;
 import '../../styles/global.css';
 import { author, site } from '../../../config';
+import styles from '../../styles/Admin.module.css';
+import shell from '../../styles/Shell.module.css';
 ---
 
 <html lang="en">
@@ -21,18 +23,18 @@ import { author, site } from '../../../config';
       } catch {}
     </script>
   </head>
-  <body class="ed-body">
-    <div class="ed-app">
-      <header class="ed-topbar">
-        <a class="ed-brand" href="/">&larr; blog</a>
-        <span class="ed-topbar-label">editor</span>
-        <div class="ed-topbar-right">
+  <body class={styles.body}>
+    <div class={styles.app}>
+      <header class={styles.topbar}>
+        <a class={styles.brand} href="/">&larr; blog</a>
+        <span class={styles.topbarLabel}>editor</span>
+        <div class={styles.topbarRight}>
           <span data-editor-user></span>
-          <button id="theme-toggle" class="chip" type="button" aria-label="toggle color theme">theme</button>
+          <button id="theme-toggle" class={shell.chip} type="button" aria-label="toggle color theme">theme</button>
         </div>
       </header>
-      <main class="ed-main" data-admin-editor>
-        <div class="ed-home"><p class="fold-note">Loading editor...</p></div>
+      <main class={styles.main} data-admin-editor>
+        <div class={styles.home}><p class={styles.status}>Loading editor...</p></div>
       </main>
     </div>
 

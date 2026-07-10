@@ -8,10 +8,11 @@ interface Props {
 
 const { entryType, entryId, title, path } = Astro.props;
 const id = `comments-${entryType}-${entryId}`.replace(/[^\w-]/g, '-');
+import styles from '../styles/Comments.module.css';
 ---
 
 <section
-  class="comments"
+  class={styles.comments}
   data-comments
   data-entry-type={entryType}
   data-entry-id={entryId}
@@ -19,13 +20,13 @@ const id = `comments-${entryType}-${entryId}`.replace(/[^\w-]/g, '-');
   data-path={path}
   aria-labelledby={id}
 >
-  <div class="comments-head">
+  <div class={styles.commentsHead}>
     <div>
-      <h2 id={id} class="comments-title">comments</h2>
-      <p class="comments-meta">GitHub Discussions</p>
+      <h2 id={id} class={styles.title} data-comments-title>comments</h2>
+      <p class={styles.meta}>GitHub Discussions</p>
     </div>
   </div>
-  <p class="fold-note" data-comments-status>Loading comments...</p>
+  <p class={styles.note} data-comments-status>Loading comments...</p>
 </section>
 
 <script>

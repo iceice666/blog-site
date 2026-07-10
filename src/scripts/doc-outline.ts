@@ -1,29 +1,29 @@
 function initDocOutline() {
-  const nav = document.querySelector<HTMLElement>(".doc-outline");
+  const nav = document.querySelector<HTMLElement>("[data-doc-outline]");
   if (!nav) return;
   const links = Array.from(
     nav.querySelectorAll<HTMLAnchorElement>("[data-doc-outline-link]"),
   );
   if (!links.length) return;
 
-  const scroller = document.querySelector<HTMLElement>(".scroll-area");
+  const scroller = document.querySelector<HTMLElement>("[data-scroll-area]");
   const linkBySlug = new Map(links.map((l) => [l.dataset.docOutlineLink!, l]));
   const headingEls = links
     .map((l) => document.getElementById(l.dataset.docOutlineLink!))
     .filter((el): el is HTMLElement => Boolean(el));
   if (!headingEls.length) return;
 
-  const marker = nav.querySelector<HTMLElement>(".doc-outline-marker");
+  const marker = nav.querySelector<HTMLElement>("[data-doc-outline-marker]");
 
   let activeSlug = "";
   let ticking = false;
   function setActive(slug: string) {
     if (slug === activeSlug) return;
-    if (activeSlug) linkBySlug.get(activeSlug)?.classList.remove("is-active");
+    if (activeSlug) linkBySlug.get(activeSlug)?.removeAttribute("data-doc-outline-active");
     activeSlug = slug;
     const link = linkBySlug.get(slug);
     if (!link) return;
-    link.classList.add("is-active");
+    link.setAttribute("data-doc-outline-active", "");
     link.scrollIntoView({ block: "nearest" });
     if (marker) {
       marker.style.transform = `translateY(${link.offsetTop}px)`;

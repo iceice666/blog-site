@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import "katex/dist/katex.min.css";
+import styles from "../styles/Shell.module.css";
 import { NAV_ITEMS, getBlogStats } from "../lib/content";
 import { getGithubData } from "../lib/github";
 import Sidebar from "../components/Sidebar.mdx";
@@ -125,11 +126,11 @@ const extraWindowIndex =
         </script>
     </head>
     <body>
-        <a class="skip-link" href="#main-content">skip to content</a>
-        <div class="tmux">
-            <div class="status-bar top">
-                <div class="session">justaslime</div>
-                <div class="windows">
+        <a class={styles.skipLink} href="#main-content">skip to content</a>
+        <div class={styles.tmux}>
+            <div class:list={[styles.statusBar, styles.top]}>
+                <div class={styles.session}>justaslime</div>
+                <div class={styles.windows}>
                     {
                         NAV_ITEMS.map((item) => {
                             const isActive =
@@ -137,7 +138,7 @@ const extraWindowIndex =
                             return (
                                 <a
                                     href={item.href}
-                                    class={`win${isActive ? " active" : ""}`}
+                                    class:list={[styles.win, isActive && styles.active]}
                                 >
                                     {item.windowIndex}:{item.label}
                                     {isActive ? "*" : ""}
@@ -147,33 +148,33 @@ const extraWindowIndex =
                     }
                     {
                         extraWindow && (
-                            <span class="win active">
+                            <span class:list={[styles.win, styles.active]}>
                                 {extraWindowIndex}:{extraWindow.label}*
                             </span>
                         )
                     }
                 </div>
-                <div class="status-right">
+                <div class={styles.statusRight}>
                     <button
                         id="vim-toggle"
-                        class="chip mode"
+                        class:list={[styles.chip, styles.mode]}
                         type="button"
                         aria-label="toggle Vim navigation"
                         aria-pressed="true">VIM ON</button
                     >
                     <button
                         id="theme-toggle"
-                        class="chip"
+                        class={styles.chip}
                         type="button"
                         aria-label="toggle color theme">THEME</button
                     >
                     {
                         langSwitch ? (
-                            <a href={langSwitch.href} class="chip">
+                            <a href={langSwitch.href} class={styles.chip}>
                                 {langSwitch.lang}
                             </a>
                         ) : (
-                            <span class="chip" aria-disabled="true">
+                            <span class={styles.chip} aria-disabled="true">
                                 {lang}
                             </span>
                         )
@@ -181,13 +182,13 @@ const extraWindowIndex =
                 </div>
             </div>
 
-            <div class="panes">
+            <div class={styles.panes}>
                 <slot name="outline" />
-                <div class="pane-main">
-                    <div class="pane-title">{paneTitle}</div>
-                    <div class="scroll-area">
+                <div class={styles.paneMain}>
+                    <div class={styles.paneTitle}>{paneTitle}</div>
+                    <div class={styles.scrollArea} data-scroll-area>
                         <div
-                            class={`reading${wide ? " is-wide" : ""}`}
+                            class:list={[styles.reading, wide && styles.wide]}
                             id="main-content"
                             tabindex="-1"
                         >
@@ -199,13 +200,13 @@ const extraWindowIndex =
                 <Sidebar stats={stats} github={github} />
             </div>
 
-            <div class="status-bar bottom">
-                <span id="vim-status" class="vim-status" aria-hidden="true"
+            <div class:list={[styles.statusBar, styles.bottom]}>
+                <span id="vim-status" class={styles.vimStatus} aria-hidden="true"
                     >-- NORMAL --</span
                 >
-                <span id="vim-status-announce" class="sr-only" aria-live="polite"
+                <span id="vim-status-announce" class={styles.srOnly} aria-live="polite"
                 ></span>
-                <span class="vim-help">
+                <span class={styles.vimHelp}>
                     <slot name="footer-hints">
                         <span>j/k move</span>
                         <span>gg/G top/bottom</span>

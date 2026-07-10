@@ -3,16 +3,17 @@ interface Props {
   headings: { depth: number; slug: string; text: string }[];
 }
 const { headings } = Astro.props;
+import styles from '../styles/DocOutline.module.css';
 ---
 
-<aside class="doc-outline" aria-label="On this page">
-  <div class="pane-title">outline</div>
-  <nav class="doc-outline-body">
-    <span class="doc-outline-marker" aria-hidden="true"></span>
+<aside class={styles.outline} data-doc-outline aria-label="On this page">
+  <div class={styles.paneTitle}>outline</div>
+  <nav class={styles.body}>
+    <span class={styles.marker} data-doc-outline-marker aria-hidden="true"></span>
     {
       headings.map((h) => (
         <a
-          class={`doc-outline-link depth-${h.depth}`}
+          class:list={[styles.link, h.depth === 2 ? styles.depth2 : styles.depth3]}
           href={`#${h.slug}`}
           data-doc-outline-link={h.slug}
         >

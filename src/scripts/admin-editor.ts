@@ -1,6 +1,28 @@
 export {};
 
 type ContentKind = 'post' | 'article';
+import styles from '../styles/Admin.module.css';
+import commentStyles from '../styles/Comments.module.css';
+import contentStyles from '../styles/Content.module.css';
+
+const CLASS_MAP: Record<string, string> = {
+  'ed-home': styles.home, 'ed-home-inner': styles.homeInner, 'ed-sub': styles.sub, 'ed-login': styles.login,
+  'ed-status': styles.status, 'ed-new-grid': styles.newGrid, 'ed-new-card': styles.newCard,
+  'ed-new-form': styles.newForm, 'ed-files': styles.files, 'ed-files-head': styles.filesHead,
+  'ed-input': styles.input, 'ed-filter': styles.filter, 'ed-file-list': styles.fileList,
+  'ed-new-fields': styles.newFields, 'ed-field': styles.field, 'ed-new-actions': styles.newActions,
+  'ed-file-empty': styles.fileEmpty, 'ed-file': styles.file, kind: styles.kind, slug: styles.slug,
+  'ed-editor': styles.editor, 'ed-toolbar': styles.toolbar, 'ed-toolbar-file': styles.toolbarFile,
+  'ed-path': styles.path, 'ed-dirty': styles.dirty, 'ed-counts': styles.counts,
+  'ed-toolbar-actions': styles.toolbarActions, 'ed-split': styles.split, 'ed-pane': styles.pane,
+  'ed-pane-head': styles.paneHead, 'ed-source': styles.source, 'ed-preview': styles.preview,
+  prose: contentStyles.prose, 'comments-action': commentStyles.action, 'comments-link': commentStyles.link,
+  'comments-user': commentStyles.user, 'is-primary': commentStyles.primary,
+};
+
+function moduleClasses(className?: string) {
+  return className?.split(' ').map((name) => CLASS_MAP[name] ?? name).join(' ');
+}
 type CreateMode = 'post' | 'series' | 'article';
 
 interface AuthUser {
@@ -239,13 +261,15 @@ function renderHome(root: HTMLElement, state: EditorState) {
 
   const grid = el('div', 'ed-new-grid');
   for (const card of CREATE_CARDS) {
-    const btn = button('', `ed-new-card${state.createMode === card.mode ? ' is-active' : ''}`);
+    const btn = button('', 'ed-new-card');
+    btn.setAttribute('data-admin-new-card', '');
+    btn.toggleAttribute('data-admin-active', state.createMode === card.mode);
     btn.dataset.mode = card.mode;
     appendNodes(btn, el('strong', undefined, card.title), el('span', undefined, card.hint));
     btn.addEventListener('click', () => {
       state.createMode = state.createMode === card.mode ? null : card.mode;
-      for (const other of grid.querySelectorAll<HTMLElement>('.ed-new-card')) {
-        other.classList.toggle('is-active', other.dataset.mode === state.createMode);
+      for (const other of grid.querySelectorAll<HTMLElement>('[data-admin-new-card]')) {
+        other.toggleAttribute('data-admin-active', other.dataset.mode === state.createMode);
       }
       paintCreateForm(root, state);
     });
@@ -262,7 +286,7 @@ function renderHome(root: HTMLElement, state: EditorState) {
   const head = el('div', 'ed-files-head');
   appendNodes(head, el('h2', undefined, `Open existing (${state.files.length})`));
   const filter = document.createElement('input');
-  filter.className = 'ed-input ed-filter';
+  filter.className = moduleClasses('ed-input ed-filter') ?? '';
   filter.type = 'search';
   filter.placeholder = 'filter files';
   filter.value = state.filter;
@@ -300,10 +324,10 @@ function paintCreateForm(root: HTMLElement, state: EditorState) {
 
   const addField = (label: string, key: 'post' | 'series' | 'article' | 'lang', placeholder: string) => {
     const wrap = document.createElement('label');
-    wrap.className = 'ed-field';
+    wrap.className = moduleClasses('ed-field') ?? '';
     appendNodes(wrap, el('span', undefined, label));
     const input = document.createElement('input');
-    input.className = 'ed-input';
+    input.className = moduleClasses('ed-input') ?? '';
     input.placeholder = placeholder;
     input.value = state.create[key];
     input.addEventListener('input', () => {
@@ -338,7 +362,7 @@ function paintCreateForm(root: HTMLElement, state: EditorState) {
   const cancel = button('cancel', 'comments-action');
   cancel.addEventListener('click', () => {
     state.createMode = null;
-    for (const card of root.querySelectorAll<HTMLElement>('.ed-new-card')) card.classList.remove('is-active');
+    for (const card of root.querySelectorAll<HTMLElement>('[data-admin-new-card]')) card.removeAttribute('data-admin-active');
     paintCreateForm(root, state);
   });
   appendNodes(actions, create, cancel);
@@ -359,7 +383,8 @@ function paintFileList(root: HTMLElement, state: EditorState) {
   }
 
   for (const file of files) {
-    const row = button('', `ed-file${file.kind === 'article' ? ' is-article' : ''}`);
+    const row = button('', 'ed-file');
+    row.toggleAttribute('data-admin-article', file.kind === 'article');
     row.title = file.path;
     appendNodes(row, el('span', 'kind', file.kind), el('span', 'slug', file.slug));
     row.addEventListener('click', () => void loadFile(root, state, file.path));
@@ -382,7 +407,9 @@ function renderEditor(root: HTMLElement, state: EditorState) {
   appendNodes(toolbar, back);
 
   const info = el('div', 'ed-toolbar-file');
-  appendNodes(info, el('span', 'ed-path', state.current?.path ?? ''));
+  const path = el('span', 'ed-path', state.current?.path ?? '');
+  path.setAttribute('data-admin-path', '');
+  appendNodes(info, path);
   const dirty = el('span', 'ed-dirty', '● unsaved');
   dirty.hidden = !state.dirty;
   ui.dirty = dirty;
@@ -437,7 +464,7 @@ function renderEditor(root: HTMLElement, state: EditorState) {
   const rawPane = el('section', 'ed-pane');
   appendNodes(rawPane, el('div', 'ed-pane-head', 'raw'));
   const textarea = document.createElement('textarea');
-  textarea.className = 'ed-source';
+  textarea.className = moduleClasses('ed-source') ?? '';
   textarea.spellcheck = false;
   textarea.value = state.content;
   textarea.addEventListener('input', () => handleEdit(root, state, textarea.value));
@@ -727,7 +754,7 @@ function setStatusValues(state: EditorState, text: string, options: { danger?: b
 function paintStatus(state: EditorState) {
   const node = ui.status;
   if (!node) return;
-  node.classList.toggle('is-danger', state.statusDanger);
+  node.toggleAttribute('data-admin-danger', state.statusDanger);
   node.replaceChildren(document.createTextNode(state.status));
   if (state.statusLink) {
     const link = el('a', undefined, state.statusLink.label);
@@ -801,7 +828,9 @@ function isSafePathSegment(segment: string) {
 }
 
 function statusNode(text: string, danger = false) {
-  return el('p', `fold-note${danger ? ' is-danger' : ''}`, text);
+  const node = el('p', 'ed-status', text);
+  node.toggleAttribute('data-admin-danger', danger);
+  return node;
 }
 
 function messageFromError(error: unknown) {
@@ -826,7 +855,7 @@ function formatClock(value: string) {
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
-  if (className) node.className = className;
+  if (className) node.className = moduleClasses(className) ?? '';
   if (text !== undefined) node.textContent = text;
   return node;
 }
@@ -834,7 +863,7 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, t
 function button(text: string, className: string) {
   const node = document.createElement('button');
   node.type = 'button';
-  node.className = className;
+  node.className = moduleClasses(className) ?? '';
   node.textContent = text;
   return node;
 }

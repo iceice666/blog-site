@@ -1,4 +1,5 @@
 type VimMode = 'normal' | 'hint' | 'search' | 'command';
+import styles from '../styles/Shell.module.css';
 
 type HintCandidate = {
   el: HTMLElement;
@@ -176,7 +177,7 @@ function initVimNav() {
     vimToggle.textContent = deviceCanUseVim ? (vimEnabled ? 'VIM ON' : 'VIM OFF') : 'VIM N/A';
     vimToggle.setAttribute('aria-pressed', String(vimEnabled));
     vimToggle.setAttribute('aria-disabled', String(!deviceCanUseVim));
-    vimToggle.classList.toggle('is-off', !vimEnabled);
+    vimToggle.toggleAttribute('data-vim-disabled', !vimEnabled);
     vimToggle.toggleAttribute('disabled', !deviceCanUseVim);
   }
 
@@ -186,7 +187,7 @@ function initVimNav() {
   }
 
   function getScroller() {
-    const scrollArea = document.querySelector<HTMLElement>('.scroll-area');
+    const scrollArea = document.querySelector<HTMLElement>('[data-scroll-area]');
     if (scrollArea && scrollArea.scrollHeight > scrollArea.clientHeight + 1) return scrollArea;
     return document.scrollingElement ?? document.documentElement;
   }
@@ -258,16 +259,16 @@ function initVimNav() {
   }
 
   function clearSelection() {
-    selectedTarget?.classList.remove('vim-selected');
+    selectedTarget?.removeAttribute('data-vim-selected');
     selectedTarget = null;
   }
 
   function getSidebar() {
-    return document.querySelector<HTMLElement>('.sidebar');
+    return document.querySelector<HTMLElement>('[data-sidebar]');
   }
 
   function applyOutlineHidden(hidden: boolean) {
-    const outline = document.querySelector<HTMLElement>('.doc-outline');
+    const outline = document.querySelector<HTMLElement>('[data-doc-outline]');
     if (hidden) document.documentElement.dataset.outline = 'hidden';
     else delete document.documentElement.dataset.outline;
     if (outline) {
@@ -282,7 +283,7 @@ function initVimNav() {
   }
 
   function setOutlineHidden(hidden: boolean, temporaryStatus = false) {
-    const outline = document.querySelector<HTMLElement>('.doc-outline');
+    const outline = document.querySelector<HTMLElement>('[data-doc-outline]');
     if (!outline) {
       setStatus('outline unavailable', temporaryStatus);
       return;
@@ -318,9 +319,9 @@ function initVimNav() {
   }
 
   function selectTarget(el: HTMLElement) {
-    selectedTarget?.classList.remove('vim-selected');
+    selectedTarget?.removeAttribute('data-vim-selected');
     selectedTarget = el;
-    selectedTarget.classList.add('vim-selected');
+    selectedTarget.setAttribute('data-vim-selected', '');
     selectedTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
   }
 
@@ -417,7 +418,7 @@ function initVimNav() {
   }
 
   function clearHints() {
-    document.querySelectorAll('.vim-hint').forEach((el) => el.remove());
+    document.querySelectorAll('[data-vim-hint]').forEach((el) => el.remove());
     hints = [];
     hintBuffer = '';
   }
@@ -474,7 +475,7 @@ function initVimNav() {
       // against layout changes between collection and render.
       const pos = clippedRect(hint.el) ?? { top: Math.max(4, rect.top), left: Math.max(4, rect.left) };
       const marker = document.createElement('span');
-      marker.className = 'vim-hint';
+      marker.setAttribute('data-vim-hint', '');
       marker.textContent = hint.label;
       marker.style.left = `${pos.left}px`;
       marker.style.top = `${pos.top}px`;
@@ -512,10 +513,10 @@ function initVimNav() {
     }
 
     const matches = hints.filter((hint) => hint.label.startsWith(hintBuffer));
-    document.querySelectorAll<HTMLElement>('.vim-hint').forEach((marker, index) => {
+    document.querySelectorAll<HTMLElement>('[data-vim-hint]').forEach((marker, index) => {
       const hint = hints[index];
-      marker.classList.toggle('is-dim', !hint.label.startsWith(hintBuffer));
-      marker.classList.toggle('is-match', hint.label === hintBuffer);
+      marker.toggleAttribute('data-vim-hint-dim', !hint.label.startsWith(hintBuffer));
+      marker.toggleAttribute('data-vim-hint-match', hint.label === hintBuffer);
     });
 
     if (matches.length === 1 && matches[0].label === hintBuffer) {
@@ -562,7 +563,7 @@ function initVimNav() {
       acceptNode(node) {
         const parent = node.parentElement;
         if (!parent) return NodeFilter.FILTER_REJECT;
-        if (parent.closest('script, style, noscript, .vim-hint, .vim-command-help')) {
+        if (parent.closest('script, style, noscript, [data-vim-hint], [data-vim-command-help]')) {
           return NodeFilter.FILTER_REJECT;
         }
         if (isInsideCollapsedDetails(parent)) return NodeFilter.FILTER_REJECT;
@@ -818,29 +819,29 @@ function initVimNav() {
     closeHelp();
 
     const overlay = document.createElement('div');
-    overlay.className = 'vim-command-help';
+    overlay.setAttribute('data-vim-command-help', '');
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-labelledby', 'vim-command-help-title');
 
     const panel = document.createElement('div');
-    panel.className = 'vim-command-help-panel';
+    panel.className = styles.vimCommandHelpPanel;
 
     const head = document.createElement('div');
-    head.className = 'vim-command-help-head';
+    head.className = styles.vimCommandHelpHead;
     const title = document.createElement('h2');
     title.id = 'vim-command-help-title';
     title.textContent = 'vim help';
     const close = document.createElement('button');
     close.type = 'button';
-    close.className = 'vim-command-help-close';
+    close.className = styles.vimCommandHelpClose;
     close.textContent = 'close';
     close.addEventListener('click', closeHelp);
     head.appendChild(title);
     head.appendChild(close);
 
     const body = document.createElement('div');
-    body.className = 'vim-command-help-body';
+    body.className = styles.vimCommandHelpBody;
     for (const section of HELP_SECTIONS) {
       const group = document.createElement('section');
       const heading = document.createElement('h3');
@@ -1057,7 +1058,7 @@ function initVimNav() {
     const editor = target.closest<HTMLElement>('[data-admin-editor]');
     if (!editor) return null;
 
-    const path = editor.querySelector<HTMLElement>('.admin-path')?.textContent ?? '';
+    const path = editor.querySelector<HTMLElement>('[data-admin-path]')?.textContent ?? '';
     if (path.includes('/posts/')) return '-- INSERT POST --';
     if (path.includes('/articles/')) return '-- INSERT ARTICLE --';
     return '-- INSERT EDITOR --';

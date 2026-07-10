@@ -3,6 +3,9 @@ export const prerender = true;
 import Shell from '../layouts/Shell.astro';
 import ViewCount from '../components/ViewCount.astro';
 import { getFeedItems, type FeedItem } from '../lib/content';
+import styles from '../styles/Feed.module.css';
+import content from '../styles/Content.module.css';
+import '../styles/Markdown.module.css';
 
 const items = await getFeedItems();
 
@@ -21,28 +24,28 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
   {
     promotedArticle && (
       <section
-        class="article-spotlight"
+        class={styles.spotlight}
         aria-labelledby="spotlight-title"
         lang={promotedArticle.lang}
         data-vim-target
         data-vim-open={promotedArticle.href}
       >
-        <div class="spot-kicker">LATEST ARTICLE</div>
-        <div class="meta">
-          <span class="pill">ARTICLE</span>
-          <span class="category">{promotedArticle.category}</span>
+        <div class={styles.spotKicker}>LATEST ARTICLE</div>
+        <div class={styles.meta}>
+          <span class={styles.pill}>ARTICLE</span>
+          <span class={styles.category}>{promotedArticle.category}</span>
           <span>{promotedArticle.lang}</span>
           <span>{promotedArticle.publishedAt}</span>
         </div>
         <h1 id="spotlight-title">
           <a href={promotedArticle.href}>{promotedArticle.title}</a>
         </h1>
-        <p class="desc">{promotedArticle.description}</p>
-        <p class="stats">
+        <p class={styles.desc}>{promotedArticle.description}</p>
+        <p class={styles.stats}>
           {promotedArticle.units} words · {promotedArticle.readMin} min read
           <ViewCount path={promotedArticle.href} />
         </p>
-        <p class="tags">{promotedArticle.tags.map((t) => `#${t}`).join(' ')}</p>
+        <p class={styles.tags}>{promotedArticle.tags.map((t) => `#${t}`).join(' ')}</p>
       </section>
     )
   }
@@ -50,31 +53,31 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
   {
     feedItems.map((item) =>
       item.kind === 'ARTICLE' ? (
-        <article class="entry-w" lang={item.lang} data-vim-target data-vim-open={item.href}>
-          <div class="meta">
-            <span class="pill">ARTICLE</span>
-            <span class="category">{item.category}</span>
+        <article class={styles.entry} lang={item.lang} data-vim-target data-vim-open={item.href}>
+          <div class={styles.meta}>
+            <span class={styles.pill}>ARTICLE</span>
+            <span class={styles.category}>{item.category}</span>
             <span>{item.lang}</span>
             <span>{item.publishedAt}</span>
           </div>
           <h2>
             <a href={item.href}>{item.title}</a>
           </h2>
-          <p class="desc">{item.description}</p>
-          <p class="stats">
+          <p class={styles.desc}>{item.description}</p>
+          <p class={styles.stats}>
             {item.units} words · {item.readMin} min read
             {item.href && <ViewCount path={item.href} />}
           </p>
-          <p class="tags">{item.tags.map((t) => `#${t}`).join(' ')}</p>
+          <p class={styles.tags}>{item.tags.map((t) => `#${t}`).join(' ')}</p>
         </article>
       ) : (
-        <article class="entry-w is-post" lang={item.lang} data-vim-target data-vim-open={item.href ?? undefined}>
-          <div class="meta">
-            <span class="pill">POST</span>
+        <article class={styles.entry} data-post lang={item.lang} data-vim-target data-vim-open={item.href ?? undefined}>
+          <div class={styles.meta}>
+            <span class={styles.pill}>POST</span>
             <span>{item.publishedAt}</span>
             {item.href && <ViewCount path={item.href} prefix="" />}
           </div>
-          <div class="prose" lang={item.lang} set:html={item.bodyHtml} />
+          <div class={content.prose} lang={item.lang} set:html={item.bodyHtml} />
         </article>
       )
     )

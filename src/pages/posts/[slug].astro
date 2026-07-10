@@ -6,6 +6,8 @@ import Comments from '../../components/Comments.astro';
 import ViewCount from '../../components/ViewCount.astro';
 import DocOutline from '../../components/DocOutline.astro';
 import { countUnits, getPostArticleStubHref, getPostHref, getPostSlug, inferLang, readingTime, stripMarkdown } from '../../lib/content';
+import styles from '../../styles/Content.module.css';
+import '../../styles/Markdown.module.css';
 
 export async function getStaticPaths() {
   const [posts, articles] = await Promise.all([getCollection('posts'), getCollection('articles')]);
@@ -37,16 +39,16 @@ const href = getPostHref(entry.id);
   ogType="article"
 >
   {outlineHeadings.length > 0 && <DocOutline slot="outline" headings={outlineHeadings} />}
-  <div class="art-meta">
-    <span class="pill pill-post">POST</span>
+  <div class={styles.meta}>
+    <span class:list={[styles.pill, styles.pillPost]}>POST</span>
     <span>{lang}</span>
     <span>{entry.data.publishedAt}</span>
   </div>
-  <h1>{title}</h1>
-  <p class="art-stats">{units} words · {readMin} min read<ViewCount path={href} /></p>
-  <hr class="art-rule" />
+  <h1 class={styles.title}>{title}</h1>
+  <p class={styles.stats}>{units} words · {readMin} min read<ViewCount path={href} /></p>
+  <hr class={styles.rule} />
 
-  <div class="prose" lang={lang}>
+  <div class={styles.prose} lang={lang}>
     <Content />
   </div>
 

@@ -281,6 +281,29 @@ const extraWindowIndex =
                     }
                 });
             })();
+
+            // Copy button for code blocks
+            (function () {
+                document.addEventListener("click", function (e) {
+                    const btn = (e.target as Element).closest?.(".code-copy");
+                    if (!btn) return;
+                    const block = btn.closest(".code-block");
+                    const code = block?.querySelector("code");
+                    if (!code) return;
+                    const text = code.textContent ?? "";
+                    navigator.clipboard.writeText(text).then(
+                        function () {
+                            btn.textContent = "Copied!";
+                            setTimeout(function () {
+                                btn.textContent = "Copy";
+                            }, 2000);
+                        },
+                        function () {
+                            // Clipboard unavailable — silently ignore.
+                        },
+                    );
+                });
+            })();
         </script>
     </body>
 </html>

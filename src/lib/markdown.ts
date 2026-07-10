@@ -57,6 +57,62 @@ export const labelCodeLang: RehypePlugin = () => {
   };
 };
 
+/** Wrap <pre> in a .code-block container with a header bar that shows the
+ *  language label and a copy button. */
+export const wrapCodeBlock: RehypePlugin = () => {
+  return (tree) => {
+    const root = tree as MarkdownNode;
+    function visitChildren(nodes: MarkdownNode[]): void {
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (node.type === 'element' && node.tagName === 'pre') {
+          const lang = node.properties?.['data-lang'];
+          const langStr = typeof lang === 'string' && lang ? lang : 'text';
+
+          const header: MarkdownNode = {
+            type: 'element',
+            tagName: 'div',
+            properties: { className: ['code-header'] },
+            children: [
+              {
+                type: 'element',
+                tagName: 'span',
+                properties: { className: ['code-lang'] },
+                children: [{ type: 'text', value: langStr }],
+              },
+              {
+                type: 'element',
+                tagName: 'button',
+                properties: { className: ['code-copy'], 'aria-label': 'Copy code', type: 'button' },
+                children: [{ type: 'text', value: 'Copy' }],
+              },
+            ],
+          };
+
+          const wrapper: MarkdownNode = {
+            type: 'element',
+            tagName: 'div',
+            properties: { className: ['code-block'] },
+            children: [header, node],
+          };
+
+          if (langStr !== 'text') {
+            (wrapper.properties as Record<string, unknown>)['data-lang'] = langStr;
+          }
+
+          nodes[i] = wrapper;
+        }
+        if (node.children) {
+          visitChildren(node.children);
+        }
+      }
+    }
+    if (root.children) {
+      visitChildren(root.children);
+    }
+  };
+ };
+
 function textOf(node: MarkdownNode): string {
   if (typeof node.value === 'string') return node.value;
   return (node.children ?? []).map(textOf).join('');
@@ -194,6 +250,7 @@ export const markdownProcessor = unified({
     rehypeKatex,
     labelCodeLang,
     highlightCode,
+    wrapCodeBlock,
     wrapTables,
     stripDuplicateLeadingH1,
   ],

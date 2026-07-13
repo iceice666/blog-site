@@ -73,8 +73,14 @@ const extraWindowIndex =
         <link
             rel="alternate"
             type="application/rss+xml"
-            title={site.title}
+            title={`${site.title} — All entries`}
             href="/rss.xml"
+        />
+        <link
+            rel="alternate"
+            type="application/rss+xml"
+            title={`${site.title} — Articles`}
+            href="/articles.xml"
         />
         <meta property="og:type" content={ogType} />
         <meta property="og:title" content={title} />

@@ -76,7 +76,17 @@ const displayedItemCount = feedItems.length + (promotedArticle ? 1 : 0);
             <span class={styles.pill}>POST</span>
             <span>{item.publishedAt}</span>
             {item.href && <ViewCount path={item.href} prefix="" />}
+            {item.href && (
+              <a class={styles.permalink} href={item.href} aria-label={`Open ${item.title ?? 'post'}`}>
+                {item.isStub ? 'READ ARTICLE →' : 'OPEN POST →'}
+              </a>
+            )}
           </div>
+          {item.title && (
+            <h2>
+              <a href={item.href ?? undefined}>{item.title}</a>
+            </h2>
+          )}
           <div class={content.prose} lang={item.lang} set:html={item.bodyHtml} />
         </article>
       )

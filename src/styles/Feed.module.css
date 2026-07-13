@@ -1,6 +1,8 @@
 .spotlight { border: 1px solid var(--border); border-left: 3px solid var(--accent); background: var(--surface); padding: 16px 18px; margin: 0 0 22px; }
 .spotKicker { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
 .meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.permalink { color: var(--accent); font-weight: 700; text-decoration: none; }
+.permalink:hover { text-decoration: underline; text-underline-offset: 3px; }
 .pill { font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 2px; background: var(--surface-2); color: var(--accent); }
 .category { color: var(--lang-ts); }
 .spotlight h1 { margin: 0 0 9px; font-family: var(--font-prose-active); font-size: 25px; line-height: 1.25; letter-spacing: 0; overflow-wrap: anywhere; text-autospace: normal; text-spacing-trim: normal; }
